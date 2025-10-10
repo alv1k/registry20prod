@@ -5,6 +5,7 @@ import Correspondent from '../pages/Correspondent';
 import Transport from '../pages/Transport';
 import Finance from '../pages/Finance';
 import Domestic from '../pages/Domestic';
+import Icons from '../pages/Icons';
 
 const AppRoutes: React.FC = () => {
   const currentPage = useStore((state) => state.currentPage);
@@ -16,6 +17,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/transport" element={<Transport />} />
         <Route path="/finance" element={<Finance />} />
         <Route path="/domestic" element={<Domestic />} />
+        <Route path="/icons" element={<Icons />} />
         <Route path="/" element={
           <div className="max-w-md w-full bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mx-auto">
             <div className="p-8">
@@ -34,26 +36,7 @@ const AppRoutes: React.FC = () => {
                   <div className="h-3 bg-gray-200 rounded w-4/6"></div>
                 </div>
               </div>
-              <div className="mt-8 flex space-x-4">
-                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300">
-                  Get Started
-                </button>
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300">
-                  Learn More
-                </button>
-              </div>
             </div>
-            <p className="mt-8 text-gray-600 text-center">
-              Edit <code className="bg-gray-100 p-1 rounded">src/App.tsx</code> and save to reload.
-            </p>
-            <a
-              className="mt-4 text-blue-600 hover:underline block text-center"
-              href="https://tailwindcss.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn Tailwind CSS
-            </a>
           </div>
         } />
       </Routes>

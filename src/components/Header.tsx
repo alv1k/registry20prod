@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
+import { 
+  MdMenu as MdMenuBase, 
+} from 'react-icons/md'; // Material Design icons
 
 const Header: React.FC = () => {
+  const MdMenu = MdMenuBase as any;
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -19,11 +24,14 @@ const Header: React.FC = () => {
               </svg>
             </button>
           </div>
-          
           <div className="hidden md:flex items-center">
-            <button className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">
-              Logo here
-            </button>
+            <MdMenu onClick={ ()=> console.log('click menu') } size={24} className="text-red-500 w-6 h-6" />
+            <div onClick={ ()=> console.log('click logo') }>
+              <a href="">
+                <img src="" alt="" />
+                123
+              </a>
+            </div>
           </div>
         </div>
         
