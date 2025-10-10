@@ -21,7 +21,7 @@ function App() {
         
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         
-        <main className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:ml-0 transition-all duration-300 w-full overflow-auto">
+        <main className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:ml-0 transition-all duration-300 w-full overflow-x-auto h-screen">
           <AppRoutes />
         </main>
       </div>
