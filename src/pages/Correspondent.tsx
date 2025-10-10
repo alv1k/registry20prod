@@ -224,7 +224,7 @@ const Correspondent = () => {
         </div>
       )}
       
-      <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+      <div className="mt-2 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">
           {/* Mobile View - Card Layout */}
           <div className="block md:hidden">
