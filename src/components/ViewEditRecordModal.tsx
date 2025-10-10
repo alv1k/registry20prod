@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useStore } from '../store/useStore';
-import Modal from './Modal';
+import GenericViewEditModal from './GenericViewEditModal';
+
+interface CorrespondentRecord {
+  id: number;
+  date: string;
+  incomingNumber: string;
+  subject: string;
+  outgoingNumber: string;
+  from: string;
+  to: string;
+  signedBy: string;
+}
 
 interface ViewEditRecordModalProps {
   isOpen: boolean;
@@ -11,193 +22,150 @@ interface ViewEditRecordModalProps {
 const ViewEditRecordModal: React.FC<ViewEditRecordModalProps> = ({ isOpen, onClose, recordId }) => {
   const correspondentData = useStore((state) => state.correspondentData);
   const updateCorrespondentRecord = useStore((state) => state.updateCorrespondentRecord);
-  
-  const record = correspondentData.find(r => r.id === recordId);
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    date: record?.date || '',
-    incomingNumber: record?.incomingNumber || '',
-    subject: record?.subject || '',
-    outgoingNumber: record?.outgoingNumber || '',
-    from: record?.from || '',
-    to: record?.to || '',
-    signedBy: record?.signedBy || ''
-  });
 
-  React.useEffect(() => {
-    if (record) {
-      setFormData({
-        date: record.date || '',
-        incomingNumber: record.incomingNumber || '',
-        subject: record.subject || '',
-        outgoingNumber: record.outgoingNumber || '',
-        from: record.from || '',
-        to: record.to || '',
-        signedBy: record.signedBy || ''
-      });
-    }
-  }, [record]);
-
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-  };
-
-  const handleSave = () => {
-    if (recordId) {
-      updateCorrespondentRecord(recordId, formData);
-      setIsEditing(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  if (!record) {
-    return null;
-  }
-
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Детали записи">
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
-            {isEditing ? (
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-              />
-            ) : (
-              <div className="p-2 bg-gray-100 rounded-md">{formData.date}</div>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Входящий номер</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="incomingNumber"
-                value={formData.incomingNumber}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-              />
-            ) : (
-              <div className="p-2 bg-gray-100 rounded-md">{formData.incomingNumber}</div>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Тема обращения</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-              />
-            ) : (
-              <div className="p-2 bg-gray-100 rounded-md">{formData.subject}</div>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Исходящий номер</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="outgoingNumber"
-                value={formData.outgoingNumber}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-              />
-            ) : (
-              <div className="p-2 bg-gray-100 rounded-md">{formData.outgoingNumber}</div>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">От кого</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="from"
-                value={formData.from}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-              />
-            ) : (
-              <div className="p-2 bg-gray-100 rounded-md">{formData.from}</div>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Кому</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="to"
-                value={formData.to}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-              />
-            ) : (
-              <div className="p-2 bg-gray-100 rounded-md">{formData.to}</div>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Подписан</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="signedBy"
-                value={formData.signedBy}
-                onChange={handleChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-              />
-            ) : (
-              <div className="p-2 bg-gray-100 rounded-md">{formData.signedBy}</div>
-            )}
-          </div>
+  const renderViewMode = (record: CorrespondentRecord) => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
+          <div className="p-2 bg-gray-100 rounded-md">{record.date}</div>
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-          >
-            Закрыть
-          </button>
-          <button
-            type="button"
-            onClick={handleEditToggle}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-          >
-            {isEditing ? 'Отмена' : 'Редактировать'}
-          </button>
-          {isEditing && (
-            <button
-              type="button"
-              onClick={handleSave}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            >
-              Сохранить
-            </button>
-          )}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Входящий номер</label>
+          <div className="p-2 bg-gray-100 rounded-md">{record.incomingNumber}</div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Тема обращения</label>
+          <div className="p-2 bg-gray-100 rounded-md">{record.subject}</div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Исходящий номер</label>
+          <div className="p-2 bg-gray-100 rounded-md">{record.outgoingNumber}</div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">От кого</label>
+          <div className="p-2 bg-gray-100 rounded-md">{record.from}</div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Кому</label>
+          <div className="p-2 bg-gray-100 rounded-md">{record.to}</div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Подписан</label>
+          <div className="p-2 bg-gray-100 rounded-md">{record.signedBy}</div>
         </div>
       </div>
-    </Modal>
+    </div>
+  );
+
+  const renderEditMode = (
+    record: CorrespondentRecord,
+    formData: Partial<CorrespondentRecord>,
+    handleChange: (field: keyof CorrespondentRecord, value: any) => void
+  ) => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
+          <input
+            type="date"
+            name="date"
+            value={formData.date || ''}
+            onChange={(e) => handleChange('date', e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Входящий номер</label>
+          <input
+            type="text"
+            name="incomingNumber"
+            value={formData.incomingNumber || ''}
+            onChange={(e) => handleChange('incomingNumber', e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Тема обращения</label>
+          <input
+            type="text"
+            name="subject"
+            value={formData.subject || ''}
+            onChange={(e) => handleChange('subject', e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Исходящий номер</label>
+          <input
+            type="text"
+            name="outgoingNumber"
+            value={formData.outgoingNumber || ''}
+            onChange={(e) => handleChange('outgoingNumber', e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">От кого</label>
+          <input
+            type="text"
+            name="from"
+            value={formData.from || ''}
+            onChange={(e) => handleChange('from', e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Кому</label>
+          <input
+            type="text"
+            name="to"
+            value={formData.to || ''}
+            onChange={(e) => handleChange('to', e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Подписан</label>
+          <input
+            type="text"
+            name="signedBy"
+            value={formData.signedBy || ''}
+            onChange={(e) => handleChange('signedBy', e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const handleUpdate = (id: number, updatedRecord: Partial<CorrespondentRecord>) => {
+    updateCorrespondentRecord(id, updatedRecord);
+  };
+
+  return (
+    <GenericViewEditModal<CorrespondentRecord>
+      isOpen={isOpen}
+      onClose={onClose}
+      recordId={recordId}
+      records={correspondentData}
+      onUpdate={handleUpdate}
+      renderViewMode={renderViewMode}
+      renderEditMode={renderEditMode}
+      title="Детали корреспондентской записи"
+    />
   );
 };
 
