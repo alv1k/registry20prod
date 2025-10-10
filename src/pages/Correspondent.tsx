@@ -155,14 +155,14 @@ const Correspondent = () => {
       
       {/* Filter Controls */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
             <input
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
           
@@ -173,7 +173,7 @@ const Correspondent = () => {
               placeholder="Фильтр по входящему номеру"
               value={incomingNumberFilter}
               onChange={(e) => setIncomingNumberFilter(e.target.value)}
-              className="p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
           
@@ -184,7 +184,7 @@ const Correspondent = () => {
               placeholder="Фильтр по исходящему номеру"
               value={outgoingNumberFilter}
               onChange={(e) => setOutgoingNumberFilter(e.target.value)}
-              className="p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
         </div>
@@ -284,8 +284,8 @@ const Correspondent = () => {
           </div>
           
           {/* Desktop View - Table */}
-          <table className="hidden md:table divide-y divide-gray-200 overflow-x-auto">
-            <thead className="bg-gray-50 overflow-x-auto">
+          <table className="hidden md:table divide-y divide-gray-200 min-w-full">
+            <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Вх. №</th>
@@ -297,46 +297,46 @@ const Correspondent = () => {
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200 overflow-x-auto">
+            <tbody className="bg-white divide-y divide-gray-200">
               {filteredData.length > 0 ? (
                 filteredData.map((record) => (
                   <tr 
                     key={record.id} 
-                    className="hover:bg-gray-50"
+                    className="hover:bg-gray-50 cursor-pointer"
                     onClick={() => openViewModal(record.id)}
                   >
                     <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {record.date}
                     </td>
                     <td 
-                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer"
+                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
                     >
                       {record.incomingNumber}
                     </td>
                     <td 
-                      className="p-4 text-sm text-gray-500 cursor-pointer"
+                      className="p-4 text-sm text-gray-500"
                     >
                       {record.subject}
                     </td>
                     <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {record.outgoingNumber}
                     </td>
                     <td 
-                      className="p-4 text-sm text-gray-500 cursor-pointer"
+                      className="p-4 text-sm text-gray-500"
                     >
                       {record.from}
                     </td>
                     <td 
-                      className="p-4 text-sm text-gray-500 cursor-pointer"
+                      className="p-4 text-sm text-gray-500"
                     >
                       {record.to}
                     </td>
                     <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {record.signedBy}
                     </td>
