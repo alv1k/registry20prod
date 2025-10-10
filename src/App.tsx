@@ -10,7 +10,7 @@ function App() {
   return (
     <div className="App min-h-screen flex flex-col">
       <Header />
-      <div className="flex flex-1">
+      <div className="flex">
         {/* Mobile sidebar backdrop */}
         {sidebarOpen && (
           <div 
@@ -21,7 +21,7 @@ function App() {
         
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         
-        <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:ml-0 transition-all duration-300">
+        <main className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:ml-0 transition-all duration-300">
           <AppRoutes />
         </main>
       </div>

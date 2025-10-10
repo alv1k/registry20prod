@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import AddCorrespondentForm from '../components/AddCorrespondentForm';
 import ViewEditRecordModal from '../components/ViewEditRecordModal';
@@ -70,6 +70,10 @@ const Correspondent = () => {
     }
   ];
 
+  useEffect(() => {
+    setCorrespondentData(sampleData);
+  }, []);
+
   // Apply filters to the data
   const filteredData = useMemo(() => {
     return correspondentData.filter(record => {
@@ -91,10 +95,6 @@ const Correspondent = () => {
       return true;
     });
   }, [correspondentData, dateFilter, incomingNumberFilter, outgoingNumberFilter]);
-
-  const initializeSampleData = () => {
-    setCorrespondentData(sampleData);
-  };
 
   const openAddModal = () => {
     setIsAddModalOpen(true);
@@ -141,14 +141,6 @@ const Correspondent = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Корреспондентский журнал</h1>
         <div className="flex flex-wrap gap-3">
-          {!correspondentData.length && (
-            <button 
-              onClick={initializeSampleData}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
-            >
-              Загрузить тестовые данные
-            </button>
-          )}
           <button 
             onClick={openAddModal}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
@@ -170,7 +162,7 @@ const Correspondent = () => {
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
           
@@ -181,7 +173,7 @@ const Correspondent = () => {
               placeholder="Фильтр по входящему номеру"
               value={incomingNumberFilter}
               onChange={(e) => setIncomingNumberFilter(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
           
@@ -192,7 +184,7 @@ const Correspondent = () => {
               placeholder="Фильтр по исходящему номеру"
               value={outgoingNumberFilter}
               onChange={(e) => setOutgoingNumberFilter(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
         </div>
@@ -285,76 +277,70 @@ const Correspondent = () => {
                 </div>
               ))
             ) : (
-              <div className="px-6 py-4 text-center text-sm text-gray-500">
+              <div className="p-4 text-center text-sm text-gray-500">
                 Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
               </div>
             )}
           </div>
           
           {/* Desktop View - Table */}
-          <table className="hidden md:table min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="hidden md:table divide-y divide-gray-200 overflow-x-auto">
+            <thead className="bg-gray-50 overflow-x-auto">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">Дата</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w:[150px]">Вх. №</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w:[200px]">Тема обращения</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w:[150px]">Исх. №</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w:[150px]">От кого</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w:[150px]">Кому</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w:[150px]">Подписан</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w:[100px]">Действия</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Вх. №</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тема обращения</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Исх. №</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">От кого</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кому</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Подписан</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200 overflow-x-auto">
               {filteredData.length > 0 ? (
                 filteredData.map((record) => (
                   <tr 
                     key={record.id} 
                     className="hover:bg-gray-50"
+                    onClick={() => openViewModal(record.id)}
                   >
                     <td 
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
-                      onClick={() => openViewModal(record.id)}
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
                     >
                       {record.date}
                     </td>
                     <td 
-                      className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer"
-                      onClick={() => openViewModal(record.id)}
+                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer"
                     >
                       {record.incomingNumber}
                     </td>
                     <td 
-                      className="px-6 py-4 text-sm text-gray-500 cursor-pointer"
-                      onClick={() => openViewModal(record.id)}
+                      className="p-4 text-sm text-gray-500 cursor-pointer"
                     >
                       {record.subject}
                     </td>
                     <td 
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
-                      onClick={() => openViewModal(record.id)}
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
                     >
                       {record.outgoingNumber}
                     </td>
                     <td 
-                      className="px-6 py-4 text-sm text-gray-500 cursor-pointer"
-                      onClick={() => openViewModal(record.id)}
+                      className="p-4 text-sm text-gray-500 cursor-pointer"
                     >
                       {record.from}
                     </td>
                     <td 
-                      className="px-6 py-4 text-sm text-gray-500 cursor-pointer"
-                      onClick={() => openViewModal(record.id)}
+                      className="p-4 text-sm text-gray-500 cursor-pointer"
                     >
                       {record.to}
                     </td>
                     <td 
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
-                      onClick={() => openViewModal(record.id)}
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 cursor-pointer"
                     >
                       {record.signedBy}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="p-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -372,7 +358,7 @@ const Correspondent = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="p-4 text-center text-sm text-gray-500">
                     Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                   </td>
                 </tr>
