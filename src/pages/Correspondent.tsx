@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import AddCorrespondentForm from '../components/AddCorrespondentForm';
 import ViewEditRecordModal from '../components/ViewEditRecordModal';
+import AnimatedAccordion from '../components/AnimatedAccordion';
 
 const Correspondent = () => {
   const correspondentData = useStore((state) => state.correspondentData);
@@ -16,7 +17,6 @@ const Correspondent = () => {
   const [dateFilter, setDateFilter] = useState<string>('');
   const [incomingNumberFilter, setIncomingNumberFilter] = useState<string>('');
   const [outgoingNumberFilter, setOutgoingNumberFilter] = useState<string>('');
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
 
   const sampleData = [
     {
@@ -155,69 +155,50 @@ const Correspondent = () => {
       </div>
       
       {/* Filter Controls - Accordion */}
-      <div className="bg-white rounded-lg shadow-md mb-4 border border-gray-200">
-        <div 
-          className="flex justify-between items-center p-4 cursor-pointer"
-          onClick={() => setIsFilterOpen(!isFilterOpen)}
-        >
-          <h2 className="text-lg font-semibold text-gray-800">Фильтры</h2>
-          <svg 
-            className={`h-5 w-5 text-gray-600 transform transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 20 20" 
-            fill="currentColor"
-          >
-            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
+      <AnimatedAccordion title="Фильтры" defaultOpen={true}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Входящий номер</label>
+            <input
+              type="text"
+              placeholder="Фильтр по входящему номеру"
+              value={incomingNumberFilter}
+              onChange={(e) => setIncomingNumberFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Исходящий номер</label>
+            <input
+              type="text"
+              placeholder="Фильтр по исходящему номеру"
+              value={outgoingNumberFilter}
+              onChange={(e) => setOutgoingNumberFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            />
+          </div>
         </div>
         
-        {isFilterOpen && (
-          <div className="p-4 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
-                <input
-                  type="date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="text-xs w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Входящий номер</label>
-                <input
-                  type="text"
-                  placeholder="Фильтр по входящему номеру"
-                  value={incomingNumberFilter}
-                  onChange={(e) => setIncomingNumberFilter(e.target.value)}
-                  className="text-xs w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Исходящий номер</label>
-                <input
-                  type="text"
-                  placeholder="Фильтр по исходящему номеру"
-                  value={outgoingNumberFilter}
-                  onChange={(e) => setOutgoingNumberFilter(e.target.value)}
-                  className="text-xs w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-end mt-3">
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Очистить фильтры
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+        <div className="flex justify-end mt-3">
+          <button
+            onClick={clearFilters}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            Очистить фильтры
+          </button>
+        </div>
+      </AnimatedAccordion>
       
       {/* Delete Confirmation Modal */}
       {deleteConfirmationId && (
