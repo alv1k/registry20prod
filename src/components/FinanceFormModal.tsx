@@ -206,7 +206,7 @@ const FinanceFormModal: React.FC<FinanceFormModalProps> = ({
               className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Количество"
               min="0"
-              step="1"
+              step="0.1"
               required
             />
           </div>

@@ -6,6 +6,35 @@ import FinanceCharts from '../components/FinanceCharts';
 import CategoriesManager from '../components/CategoriesManager';
 import { log } from 'console';
 
+// Функция для форматирования даты в формат "DD.MM.YYг"
+const formatDate = (dateString: string): string => {
+  if (!dateString) return '';
+  
+  try {
+    // Если дата уже в формате DD.MM.YYг, возвращаем как есть
+    if (dateString.includes('.')) {
+      // Проверяем, соответствует ли формат шаблону DD.MM.YYг
+      const parts = dateString.split('.');
+      if (parts.length === 3 && parts[2].endsWith('г')) {
+        return dateString;
+      }
+    }
+    
+    // Парсим дату в формате YYYY-MM-DD
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // Если дата некорректна, возвращаем исходную строку
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString().slice(-2); // Берем последние 2 цифры года
+    
+    return `${day}.${month}.${year}г`;
+  } catch (error) {
+    console.error('Ошибка форматирования даты:', error);
+    return dateString; // В случае ошибки возвращаем исходную строку
+  }
+};
+
 const Finance = () => {
   const financeData = useStore((state) => state.financeData);
   const syncFinanceData = useStore((state) => state.syncFinanceData);
@@ -23,6 +52,7 @@ const Finance = () => {
   const [dateFilter, setDateFilter] = useState<string>('');
   const [nameFilter, setNameFilter] = useState<string>('');
   const [classificationFilter, setClassificationFilter] = useState<string>('');
+  const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'all', value: ''});
 
   useEffect(() => {
     // Load data from Firebase when component mounts
@@ -34,9 +64,40 @@ const Finance = () => {
   // Apply filters to the data
   const filteredData = useMemo(() => {
     return financeData.filter(record => {
-      // Date filter
+      // Date filter - используем оригинальный формат даты для фильтрации
       if (dateFilter && record.date !== dateFilter) {
         return false;
+      }
+      
+      // Period filter
+      if (periodFilter.type !== 'all') {
+        const recordDate = new Date(record.date);
+        const recordYear = recordDate.getFullYear().toString();
+        const recordMonth = recordDate.getMonth() + 1; // месяцы в JS от 0 до 11
+        const recordQuarter = Math.floor(recordDate.getMonth() / 3) + 1;
+        
+        switch(periodFilter.type) {
+          case 'month':
+            // periodFilter.value format: 'YYYY-MM'
+            if (recordYear !== periodFilter.value.split('-')[0] || 
+                recordMonth !== parseInt(periodFilter.value.split('-')[1])) {
+              return false;
+            }
+            break;
+          case 'quarter':
+            // periodFilter.value format: 'YYYY-Q' where Q is quarter number
+            const [year, quarter] = periodFilter.value.split('-');
+            if (recordYear !== year || recordQuarter !== parseInt(quarter.charAt(1))) {
+              return false;
+            }
+            break;
+          case 'year':
+            // periodFilter.value format: 'YYYY'
+            if (recordYear !== periodFilter.value) {
+              return false;
+            }
+            break;
+        }
       }
       
       // Name filter (partial match)
@@ -51,7 +112,7 @@ const Finance = () => {
       
       return true;
     });
-  }, [financeData, dateFilter, nameFilter, classificationFilter]);
+  }, [financeData, dateFilter, nameFilter, classificationFilter, periodFilter]);
 
   const openFormModal = (id?: number | string | null) => {
     if (id !== undefined) {
@@ -88,6 +149,7 @@ const Finance = () => {
     setDateFilter('');
     setNameFilter('');
     setClassificationFilter('');
+    setPeriodFilter({type: 'all', value: ''});
   };
 
   return (
@@ -148,6 +210,46 @@ const Finance = () => {
               className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Период</label>
+            <div className="flex space-x-2">
+              <select
+                value={periodFilter.type}
+                onChange={(e) => setPeriodFilter({type: e.target.value as any, value: periodFilter.value})}
+                className="w-1/2 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              >
+                <option value="all">Все</option>
+                <option value="month">Месяц</option>
+                <option value="quarter">Квартал</option>
+                <option value="year">Год</option>
+              </select>
+              {periodFilter.type !== 'all' && (
+                <select
+                  value={periodFilter.value}
+                  onChange={(e) => setPeriodFilter({...periodFilter, value: e.target.value})}
+                  className="w-1/2 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                >
+                  {periodFilter.type === 'year' && Array.from({length: 10}, (_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return <option key={year} value={year.toString()}>{year}</option>;
+                  })}
+                  {periodFilter.type === 'month' && Array.from({length: 12}, (_, i) => {
+                    const month = i + 1;
+                    const year = new Date().getFullYear();
+                    const monthStr = month < 10 ? `0${month}` : month;
+                    const displayMonth = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][i];
+                    return <option key={month} value={`${year}-${monthStr}`}>{displayMonth}</option>;
+                  })}
+                  {periodFilter.type === 'quarter' && Array.from({length: 4}, (_, i) => {
+                    const quarter = i + 1;
+                    const year = new Date().getFullYear();
+                    return <option key={quarter} value={`${year}-Q${quarter}`}>Q{quarter}</option>;
+                  })}
+                </select>
+              )}
+            </div>
+          </div>
         </div>
         
         <div className="flex justify-end mt-3">
@@ -201,7 +303,7 @@ const Finance = () => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-sm font-medium text-gray-900">{record.name}</div>
-                        <div className="text-sm text-gray-500">{record.date}</div>
+                        <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
                       </div>
                       <div className="mt-1 text-sm text-gray-500 truncate max-w-xs">{record.comment}</div>
                       <div className="mt-2 text-xs text-gray-500 space-y-1">
@@ -263,7 +365,7 @@ const Finance = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredData.length > 0 ? (
-                filteredData.map((record) => (
+                filteredData.map((record, index) => (
                   <tr 
                     key={record.id} 
                     className="hover:bg-gray-50 cursor-pointer"
@@ -272,7 +374,7 @@ const Finance = () => {
                     <td 
                       className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
-                      {record.date}
+                      {formatDate(record.date)}
                     </td>
                     <td 
                       className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
@@ -332,7 +434,9 @@ const Finance = () => {
         </div>
       </div>
       
-      <CategoriesManager />
+      <AnimatedAccordion title="Управление категориями" defaultOpen={false}>
+        <CategoriesManager />
+      </AnimatedAccordion>
       
       <FinanceFormModal 
         isOpen={isFormModalOpen} 

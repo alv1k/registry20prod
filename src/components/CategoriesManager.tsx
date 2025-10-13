@@ -50,7 +50,8 @@ const CategoriesManager: React.FC = () => {
 
   const handleDelete = () => {
     if (deleteConfirmationId !== null) {
-      deleteCategory(deleteConfirmationId);
+      // deleteCategory(deleteConfirmationId);
+      alert('В демо режиме нельзя удалять категорию');
       setDeleteConfirmationId(null);
     }
   };
@@ -60,10 +61,8 @@ const CategoriesManager: React.FC = () => {
   };
 
   return (
-    <div className="mt-6 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h2 className="text-xl font-semibold text-gray-800">Управление категориями</h2>
+    <div className="bg-white overflow-hidden">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
           <div className="flex flex-wrap gap-3">
             <select
               value={filterType}
@@ -85,7 +84,6 @@ const CategoriesManager: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
       
       {/* Error message */}
       {categoriesError && (
