@@ -17,8 +17,8 @@ interface TransportRecord {
 interface ViewEditTransportRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  recordId: number | null;
-  onUpdate: (id: number, updatedRecord: Partial<TransportRecord>) => void;
+  recordId: number | string | null; // Support both number and string IDs
+  onUpdate: (id: number | string, updatedRecord: Partial<TransportRecord>) => void | Promise<void>; // Match GenericViewEditModal signature
   records: TransportRecord[];
 }
 

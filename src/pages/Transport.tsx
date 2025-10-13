@@ -183,9 +183,9 @@ const Transport = () => {
   };
 
   // Function to update a record
-  const updateTransportRecord = (id: number, updatedFields: Partial<typeof sampleData[0]>) => {
+  const updateTransportRecord = (id: number | string, updatedFields: Partial<typeof sampleData[0]>) => {
     setTransportData(transportData.map(record => 
-      record.id === id ? { ...record, ...updatedFields } : record
+      record.id === Number(id) ? { ...record, ...updatedFields } : record  // Convert string id to number for comparison
     ));
   };
   

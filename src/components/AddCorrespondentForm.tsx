@@ -9,7 +9,7 @@ interface AddCorrespondentFormProps {
 
 const AddCorrespondentForm: React.FC<AddCorrespondentFormProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
-    date: '',
+    date: new Date().toISOString().split('T')[0], // Установить текущую дату по умолчанию
     incomingNumber: '',
     subject: '',
     outgoingNumber: '',
@@ -19,7 +19,10 @@ const AddCorrespondentForm: React.FC<AddCorrespondentFormProps> = ({ isOpen, onC
   });
   
   const addCorrespondentRecord = useStore((state) => state.addCorrespondentRecord);
-  const correspondentData = useStore((state) => state.correspondentData);
+  const isLoading = useStore((state) => state.isCorrespondentDataLoading);
+  const error = useStore((state) => state.correspondentDataError);
+
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -29,7 +32,7 @@ const AddCorrespondentForm: React.FC<AddCorrespondentFormProps> = ({ isOpen, onC
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate required fields
@@ -38,28 +41,37 @@ const AddCorrespondentForm: React.FC<AddCorrespondentFormProps> = ({ isOpen, onC
       return;
     }
     
-    addCorrespondentRecord({
-      date: formData.date,
-      incomingNumber: formData.incomingNumber,
-      subject: formData.subject,
-      outgoingNumber: formData.outgoingNumber,
-      from: formData.from,
-      to: formData.to,
-      signedBy: formData.signedBy
-    });
+    setSubmitting(true);
     
-    // Reset form
-    setFormData({
-      date: '',
-      incomingNumber: '',
-      subject: '',
-      outgoingNumber: '',
-      from: '',
-      to: '',
-      signedBy: ''
-    });
-    
-    onClose();
+    try {
+      await addCorrespondentRecord({
+        date: formData.date,
+        incomingNumber: formData.incomingNumber,
+        subject: formData.subject,
+        outgoingNumber: formData.outgoingNumber,
+        from: formData.from,
+        to: formData.to,
+        signedBy: formData.signedBy
+      });
+      
+      // Reset form
+      setFormData({
+        date: new Date().toISOString().split('T')[0], // Reset to current date
+        incomingNumber: '',
+        subject: '',
+        outgoingNumber: '',
+        from: '',
+        to: '',
+        signedBy: ''
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Error adding correspondent record:', error);
+      alert('Ошибка при добавлении записи: ' + (error as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -156,19 +168,27 @@ const AddCorrespondentForm: React.FC<AddCorrespondentFormProps> = ({ isOpen, onC
           </div>
         </div>
         
+        {error && (
+          <div className="text-red-500 text-sm py-2">
+            {error}
+          </div>
+        )}
+        
         <div className="flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            disabled={submitting}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
           >
             Отмена
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            disabled={submitting || isLoading}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
           >
-            Сохранить
+            {submitting ? 'Сохранение...' : 'Сохранить'}
           </button>
         </div>
       </form>

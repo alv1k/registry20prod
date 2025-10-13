@@ -22,15 +22,22 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
   const handleClick = (path: string) => {
     setCurrentPage(path);
     if (setSidebarOpen) {
-      setSidebarOpen(false); // Close sidebar when a link is clicked on mobile
+      // Only close on mobile, keep open on desktop when collapsing
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      } else {
+        // On desktop, just navigate but don't close the sidebar
+      }
     }
   };
 
   return (
     <div 
-      className={`w-64 bg-white shadow-md h-full flex flex-col md:static md:translate-x-0 z-30 fixed inset-y-0 left-0 transform transition-transform duration-300 ease-in-out ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0`}
+      className={`${
+        sidebarOpen ? 'w-64' : 'w-20' // Full width when open, narrow when collapsed
+      } bg-white shadow-md h-full flex flex-col md:static md:translate-x-0 z-30 fixed inset-y-0 left-0 transform transition-all duration-300 ease-in-out ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}
     >
       <div className="p-4 flex justify-end md:hidden">
         <button 
@@ -53,10 +60,19 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
                   location.pathname === item.path 
                     ? 'bg-indigo-100 text-indigo-600' 
                     : 'text-gray-700 hover:bg-indigo-100 hover:text-indigo-600'
-                }`}
+                } 
+                ${
+                  sidebarOpen ? '' : 'justify-center'
+                }`}                
               >
-                <span className="mr-3 text-lg">{item.icon}</span>
-                <span className="font-medium">{item.name}</span>
+                <span className="text-lg">{item.icon}</span>
+                <span 
+                  className={`${
+                    sidebarOpen ? 'ml-3 font-medium' : 'hidden' // Hide text when collapsed
+                  }`}
+                >
+                  {item.name}
+                </span>
               </Link>
             </li>
           ))}

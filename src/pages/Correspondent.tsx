@@ -6,74 +6,27 @@ import AnimatedAccordion from '../components/AnimatedAccordion';
 
 const Correspondent = () => {
   const correspondentData = useStore((state) => state.correspondentData);
-  const setCorrespondentData = useStore((state) => state.setCorrespondentData);
+  const syncCorrespondentData = useStore((state) => state.syncCorrespondentData);
   const deleteCorrespondentRecord = useStore((state) => state.deleteCorrespondentRecord);
+  const isDataLoading = useStore((state) => state.isCorrespondentDataLoading);
+  const dataError = useStore((state) => state.correspondentDataError);
+  
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
-  const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | null>(null);
+  const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
+  const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
   
   // Filter state variables
   const [dateFilter, setDateFilter] = useState<string>('');
   const [incomingNumberFilter, setIncomingNumberFilter] = useState<string>('');
   const [outgoingNumberFilter, setOutgoingNumberFilter] = useState<string>('');
 
-  const sampleData = [
-    {
-      id: 1,
-      date: '2023-10-15',
-      incomingNumber: 'ВХ-2023-001',
-      subject: 'Запрос о сотрудничестве',
-      outgoingNumber: 'ИСХ-2023-001',
-      from: 'ООО "ТехноСнаб"',
-      to: 'ОАО "Промышленные системы"',
-      signedBy: 'Иванов А.А.'
-    },
-    {
-      id: 2,
-      date: '2023-10-16',
-      incomingNumber: 'ВХ-2023-002',
-      subject: 'Дополнение к контракту',
-      outgoingNumber: 'ИСХ-2023-002',
-      from: 'ЗАО "СтройИнвест"',
-      to: 'ООО "Городская застройка"',
-      signedBy: 'Петрова М.С.'
-    },
-    {
-      id: 3,
-      date: '2023-10-17',
-      incomingNumber: 'ВХ-2023-003',
-      subject: 'Отчет по поставкам',
-      outgoingNumber: 'ИСХ-2023-003',
-      from: 'ООО "ЛогистикСервис"',
-      to: 'АО "Торговый дом"',
-      signedBy: 'Сидоров В.П.'
-    },
-    {
-      id: 4,
-      date: '2023-10-18',
-      incomingNumber: 'ВХ-2023-004',
-      subject: 'Заявка на участие в тендере',
-      outgoingNumber: 'ИСХ-2023-004',
-      from: 'ООО "Инновационные технологии"',
-      to: 'Министерство промышленности',
-      signedBy: 'Кузнецова Е.А.'
-    },
-    {
-      id: 5,
-      date: '2023-10-19',
-      incomingNumber: 'ВХ-2023-005',
-      subject: 'Согласование графика поставок',
-      outgoingNumber: 'ИСХ-2023-005',
-      from: 'ОАО "ЭнергоСбыт"',
-      to: 'ГУП "ЖКХ городского округа"',
-      signedBy: 'Морозов Д.К.'
-    }
-  ];
-
   useEffect(() => {
-    setCorrespondentData(sampleData);
-  }, []);
+    // Load data from Firebase when component mounts
+    syncCorrespondentData().catch(error => {
+      console.error('Error loading correspondent data:', error);
+    });
+  }, [syncCorrespondentData]);
 
   // Apply filters to the data
   const filteredData = useMemo(() => {
@@ -105,7 +58,7 @@ const Correspondent = () => {
     setIsAddModalOpen(false);
   };
 
-  const openViewModal = (id: number) => {
+  const openViewModal = (id: number | string) => {
     setSelectedRecordId(id);
     setIsViewModalOpen(true);
   };
@@ -115,13 +68,14 @@ const Correspondent = () => {
     setSelectedRecordId(null);
   };
 
-  const confirmDelete = (id: number) => {
+  const confirmDelete = (id: number | string) => {
     setDeleteConfirmationId(id);
   };
 
   const handleDelete = () => {
     if (deleteConfirmationId !== null) {
-      deleteCorrespondentRecord(deleteConfirmationId);
+      // deleteCorrespondentRecord(deleteConfirmationId);
+      alert('В демо режиме нельзя удалять запись')
       setDeleteConfirmationId(null);
     }
   };

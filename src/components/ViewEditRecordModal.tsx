@@ -1,27 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import GenericViewEditModal from './GenericViewEditModal';
 
-interface CorrespondentRecord {
-  id: number;
-  date: string;
-  incomingNumber: string;
-  subject: string;
-  outgoingNumber: string;
-  from: string;
-  to: string;
-  signedBy: string;
-}
+// We'll use the type from the store instead of defining it locally
+import { AppCorrespondentRecord as CorrespondentRecord } from '../store/useStore';
 
 interface ViewEditRecordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  recordId: number | null;
+  recordId: number | string | null;
 }
 
 const ViewEditRecordModal: React.FC<ViewEditRecordModalProps> = ({ isOpen, onClose, recordId }) => {
   const correspondentData = useStore((state) => state.correspondentData);
   const updateCorrespondentRecord = useStore((state) => state.updateCorrespondentRecord);
+  const addCorrespondentRecord = useStore((state) => state.addCorrespondentRecord);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const renderViewMode = (record: CorrespondentRecord) => (
     <div className="space-y-4">
@@ -151,21 +147,61 @@ const ViewEditRecordModal: React.FC<ViewEditRecordModalProps> = ({ isOpen, onClo
     </div>
   );
 
-  const handleUpdate = (id: number, updatedRecord: Partial<CorrespondentRecord>) => {
-    updateCorrespondentRecord(id, updatedRecord);
+  // Handle updates (for both existing records and new records)
+  const handleUpdate = async (id: number | string, updatedRecord: Partial<CorrespondentRecord>) => {
+    setSubmitting(true);
+    setError(null);
+    
+    try {
+      if (id === -1 || recordId === null) {
+        // Creating a new record (indicated by id = -1 from GenericViewEditModal or recordId is null)
+        await addCorrespondentRecord(updatedRecord as Omit<CorrespondentRecord, 'id' | 'id'>);
+      } else {
+        // Updating an existing record
+        await updateCorrespondentRecord(id, updatedRecord);
+      }
+      
+      onClose(); // Close modal after successful update
+    } catch (error) {
+      console.error('Error updating correspondent record:', error);
+      setError((error as Error).message || 'Ошибка при сохранении записи');
+      throw error; // Re-throw to be handled by GenericViewEditModal
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Pre-populate date field with current date when creating new record
+  const preProcessFormData = (record: CorrespondentRecord | null, formData: Partial<CorrespondentRecord>) => {
+    if (recordId === null && !formData.date) {
+      // If creating a new record and date is not set, set it to current date
+      return {
+        ...formData,
+        date: new Date().toISOString().split('T')[0] // Format as YYYY-MM-DD
+      };
+    }
+    return formData;
   };
 
   return (
-    <GenericViewEditModal<CorrespondentRecord>
-      isOpen={isOpen}
-      onClose={onClose}
-      recordId={recordId}
-      records={correspondentData}
-      onUpdate={handleUpdate}
-      renderViewMode={renderViewMode}
-      renderEditMode={renderEditMode}
-      title="Детали корреспондентской записи"
-    />
+    <div>
+      {error && (
+        <div className="text-red-500 text-sm py-2">
+          {error}
+        </div>
+      )}
+      <GenericViewEditModal<CorrespondentRecord>
+        isOpen={isOpen}
+        onClose={onClose}
+        recordId={recordId}
+        records={correspondentData}
+        onUpdate={handleUpdate}
+        renderViewMode={renderViewMode}
+        renderEditMode={renderEditMode}
+        title="Детали корреспондентской записи"
+        preProcessFormData={preProcessFormData}
+      />
+    </div>
   );
 };
 
