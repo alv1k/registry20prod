@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import AddCorrespondentForm from '../components/AddCorrespondentForm';
-import ViewEditRecordModal from '../components/ViewEditRecordModal';
+import CorrespondentFormModal from '../components/CorrespondentFormModal';
 import AnimatedAccordion from '../components/AnimatedAccordion';
 
 const Correspondent = () => {
@@ -11,8 +10,7 @@ const Correspondent = () => {
   const isDataLoading = useStore((state) => state.isCorrespondentDataLoading);
   const dataError = useStore((state) => state.correspondentDataError);
   
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
   
@@ -20,6 +18,9 @@ const Correspondent = () => {
   const [dateFilter, setDateFilter] = useState<string>('');
   const [incomingNumberFilter, setIncomingNumberFilter] = useState<string>('');
   const [outgoingNumberFilter, setOutgoingNumberFilter] = useState<string>('');
+  const [fromFilter, setFromFilter] = useState<string>('');
+  const [toFilter, setToFilter] = useState<string>('');
+  const [signedFilter, setSignedFilter] = useState<string>('all'); // 'all', 'signed', 'not_signed'
 
   useEffect(() => {
     // Load data from Firebase when component mounts
@@ -46,25 +47,39 @@ const Correspondent = () => {
         return false;
       }
       
+      // From filter (partial match)
+      if (fromFilter && !record.from.toLowerCase().includes(fromFilter.toLowerCase())) {
+        return false;
+      }
+      
+      // To filter (partial match)
+      if (toFilter && !record.to.toLowerCase().includes(toFilter.toLowerCase())) {
+        return false;
+      }
+      
+      // Signed filter
+      if (signedFilter === 'signed' && !record.signedBy) {
+        return false;
+      }
+      if (signedFilter === 'not_signed' && record.signedBy) {
+        return false;
+      }
+      
       return true;
     });
-  }, [correspondentData, dateFilter, incomingNumberFilter, outgoingNumberFilter]);
+  }, [correspondentData, dateFilter, incomingNumberFilter, outgoingNumberFilter, fromFilter, toFilter, signedFilter]);
 
-  const openAddModal = () => {
-    setIsAddModalOpen(true);
+  const openFormModal = (id?: number | string | null) => {
+    if (id !== undefined) {
+      setSelectedRecordId(id);
+    } else {
+      setSelectedRecordId(null);
+    }
+    setIsFormModalOpen(true);
   };
 
-  const closeAddModal = () => {
-    setIsAddModalOpen(false);
-  };
-
-  const openViewModal = (id: number | string) => {
-    setSelectedRecordId(id);
-    setIsViewModalOpen(true);
-  };
-
-  const closeViewModal = () => {
-    setIsViewModalOpen(false);
+  const closeFormModal = () => {
+    setIsFormModalOpen(false);
     setSelectedRecordId(null);
   };
 
@@ -89,6 +104,9 @@ const Correspondent = () => {
     setDateFilter('');
     setIncomingNumberFilter('');
     setOutgoingNumberFilter('');
+    setFromFilter('');
+    setToFilter('');
+    setSignedFilter('all');
   };
 
   return (
@@ -97,7 +115,7 @@ const Correspondent = () => {
         <h1 className="text-2xl font-bold text-gray-800">Корреспондентский журнал</h1>
         <div className="flex flex-wrap gap-3">
           <button 
-            onClick={openAddModal}
+            onClick={() => openFormModal()}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -110,7 +128,7 @@ const Correspondent = () => {
       
       {/* Filter Controls - Accordion */}
       <AnimatedAccordion title="Фильтры" defaultOpen={true}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
             <input
@@ -141,6 +159,41 @@ const Correspondent = () => {
               onChange={(e) => setOutgoingNumberFilter(e.target.value)}
               className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">От кого</label>
+            <input
+              type="text"
+              placeholder="Фильтр по 'от кого'"
+              value={fromFilter}
+              onChange={(e) => setFromFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Кому</label>
+            <input
+              type="text"
+              placeholder="Фильтр по 'кому'"
+              value={toFilter}
+              onChange={(e) => setToFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Подписан</label>
+            <select
+              value={signedFilter}
+              onChange={(e) => setSignedFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            >
+              <option value="all">Все</option>
+              <option value="signed">Подписано</option>
+              <option value="not_signed">Не подписано</option>
+            </select>
           </div>
         </div>
         
@@ -188,7 +241,7 @@ const Correspondent = () => {
                   <div className="flex justify-between items-start">
                     <div 
                       className="flex-1 cursor-pointer"
-                      onClick={() => openViewModal(record.id)}
+                      onClick={() => openFormModal(record.id)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-sm font-medium text-gray-900">{record.incomingNumber}</div>
@@ -258,7 +311,7 @@ const Correspondent = () => {
                   <tr 
                     key={record.id} 
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => openViewModal(record.id)}
+                    onClick={() => openFormModal(record.id)}
                   >
                     <td 
                       className="p-4 whitespace-nowrap text-sm text-gray-500"
@@ -323,10 +376,9 @@ const Correspondent = () => {
         </div>
       </div>
       
-      <AddCorrespondentForm isOpen={isAddModalOpen} onClose={closeAddModal} />
-      <ViewEditRecordModal 
-        isOpen={isViewModalOpen} 
-        onClose={closeViewModal} 
+      <CorrespondentFormModal 
+        isOpen={isFormModalOpen} 
+        onClose={closeFormModal} 
         recordId={selectedRecordId} 
       />
     </div>

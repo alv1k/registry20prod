@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,6 +8,10 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+  
+  const [hasFocusedElement, setHasFocusedElement] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -24,10 +28,58 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     };
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      const handleFocusIn = () => setHasFocusedElement(true);
+      const handleFocusOut = () => {
+        // Устанавливаем небольшую задержку, чтобы дать браузеру обработать фокус 
+        // на другом элементе перед проверкой
+        setTimeout(() => {
+          if (modalRef.current) {
+            // Проверяем, есть ли фокус на каком-либо элементе внутри модального окна
+            const activeElement = document.activeElement;
+            if (!activeElement || !modalRef.current.contains(activeElement)) {
+              setHasFocusedElement(false);
+            }
+          }
+        }, 0);
+      };
+
+      // Находим все интерактивные элементы внутри модального окна
+      const inputs = modalRef.current.querySelectorAll('input, textarea, button, select, [tabindex]:not([tabindex="-1"])');
+      
+      inputs.forEach(input => {
+        (input as HTMLElement).addEventListener('focus', handleFocusIn);
+        (input as HTMLElement).addEventListener('blur', handleFocusOut);
+      });
+
+      return () => {
+        inputs.forEach(input => {
+          (input as HTMLElement).removeEventListener('focus', handleFocusIn);
+          (input as HTMLElement).removeEventListener('blur', handleFocusOut);
+        });
+      };
+    }
+  }, [isOpen]);
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    // Закрывать модальное окно только если клик был на оверлее (а не внутри модального окна)
+    if (e.target === e.currentTarget) {
+      // Закрываем только если внутри модального окна нет элемента с фокусом
+      if (!hasFocusedElement) {
+        onClose();
+      }
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50" 
+      onClick={handleOverlayClick}
+      ref={modalRef}
+    >
       <div 
         className="bg-white rounded-lg shadow-xl w-full max-w-lg sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}

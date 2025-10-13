@@ -5,7 +5,6 @@ import Correspondent from '../pages/Correspondent';
 import Transport from '../pages/Transport';
 import Finance from '../pages/Finance';
 import Domestic from '../pages/Domestic';
-import Icons from '../pages/Icons';
 
 const AppRoutes: React.FC = () => {
   const currentPage = useStore((state) => state.currentPage);
@@ -17,7 +16,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/transport" element={<Transport />} />
         <Route path="/finance" element={<Finance />} />
         <Route path="/domestic" element={<Domestic />} />
-        <Route path="/icons" element={<Icons />} />
         <Route path="/" element={
           <div className="max-w-md w-full bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl mx-auto">
             <div className="p-8">

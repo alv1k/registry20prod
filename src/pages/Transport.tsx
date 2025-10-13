@@ -1,9 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useStore } from '../store/useStore';
 import AnimatedAccordion from '../components/AnimatedAccordion';
-import AddTransportForm from '../components/AddTransportForm';
-import ViewEditTransportRecordModal from '../components/ViewEditTransportRecordModal';
+import TransportFormModal from '../components/TransportFormModal';
 
 const Transport = () => {
+  const transportData = useStore((state) => state.transportData);
+  const syncTransportData = useStore((state) => state.syncTransportData);
+  const addTransportRecord = useStore((state) => state.addTransportRecord);
+  const updateTransportRecord = useStore((state) => state.updateTransportRecord);
+  const deleteTransportRecord = useStore((state) => state.deleteTransportRecord);
+  const isDataLoading = useStore((state) => state.isTransportDataLoading);
+  const dataError = useStore((state) => state.transportDataError);
+
   // State for filters
   const [shippingDateFilter, setShippingDateFilter] = useState<string>('');
   const [departureDateFilter, setDepartureDateFilter] = useState<string>('');
@@ -15,178 +23,33 @@ const Transport = () => {
   const [shippingWeightFilter, setShippingWeightFilter] = useState<string>('');
   const [deliveryWeightFilter, setDeliveryWeightFilter] = useState<string>('');
   
-  // State for modals
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
-  const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | null>(null);
+  // State for modal
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
+  const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
 
-  // Sample data
-  const sampleData = [
-    {
-      id: 1,
-      shippingDate: '2023-10-15',
-      departureDate: '2023-10-15',
-      arrivalDate: '2023-10-17',
-      cargoName: 'Электронное оборудование',
-      driver: 'Иванов А.А.',
-      carNumber: 'А123БВ',
-      driverLicense: '1234567890',
-      shippingWeight: 1250,
-      deliveryWeight: 1240
-    },
-    {
-      id: 2,
-      shippingDate: '2023-10-16',
-      departureDate: '2023-10-16',
-      arrivalDate: '2023-10-19',
-      cargoName: 'Продовольственные товары',
-      driver: 'Петров Б.Б.',
-      carNumber: 'В456СД',
-      driverLicense: '0987654321',
-      shippingWeight: 2100,
-      deliveryWeight: 2090
-    },
-    {
-      id: 3,
-      shippingDate: '2023-10-17',
-      departureDate: '2023-10-17',
-      arrivalDate: '2023-10-20',
-      cargoName: 'Строительные материалы',
-      driver: 'Сидоров В.В.',
-      carNumber: 'С789ЕК',
-      driverLicense: '5678901234',
-      shippingWeight: 3500,
-      deliveryWeight: 3485
-    },
-    {
-      id: 4,
-      shippingDate: '2023-10-18',
-      departureDate: '2023-10-18',
-      arrivalDate: '2023-10-22',
-      cargoName: 'Медицинское оборудование',
-      driver: 'Кузнецов Г.Г.',
-      carNumber: 'К321МН',
-      driverLicense: '4321098765',
-      shippingWeight: 850,
-      deliveryWeight: 845
-    },
-    {
-      id: 5,
-      shippingDate: '2023-10-19',
-      departureDate: '2023-10-19',
-      arrivalDate: '2023-10-23',
-      cargoName: 'Канцелярские товары',
-      driver: 'Морозов Д.Д.',
-      carNumber: 'О654РП',
-      driverLicense: '3210987654',
-      shippingWeight: 420,
-      deliveryWeight: 418
-    },
-    {
-      id: 6,
-      shippingDate: '2023-10-19',
-      departureDate: '2023-10-19',
-      arrivalDate: '2023-10-23',
-      cargoName: 'Канцелярские товары',
-      driver: 'Морозов Д.Д.',
-      carNumber: 'О654РП',
-      driverLicense: '3210987654',
-      shippingWeight: 420,
-      deliveryWeight: 418
-    },
-    {
-      id: 7,
-      shippingDate: '2023-10-19',
-      departureDate: '2023-10-19',
-      arrivalDate: '2023-10-23',
-      cargoName: 'Канцелярские товары',
-      driver: 'Морозов Д.Д.',
-      carNumber: 'О654РП',
-      driverLicense: '3210987654',
-      shippingWeight: 420,
-      deliveryWeight: 418
-    },
-    {
-      id: 8,
-      shippingDate: '2023-10-19',
-      departureDate: '2023-10-19',
-      arrivalDate: '2023-10-23',
-      cargoName: 'Канцелярские товары',
-      driver: 'Морозов Д.Д.',
-      carNumber: 'О654РП',
-      driverLicense: '3210987654',
-      shippingWeight: 420,
-      deliveryWeight: 418
-    },
-    {
-      id: 9,
-      shippingDate: '2023-10-19',
-      departureDate: '2023-10-19',
-      arrivalDate: '2023-10-23',
-      cargoName: 'Канцелярские товары',
-      driver: 'Морозов Д.Д.',
-      carNumber: 'О654РП',
-      driverLicense: '3210987654',
-      shippingWeight: 420,
-      deliveryWeight: 418
-    },
-    {
-      id: 10,
-      shippingDate: '2023-10-19',
-      departureDate: '2023-10-19',
-      arrivalDate: '2023-10-23',
-      cargoName: 'Канцелярские товары',
-      driver: 'Морозов Д.Д.',
-      carNumber: 'О654РП',
-      driverLicense: '3210987654',
-      shippingWeight: 420,
-      deliveryWeight: 418
-    },
-  ];
-
-  const [transportData, setTransportData] = useState(sampleData);
-  
-  // Function to add a new record
-  const addTransportRecord = (newRecord: Omit<typeof sampleData[0], 'id'>) => {
-    const newId = transportData.length > 0 
-      ? Math.max(...transportData.map(r => r.id)) + 1 
-      : 1;
-    
-    const recordWithId = {
-      ...newRecord,
-      id: newId
-    };
-    
-    setTransportData([...transportData, recordWithId]);
-  };
-  
-  // Function to delete a record
-  const deleteTransportRecord = (id: number) => {
-    setTransportData(transportData.filter(record => record.id !== id));
-  };
+  useEffect(() => {
+    // Load data from Firebase when component mounts
+    syncTransportData().catch(error => {
+      console.error('Error loading transport data:', error);
+    });
+  }, [syncTransportData]);
   
   // Confirmation functions for deletion
-  const confirmDelete = (id: number) => {
+  const confirmDelete = (id: number | string) => {
     setDeleteConfirmationId(id);
   };
 
   const handleDelete = () => {
     if (deleteConfirmationId !== null) {
-      deleteTransportRecord(deleteConfirmationId);
+      // deleteTransportRecord(deleteConfirmationId);
+      alert('В демо режиме нельзя удалять запись')
       setDeleteConfirmationId(null);
     }
   };
 
   const cancelDelete = () => {
     setDeleteConfirmationId(null);
-  };
-
-  // Function to update a record
-  const updateTransportRecord = (id: number | string, updatedFields: Partial<typeof sampleData[0]>) => {
-    setTransportData(transportData.map(record => 
-      record.id === Number(id) ? { ...record, ...updatedFields } : record  // Convert string id to number for comparison
-    ));
   };
   
   // Apply filters to the data
@@ -253,23 +116,17 @@ const Transport = () => {
   ]);
 
   // Functions to handle modal
-  const openAddModal = () => {
-    setIsAddModalOpen(true);
+  const openFormModal = (id?: number | string | null) => {
+    if (id !== undefined) {
+      setSelectedRecordId(id as number | null); // Приведение типа для совместимости со старым состоянием
+    } else {
+      setSelectedRecordId(null);
+    }
+    setIsFormModalOpen(true);
   };
 
-  const closeAddModal = () => {
-    setIsAddModalOpen(false);
-  };  
-
-  const openViewModal = (id: number) => {
-    console.log('777');
-    
-    setSelectedRecordId(id);
-    setIsViewModalOpen(true);
-  };
-
-  const closeViewModal = () => {
-    setIsViewModalOpen(false);
+  const closeFormModal = () => {
+    setIsFormModalOpen(false);
     setSelectedRecordId(null);
   };
 
@@ -292,7 +149,7 @@ const Transport = () => {
         <h1 className="text-2xl font-bold text-gray-800">Транспортный журнал</h1>
         <div className="flex flex-wrap gap-3">
           <button 
-            onClick={openAddModal}
+            onClick={() => openFormModal()}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -437,6 +294,13 @@ const Transport = () => {
         </div>
       )}
       
+      {/* Error message */}
+      {dataError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {dataError}
+        </div>
+      )}
+      
       <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mt-4">
         <div className="overflow-x-auto">
           {/* Mobile View - Card Layout */}
@@ -447,6 +311,7 @@ const Transport = () => {
                   <div className="flex justify-between items-start">
                     <div 
                       className="flex-1 cursor-pointer"
+                      onClick={() => openFormModal(record.id)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-sm font-medium text-gray-900">{record.driver}</div>
@@ -522,50 +387,50 @@ const Transport = () => {
                   <tr 
                     key={record.id} 
                     className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => openViewModal(record.id)}
+                    onClick={() => openFormModal(record.id)}
                   >
                     <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500 select-none"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {record.shippingDate}
                     </td>
                     <td 
-                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 select-none"
+                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
                     >
                       {record.departureDate}
                     </td>
                     <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500 select-none"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {record.arrivalDate}
                     </td>
                     <td 
-                      className="p-4 text-sm text-gray-500 select-none"
+                      className="p-4 text-sm text-gray-500"
                     >
                       {record.cargoName}
                     </td>
                     <td 
-                      className="p-4 text-sm text-gray-500 select-none"
+                      className="p-4 text-sm text-gray-500"
                     >
                       {record.driver}
                     </td>
                     <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500 select-none"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {record.carNumber}
                     </td>
                     <td 
-                      className="p-4 text-sm text-gray-500 select-none"
+                      className="p-4 text-sm text-gray-500"
                     >
                       {record.driverLicense}
                     </td>
                     <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500 select-none"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {record.shippingWeight} кг
                     </td>
                     <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500 select-none"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {record.deliveryWeight} кг
                     </td>
@@ -597,17 +462,12 @@ const Transport = () => {
         </div>
       </div>
       
-      <AddTransportForm 
-        isOpen={isAddModalOpen} 
-        onClose={closeAddModal} 
-        onAdd={addTransportRecord} 
-      />      
-      <ViewEditTransportRecordModal 
-        isOpen={isViewModalOpen} 
-        onClose={closeViewModal} 
+      <TransportFormModal 
+        isOpen={isFormModalOpen} 
+        onClose={closeFormModal} 
         recordId={selectedRecordId} 
-        onUpdate={updateTransportRecord}
-        records={transportData}
+        onAdd={addTransportRecord} 
+        onUpdate={updateTransportRecord} 
       />
     </div>
   );
