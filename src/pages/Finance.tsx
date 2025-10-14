@@ -153,8 +153,7 @@ const Finance = () => {
 
   const handleDelete = () => {
     if (deleteConfirmationId !== null) {
-      // deleteFinanceRecord(deleteConfirmationId);
-      alert('В демо режиме нельзя удалять запись');
+      deleteFinanceRecord(deleteConfirmationId);
       setDeleteConfirmationId(null);
     }
   };
@@ -316,7 +315,7 @@ const Finance = () => {
       )}
       
       <AnimatedAccordion title="Таблица финансов" defaultOpen={true}>
-        <div className="mt-2 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+        <div className="mt-2 bg-white rounded-lg shadow-md border border-gray-200">
           <div className="overflow-x-auto">
             {isDataLoading ? (
               <div className="py-12">
@@ -325,7 +324,7 @@ const Finance = () => {
             ) : (
               <>
                 {/* Mobile View - Card Layout */}
-                <div className="block md:hidden">
+                <div className="block md:hidden overflow-y-scroll">
                   {filteredData.length > 0 ? (
                     filteredData.map((record) => (
                       <div key={record.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
@@ -385,7 +384,7 @@ const Finance = () => {
                 </div>
                 
                 {/* Desktop View - Table */}
-                <table className="hidden md:table divide-y divide-gray-200 min-w-full">
+                <table className="hidden md:table divide-y divide-gray-200 min-w-full overflow-y-scroll">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
