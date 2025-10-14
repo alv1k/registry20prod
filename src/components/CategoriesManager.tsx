@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import CategoryFormModal from './CategoryFormModal';
-import AnimatedAccordion from './AnimatedAccordion';
 
 const CategoriesManager: React.FC = () => {
   const categories = useStore((state) => state.categories);

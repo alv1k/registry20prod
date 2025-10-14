@@ -4,7 +4,6 @@ import FinanceFormModal from '../components/FinanceFormModal';
 import AnimatedAccordion from '../components/AnimatedAccordion';
 import FinanceCharts from '../components/FinanceCharts';
 import CategoriesManager from '../components/CategoriesManager';
-import { log } from 'console';
 
 // Функция для форматирования даты в формат "DD.MM.YYг"
 const formatDate = (dateString: string): string => {
