@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import FinanceFormModal from '../components/FinanceFormModal';
 import AnimatedAccordion from '../components/AnimatedAccordion';
@@ -25,7 +25,11 @@ const Finance = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
 
+  // Ref for the table container
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  
   // Check if user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -45,6 +49,16 @@ const Finance = () => {
 
     checkAdminStatus();
   }, [user]);
+
+  // Auto-scroll to the bottom of the table when shouldScrollToBottom is true
+  useEffect(() => {
+    if (shouldScrollToBottom && tableContainerRef.current) {
+      // Scroll to the bottom of the container
+      tableContainerRef.current.scrollTop = tableContainerRef.current.scrollHeight;
+      // Reset the flag
+      setShouldScrollToBottom(false);
+    }
+  }, [shouldScrollToBottom]);
 
   // Filter state variables
   const [dateFilter, setDateFilter] = useState<string>('');
@@ -145,6 +159,17 @@ const Finance = () => {
     setSelectedRecordId(null);
   };
 
+  // Wrapper function to add a record and trigger scroll to bottom
+  const addFinanceRecordAndScroll = async (record: any) => {
+    try {
+      await addFinanceRecord(record);
+      // Set flag to trigger scroll to bottom after the record is added
+      setShouldScrollToBottom(true);
+    } catch (error) {
+      console.error('Error adding finance record:', error);
+    }
+  };
+
   const confirmDelete = (id: number | string) => {
     if (isAdmin) {
       setDeleteConfirmationId(id);
@@ -169,6 +194,32 @@ const Finance = () => {
     setClassificationFilter('');
     setPeriodFilter({type: 'month', value: getCurrentMonth()});
   };
+
+  // Calculate total amount for filtered data
+  const calculateTotalAmount = useMemo(() => {
+    return filteredData.reduce((sum, record) => sum + record.total, 0);
+  }, [filteredData]);
+
+  // Get top 3 most expensive categories
+  const getTopCategories = useMemo(() => {
+    // Group records by classification and sum totals
+    const categoryTotals: Record<string, number> = {};
+    
+    filteredData.forEach(record => {
+      if (!categoryTotals[record.classification]) {
+        categoryTotals[record.classification] = 0;
+      }
+      categoryTotals[record.classification] += record.total;
+    });
+    
+    // Convert to array and sort by total (descending)
+    const sortedCategories = Object.entries(categoryTotals)
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+    
+    // Return top 3
+    return sortedCategories.slice(0, 3);
+  }, [filteredData]);
 
   return (
     <div className="p-4 sm:p-6">
@@ -286,6 +337,51 @@ const Finance = () => {
           </button>
         </div>
       </AnimatedAccordion>
+      
+      {/* Summary blocks */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        {/* Total Amount Block */}
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Общая сумма</h3>
+          <div className="flex items-center">
+            <div className="text-3xl font-bold text-blue-600">
+              {formatCurrencyWithSeparators(calculateTotalAmount)} ₽
+            </div>
+            <div className="ml-4 text-sm text-gray-500">
+              по выбранным фильтрам
+            </div>
+          </div>
+        </div>
+        
+        {/* Top 3 Categories Block */}
+        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Топ 3 категории</h3>
+          <div className="space-y-3">
+            {getTopCategories.length > 0 ? (
+              getTopCategories.map((category, index) => (
+                <div key={category.name} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3 ${
+                      index === 0 ? 'bg-yellow-500' : 
+                      index === 1 ? 'bg-gray-400' : 'bg-amber-700'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <div className="font-medium text-gray-800">{category.name}</div>
+                  </div>
+                  <div className="font-semibold text-gray-700">
+                    {formatCurrencyWithSeparators(category.total)} ₽
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-gray-500 text-center py-4">
+                Нет данных для отображения
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Chart section */}      
       <FinanceCharts records={filteredData} />
@@ -315,7 +411,7 @@ const Finance = () => {
       )}
       
       <AnimatedAccordion title="Таблица финансов" defaultOpen={true}>
-        <div className="mt-2 bg-white rounded-lg shadow-md border border-gray-200">
+        <div ref={tableContainerRef} className="mt-2 bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[500px]">
           <div className="overflow-x-auto">
             {isDataLoading ? (
               <div className="py-12">
@@ -484,7 +580,7 @@ const Finance = () => {
           isOpen={isFormModalOpen} 
           onClose={closeFormModal} 
           recordId={selectedRecordId} 
-          onAdd={addFinanceRecord} 
+          onAdd={addFinanceRecordAndScroll} 
           onUpdate={updateFinanceRecord} 
         />
       )}

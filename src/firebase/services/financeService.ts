@@ -10,8 +10,14 @@ import {
   orderBy,
   where
 } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
+import app from '../config';
 import { isValidFinanceRecord } from '../../utils/validation';
+import { sanitizeFinanceRecord } from '../../utils/sanitization';
+
+// Initialize Firebase Functions
+const functions = getFunctions(app);
 
 // Тип для финансовой записи
 export interface FinanceRecord {
@@ -59,13 +65,32 @@ export const getAllFinanceRecords = async (): Promise<FinanceRecord[]> => {
 // Добавить новую финансовую запись
 export const addFinanceRecord = async (record: Omit<FinanceRecord, 'id'>): Promise<string> => {
   try {
+    // Санитизация данных перед валидацией
+    const sanitizedRecord = sanitizeFinanceRecord(record);
+    
     // Валидация данных перед сохранением
-    const validation = isValidFinanceRecord(record);
+    const validation = isValidFinanceRecord(sanitizedRecord);
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
     }
     
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), record);
+    // Define the expected response structure
+    interface ValidationResponse {
+      valid: boolean;
+      message?: string;
+    }
+    
+    // Server-side validation using callable function (temporarily disabled due to deployment issues)
+    // const validateFunction = httpsCallable(functions, 'validateFinanceRecord');
+    // const validationResult = await validateFunction(sanitizedRecord);
+    // const responseData = validationResult.data as ValidationResponse;
+    // 
+    // if (!responseData.valid) {
+    //   throw new Error(`Server validation failed: ${responseData.message || 'Unknown error'}`);
+    // }
+    
+    // TEMP: Skip server validation for now and proceed directly to Firestore
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedRecord);
     return docRef.id;
   } catch (error: any) {
     console.error('Error adding finance record:', error);
@@ -80,6 +105,32 @@ export const addFinanceRecord = async (record: Omit<FinanceRecord, 'id'>): Promi
 // Обновить финансовую запись
 export const updateFinanceRecord = async (id: string, record: Partial<FinanceRecord>): Promise<void> => {
   try {
+    // Санитизация данных перед валидацией
+    const sanitizedRecord: Partial<FinanceRecord> = {};
+    
+    // Санитизируем только те поля, которые передаются для обновления
+    if (record.date !== undefined) {
+      sanitizedRecord.date = sanitizeFinanceRecord({ date: record.date }).date;
+    }
+    if (record.name !== undefined) {
+      sanitizedRecord.name = sanitizeFinanceRecord({ name: record.name }).name;
+    }
+    if (record.price !== undefined) {
+      sanitizedRecord.price = sanitizeFinanceRecord({ price: record.price }).price;
+    }
+    if (record.quantity !== undefined) {
+      sanitizedRecord.quantity = sanitizeFinanceRecord({ quantity: record.quantity }).quantity;
+    }
+    if (record.total !== undefined) {
+      sanitizedRecord.total = sanitizeFinanceRecord({ total: record.total }).total;
+    }
+    if (record.classification !== undefined) {
+      sanitizedRecord.classification = sanitizeFinanceRecord({ classification: record.classification }).classification;
+    }
+    if (record.comment !== undefined) {
+      sanitizedRecord.comment = sanitizeFinanceRecord({ comment: record.comment }).comment;
+    }
+    
     // Валидация данных перед обновлением
     if (record.date !== undefined || record.name !== undefined || record.price !== undefined || 
         record.quantity !== undefined || record.total !== undefined || 
@@ -102,7 +153,7 @@ export const updateFinanceRecord = async (id: string, record: Partial<FinanceRec
     }
     
     const recordRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(recordRef, record);
+    await updateDoc(recordRef, sanitizedRecord);
   } catch (error: any) {
     console.error('Error updating finance record:', error);
     // Check if it's an authentication error

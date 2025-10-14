@@ -5,9 +5,10 @@ import LoginForm from './LoginForm';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireAuth?: boolean; // Whether authentication is required to view content
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAuth = true }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -19,12 +20,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  if (!user) {
-    // Show login form if not authenticated
+  if (requireAuth && !user) {
+    // Show login form if authentication is required and user is not authenticated
     return <LoginForm onSuccess={() => {}} />;
   }
 
-  // Show children if authenticated
+  // Show children - either authenticated user or allow public viewing
   return <>{children}</>;
 };
 

@@ -10,7 +10,13 @@ import {
   orderBy,
   where
 } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
+import app from '../config';
+import { sanitizeTransportRecord } from '../../utils/sanitization';
+
+// Initialize Firebase Functions
+const functions = getFunctions(app);
 
 // Тип для записи транспорта
 export interface TransportRecord {
@@ -62,7 +68,10 @@ export const getAllTransportRecords = async (): Promise<TransportRecord[]> => {
 // Добавить новую запись транспорта
 export const addTransportRecord = async (record: Omit<TransportRecord, 'id'>): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), record);
+    // Санитизация данных перед сохранением
+    const sanitizedRecord = sanitizeTransportRecord(record);
+    
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedRecord);
     return docRef.id;
   } catch (error: any) {
     console.error('Error adding transport record:', error);
@@ -77,8 +86,40 @@ export const addTransportRecord = async (record: Omit<TransportRecord, 'id'>): P
 // Обновить запись транспорта
 export const updateTransportRecord = async (id: string, record: Partial<TransportRecord>): Promise<void> => {
   try {
+    // Санитизация данных перед обновлением
+    const sanitizedRecord: Partial<TransportRecord> = {};
+    
+    // Санитизируем только те поля, которые передаются для обновления
+    if (record.shippingDate !== undefined) {
+      sanitizedRecord.shippingDate = sanitizeTransportRecord({ shippingDate: record.shippingDate }).shippingDate;
+    }
+    if (record.departureDate !== undefined) {
+      sanitizedRecord.departureDate = sanitizeTransportRecord({ departureDate: record.departureDate }).departureDate;
+    }
+    if (record.arrivalDate !== undefined) {
+      sanitizedRecord.arrivalDate = sanitizeTransportRecord({ arrivalDate: record.arrivalDate }).arrivalDate;
+    }
+    if (record.cargoName !== undefined) {
+      sanitizedRecord.cargoName = sanitizeTransportRecord({ cargoName: record.cargoName }).cargoName;
+    }
+    if (record.driver !== undefined) {
+      sanitizedRecord.driver = sanitizeTransportRecord({ driver: record.driver }).driver;
+    }
+    if (record.carNumber !== undefined) {
+      sanitizedRecord.carNumber = sanitizeTransportRecord({ carNumber: record.carNumber }).carNumber;
+    }
+    if (record.driverLicense !== undefined) {
+      sanitizedRecord.driverLicense = sanitizeTransportRecord({ driverLicense: record.driverLicense }).driverLicense;
+    }
+    if (record.shippingWeight !== undefined) {
+      sanitizedRecord.shippingWeight = sanitizeTransportRecord({ shippingWeight: record.shippingWeight }).shippingWeight;
+    }
+    if (record.deliveryWeight !== undefined) {
+      sanitizedRecord.deliveryWeight = sanitizeTransportRecord({ deliveryWeight: record.deliveryWeight }).deliveryWeight;
+    }
+    
     const recordRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(recordRef, record);
+    await updateDoc(recordRef, sanitizedRecord);
   } catch (error: any) {
     console.error('Error updating transport record:', error);
     // Check if it's an authentication error

@@ -82,32 +82,6 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
 
   return (
     <div className="mt-6 space-y-8">
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Распределение по классификациям</h3>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={classificationData}
-              margin={{
-                top: 20,
-                right: 30,
-                left: 20,
-                bottom: 50,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
-              <YAxis />
-              <Tooltip 
-                formatter={(value: number) => [`${formatCurrencyWithSeparators(value)} ₽`]}
-                labelFormatter={(value: string) => `${value}`}
-              />
-              <Legend />
-              <Bar dataKey="total" name="Общая сумма" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -168,6 +142,32 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
               </LineChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Распределение по классификациям</h3>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={classificationData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 50,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
+              <YAxis />
+              <Tooltip 
+                formatter={(value: number) => [`${formatCurrencyWithSeparators(value)} ₽`]}
+                labelFormatter={(value: string) => `${value}`}
+              />
+              <Legend />
+              <Bar dataKey="total" name="Общая сумма" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

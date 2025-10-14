@@ -13,7 +13,7 @@ function App() {
     <AuthProvider>
       <div className="App min-h-screen flex flex-col">
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <ProtectedRoute>
+        <ProtectedRoute requireAuth={false}>
           <div className="flex">
             {/* Mobile sidebar backdrop */}
             {sidebarOpen && (

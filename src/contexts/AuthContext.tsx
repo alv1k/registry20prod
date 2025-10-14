@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChangedListener, getCurrentUser } from '../firebase/authService';
 import { User } from 'firebase/auth';
+import { isTokenExpiringSoon, refreshToken } from '../utils/authUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -17,6 +18,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tokenCheckInterval, setTokenCheckInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChangedListener((user) => {
@@ -32,6 +34,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     return unsubscribe;
   }, []);
+
+  // Monitor token expiration and refresh if needed
+  useEffect(() => {
+    if (user) {
+      // Set up interval to check token expiration every 5 minutes
+      const interval = setInterval(async () => {
+        try {
+          if (await isTokenExpiringSoon(user, 10)) { // Check if token expires in 10 minutes or less
+            console.log('Refreshing user token...');
+            await refreshToken(user);
+          }
+        } catch (error) {
+          console.error('Error checking/expiring token:', error);
+        }
+      }, 5 * 60 * 1000); // Every 5 minutes
+      
+      setTokenCheckInterval(interval);
+      
+      return () => {
+        if (interval) {
+          clearInterval(interval);
+        }
+      };
+    } else {
+      // Clear interval if user logs out
+      if (tokenCheckInterval) {
+        clearInterval(tokenCheckInterval);
+        setTokenCheckInterval(null);
+      }
+    }
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>

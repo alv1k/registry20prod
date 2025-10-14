@@ -34,10 +34,18 @@ export const signIn = async (email: string, password: string): Promise<User> => 
   }
 };
 
-// Sign out
+// Sign out with enhanced cleanup
 export const signOutUser = async (): Promise<void> => {
   try {
+    // Clear any application-specific local storage data if needed
+    // Example: localStorage.removeItem('app-specific-key');
+    // Currently no app-specific data to clear
+    
+    // Sign out from Firebase
     await signOut(auth);
+    
+    // Firebase SDK handles token cleanup automatically
+    console.log('User successfully signed out');
   } catch (error) {
     console.error('Error during sign out:', error);
     throw error;

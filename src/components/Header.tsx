@@ -20,9 +20,11 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const handleSignOut = async () => {
     try {
       await signOutUser();
-      // Optionally redirect or update UI after logout
+      // ProtectedRoute will handle redirecting to login page
     } catch (error) {
       console.error('Error signing out:', error);
+      // Show error message to user
+      alert('Ошибка при выходе из системы. Пожалуйста, попробуйте снова.');
     }
   };
 
@@ -50,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
             />
             <div className="ms-12" onClick={ ()=> console.log('click logo') }>
               <a href="/">
-                <img src="/logo.png" alt="logo" className="h-10 w-10" />
+                <img src="/logo.svg" alt="logo" className="h-10 w-10" />
               </a>
             </div>
           </div>

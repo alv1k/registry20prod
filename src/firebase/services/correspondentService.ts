@@ -11,7 +11,13 @@ import {
   where,
   DocumentData
 } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
+import app from '../config';
+import { sanitizeCorrespondentRecord } from '../../utils/sanitization';
+
+// Initialize Firebase Functions
+const functions = getFunctions(app);
 
 // Тип для записи корреспондента
 export interface CorrespondentRecord {
@@ -59,7 +65,10 @@ export const getAllCorrespondentRecords = async (): Promise<CorrespondentRecord[
 // Добавить новую запись корреспондента
 export const addCorrespondentRecord = async (record: Omit<CorrespondentRecord, 'id'>): Promise<string> => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), record);
+    // Санитизация данных перед сохранением
+    const sanitizedRecord = sanitizeCorrespondentRecord(record);
+    
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedRecord);
     return docRef.id;
   } catch (error: any) {
     console.error('Error adding correspondent record:', error);
@@ -74,8 +83,34 @@ export const addCorrespondentRecord = async (record: Omit<CorrespondentRecord, '
 // Обновить запись корреспондента
 export const updateCorrespondentRecord = async (id: string, record: Partial<CorrespondentRecord>): Promise<void> => {
   try {
+    // Санитизация данных перед обновлением
+    const sanitizedRecord: Partial<CorrespondentRecord> = {};
+    
+    // Санитизируем только те поля, которые передаются для обновления
+    if (record.date !== undefined) {
+      sanitizedRecord.date = sanitizeCorrespondentRecord({ date: record.date }).date;
+    }
+    if (record.incomingNumber !== undefined) {
+      sanitizedRecord.incomingNumber = sanitizeCorrespondentRecord({ incomingNumber: record.incomingNumber }).incomingNumber;
+    }
+    if (record.subject !== undefined) {
+      sanitizedRecord.subject = sanitizeCorrespondentRecord({ subject: record.subject }).subject;
+    }
+    if (record.outgoingNumber !== undefined) {
+      sanitizedRecord.outgoingNumber = sanitizeCorrespondentRecord({ outgoingNumber: record.outgoingNumber }).outgoingNumber;
+    }
+    if (record.from !== undefined) {
+      sanitizedRecord.from = sanitizeCorrespondentRecord({ from: record.from }).from;
+    }
+    if (record.to !== undefined) {
+      sanitizedRecord.to = sanitizeCorrespondentRecord({ to: record.to }).to;
+    }
+    if (record.signedBy !== undefined) {
+      sanitizedRecord.signedBy = sanitizeCorrespondentRecord({ signedBy: record.signedBy }).signedBy;
+    }
+    
     const recordRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(recordRef, record);
+    await updateDoc(recordRef, sanitizedRecord);
   } catch (error: any) {
     console.error('Error updating correspondent record:', error);
     // Check if it's an authentication error

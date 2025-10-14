@@ -9,8 +9,14 @@ import {
   query,
   where
 } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
+import app from '../config';
 import { isValidCategory } from '../../utils/validation';
+import { sanitizeCategoryRecord } from '../../utils/sanitization';
+
+// Initialize Firebase Functions
+const functions = getFunctions(app);
 
 // Тип для категории
 export interface Category {
@@ -56,7 +62,10 @@ export const addCategory = async (category: Omit<Category, 'id'>): Promise<strin
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
     }
     
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), category);
+    // Санитизация данных перед сохранением
+    const sanitizedCategory = sanitizeCategoryRecord(category);
+    
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), sanitizedCategory);
     return docRef.id;
   } catch (error: any) {
     console.error('Error adding category:', error);
@@ -86,8 +95,22 @@ export const updateCategory = async (id: string, category: Partial<Category>): P
       }
     }
     
+    // Санитизация данных перед обновлением
+    const sanitizedCategory: Partial<Category> = {};
+    
+    // Санитизируем только те поля, которые передаются для обновления
+    if (category.name !== undefined) {
+      sanitizedCategory.name = sanitizeCategoryRecord({ name: category.name }).name;
+    }
+    if (category.description !== undefined) {
+      sanitizedCategory.description = sanitizeCategoryRecord({ description: category.description }).description;
+    }
+    if (category.type !== undefined) {
+      sanitizedCategory.type = sanitizeCategoryRecord({ type: category.type }).type;
+    }
+    
     const categoryRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(categoryRef, category);
+    await updateDoc(categoryRef, sanitizedCategory);
   } catch (error: any) {
     console.error('Error updating category:', error);
     // Check if it's an authentication error
