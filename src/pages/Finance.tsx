@@ -572,7 +572,9 @@ const Finance = () => {
       </AnimatedAccordion>
       
       <AnimatedAccordion title="Управление категориями" defaultOpen={false}>
-        <CategoriesManager />
+        <div className="max-h-96 overflow-y-auto pr-2">
+          <CategoriesManager />
+        </div>
       </AnimatedAccordion>
       
       {isAdmin && (
