@@ -14,35 +14,7 @@ import {
   LineChart,
   Line
 } from 'recharts';
-
-// Функция для форматирования даты в формат "DD.MM.YYг"
-const formatDate = (dateString: string): string => {
-  if (!dateString) return '';
-  
-  try {
-    // Если дата уже в формате DD.MM.YYг, возвращаем как есть
-    if (dateString.includes('.')) {
-      // Проверяем, соответствует ли формат шаблону DD.MM.YYг
-      const parts = dateString.split('.');
-      if (parts.length === 3 && parts[2].endsWith('г')) {
-        return dateString;
-      }
-    }
-    
-    // Парсим дату в формате YYYY-MM-DD
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString; // Если дата некорректна, возвращаем исходную строку
-    
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear().toString().slice(-2); // Берем последние 2 цифры года
-    
-    return `${day}.${month}.${year}г`;
-  } catch (error) {
-    console.error('Ошибка форматирования даты:', error);
-    return dateString; // В случае ошибки возвращаем исходную строку
-  }
-};
+import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
 
 interface FinanceRecord {
   id: number | string;
@@ -127,7 +99,7 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
               <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
               <YAxis />
               <Tooltip 
-                formatter={(value: number) => [`${value} ₽`]}
+                formatter={(value: number) => [`${formatCurrencyWithSeparators(value)} ₽`]}
                 labelFormatter={(value: string) => `${value}`}
               />
               <Legend />
@@ -158,7 +130,7 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => [`${value} ₽`]} />
+                <Tooltip formatter={(value: number) => [`${formatCurrencyWithSeparators(value)} ₽`]} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -182,7 +154,7 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
                 <XAxis dataKey="date" angle={-45} textAnchor="end" height={60} />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value: number) => [`${value} ₽`, 'Сумма']}
+                  formatter={(value: number) => [`${formatCurrencyWithSeparators(value)} ₽`, 'Сумма']}
                   labelFormatter={(value: string) => `Дата: ${formatDate(value)}`}
                 />
                 <Legend />

@@ -16,7 +16,7 @@ const AnimatedAccordion: React.FC<AnimatedAccordionProps> = ({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={`bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden ${className}`}>
+    <div className={`my-3 bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden ${className}`}>
       <div 
         className="flex justify-between items-center p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
         onClick={() => setIsOpen(!isOpen)}

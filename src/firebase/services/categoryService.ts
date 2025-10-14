@@ -10,6 +10,7 @@ import {
   where
 } from 'firebase/firestore';
 import { db } from '../firestore';
+import { isValidCategory } from '../../utils/validation';
 
 // Тип для категории
 export interface Category {
@@ -38,7 +39,6 @@ export const getAllCategories = async (): Promise<Category[]> => {
         type: data.type || 'expense'
       });
     });
-    console.log(categories,'categories');
     
     return categories;
   } catch (error) {
@@ -50,10 +50,20 @@ export const getAllCategories = async (): Promise<Category[]> => {
 // Добавить новую категорию
 export const addCategory = async (category: Omit<Category, 'id'>): Promise<string> => {
   try {
+    // Валидация данных перед сохранением
+    const validation = isValidCategory(category);
+    if (!validation.isValid) {
+      throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+    }
+    
     const docRef = await addDoc(collection(db, COLLECTION_NAME), category);
     return docRef.id;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error adding category:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };
@@ -61,10 +71,29 @@ export const addCategory = async (category: Omit<Category, 'id'>): Promise<strin
 // Обновить категорию
 export const updateCategory = async (id: string, category: Partial<Category>): Promise<void> => {
   try {
+    // Валидация данных перед обновлением
+    if (category.name !== undefined || category.description !== undefined || category.type !== undefined) {
+      // Create a temporary object to validate
+      const tempCategory = {
+        name: category.name !== undefined ? category.name : '',
+        description: category.description !== undefined ? category.description : '',
+        type: category.type !== undefined ? category.type : 'expense'
+      };
+      
+      const validation = isValidCategory(tempCategory);
+      if (!validation.isValid) {
+        throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+      }
+    }
+    
     const categoryRef = doc(db, COLLECTION_NAME, id);
     await updateDoc(categoryRef, category);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating category:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };
@@ -73,8 +102,12 @@ export const updateCategory = async (id: string, category: Partial<Category>): P
 export const deleteCategory = async (id: string): Promise<void> => {
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, id));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting category:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };

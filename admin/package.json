@@ -1,0 +1,17 @@
+{
+  "name": "firebase-admin-scripts",
+  "version": "1.0.0",
+  "description": "Admin scripts for managing Firebase users and permissions",
+  "main": "setAdmin.js",
+  "scripts": {
+    "set-admin": "node setAdmin.js",
+    "list-users": "node listUsers.js",
+    "check-admin": "node checkAdmin.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.0.0"
+  },
+  "keywords": ["firebase", "admin", "authentication", "permissions"],
+  "author": "Your Name",
+  "license": "MIT"
+}

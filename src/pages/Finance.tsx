@@ -4,35 +4,9 @@ import FinanceFormModal from '../components/FinanceFormModal';
 import AnimatedAccordion from '../components/AnimatedAccordion';
 import FinanceCharts from '../components/FinanceCharts';
 import CategoriesManager from '../components/CategoriesManager';
-
-// Функция для форматирования даты в формат "DD.MM.YYг"
-const formatDate = (dateString: string): string => {
-  if (!dateString) return '';
-  
-  try {
-    // Если дата уже в формате DD.MM.YYг, возвращаем как есть
-    if (dateString.includes('.')) {
-      // Проверяем, соответствует ли формат шаблону DD.MM.YYг
-      const parts = dateString.split('.');
-      if (parts.length === 3 && parts[2].endsWith('г')) {
-        return dateString;
-      }
-    }
-    
-    // Парсим дату в формате YYYY-MM-DD
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return dateString; // Если дата некорректна, возвращаем исходную строку
-    
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear().toString().slice(-2); // Берем последние 2 цифры года
-    
-    return `${day}.${month}.${year}г`;
-  } catch (error) {
-    console.error('Ошибка форматирования даты:', error);
-    return dateString; // В случае ошибки возвращаем исходную строку
-  }
-};
+import LoadingSpinner from '../components/LoadingSpinner';
+import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
+import { useAuth } from '../contexts/AuthContext';
 
 const Finance = () => {
   const financeData = useStore((state) => state.financeData);
@@ -42,75 +16,119 @@ const Finance = () => {
   const deleteFinanceRecord = useStore((state) => state.deleteFinanceRecord);
   const isDataLoading = useStore((state) => state.isFinanceDataLoading);
   const dataError = useStore((state) => state.financeDataError);
+  const categories = useStore((state) => state.categories);
+  const syncCategories = useStore((state) => state.syncCategories);
 
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        try {
+          const idTokenResult = await user.getIdTokenResult();
+          setIsAdmin(idTokenResult.claims.admin === true || user.uid === 'kpXIs5bBpdYsP5NKW7P1ZecgYwr2');
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          // As a fallback, check if it's the specific UID
+          setIsAdmin(user.uid === 'kpXIs5bBpdYsP5NKW7P1ZecgYwr2');
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   // Filter state variables
   const [dateFilter, setDateFilter] = useState<string>('');
   const [nameFilter, setNameFilter] = useState<string>('');
   const [classificationFilter, setClassificationFilter] = useState<string>('');
-  const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'all', value: ''});
+  
+  // Set default period filter to current month
+  const getCurrentMonth = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    return `${year}-${month}`;
+  };
+  
+  const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'month', value: getCurrentMonth()});
 
   useEffect(() => {
     // Load data from Firebase when component mounts
     syncFinanceData().catch(error => {
       console.error('Error loading finance data:', error);
     });    
-  }, [syncFinanceData]);
+    syncCategories().catch(error => {
+      console.error('Error loading categories:', error);
+    });    
+  }, [syncFinanceData, syncCategories]);
 
-  // Apply filters to the data
+  // Apply filters to the data and sort by date (newest first)
   const filteredData = useMemo(() => {
-    return financeData.filter(record => {
-      // Date filter - используем оригинальный формат даты для фильтрации
-      if (dateFilter && record.date !== dateFilter) {
-        return false;
-      }
-      
-      // Period filter
-      if (periodFilter.type !== 'all') {
-        const recordDate = new Date(record.date);
-        const recordYear = recordDate.getFullYear().toString();
-        const recordMonth = recordDate.getMonth() + 1; // месяцы в JS от 0 до 11
-        const recordQuarter = Math.floor(recordDate.getMonth() / 3) + 1;
-        
-        switch(periodFilter.type) {
-          case 'month':
-            // periodFilter.value format: 'YYYY-MM'
-            if (recordYear !== periodFilter.value.split('-')[0] || 
-                recordMonth !== parseInt(periodFilter.value.split('-')[1])) {
-              return false;
-            }
-            break;
-          case 'quarter':
-            // periodFilter.value format: 'YYYY-Q' where Q is quarter number
-            const [year, quarter] = periodFilter.value.split('-');
-            if (recordYear !== year || recordQuarter !== parseInt(quarter.charAt(1))) {
-              return false;
-            }
-            break;
-          case 'year':
-            // periodFilter.value format: 'YYYY'
-            if (recordYear !== periodFilter.value) {
-              return false;
-            }
-            break;
+    return financeData
+      .filter(record => {
+        // Date filter - используем оригинальный формат даты для фильтрации
+        if (dateFilter && record.date !== dateFilter) {
+          return false;
         }
-      }
-      
-      // Name filter (partial match)
-      if (nameFilter && !record.name.toLowerCase().includes(nameFilter.toLowerCase())) {
-        return false;
-      }
-      
-      // Classification filter (partial match)
-      if (classificationFilter && !record.classification.toLowerCase().includes(classificationFilter.toLowerCase())) {
-        return false;
-      }
-      
-      return true;
-    });
+        
+        // Period filter
+        if (periodFilter.type !== 'all') {
+          const recordDate = new Date(record.date);
+          const recordYear = recordDate.getFullYear().toString();
+          const recordMonth = recordDate.getMonth() + 1; // месяцы в JS от 0 до 11
+          const recordQuarter = Math.floor(recordDate.getMonth() / 3) + 1;
+          
+          switch(periodFilter.type) {
+            case 'month':
+              // periodFilter.value format: 'YYYY-MM'
+              if (recordYear !== periodFilter.value.split('-')[0] || 
+                  recordMonth !== parseInt(periodFilter.value.split('-')[1])) {
+                return false;
+              }
+              break;
+            case 'quarter':
+              // periodFilter.value format: 'YYYY-Q' where Q is quarter number
+              const [year, quarter] = periodFilter.value.split('-');
+              if (recordYear !== year || recordQuarter !== parseInt(quarter.charAt(1))) {
+                return false;
+              }
+              break;
+            case 'year':
+              // periodFilter.value format: 'YYYY'
+              if (recordYear !== periodFilter.value) {
+                return false;
+              }
+              break;
+          }
+        }
+        
+        // Name filter (partial match)
+        if (nameFilter && !record.name.toLowerCase().includes(nameFilter.toLowerCase())) {
+          return false;
+        }
+        
+        // Classification filter (exact match)
+        if (classificationFilter && record.classification !== classificationFilter) {
+          return false;
+        }
+        
+        return true;
+      })
+      .sort((a, b) => {
+        // Sort by date, newest first
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
+      });
   }, [financeData, dateFilter, nameFilter, classificationFilter, periodFilter]);
 
   const openFormModal = (id?: number | string | null) => {
@@ -128,7 +146,9 @@ const Finance = () => {
   };
 
   const confirmDelete = (id: number | string) => {
-    setDeleteConfirmationId(id);
+    if (isAdmin) {
+      setDeleteConfirmationId(id);
+    }
   };
 
   const handleDelete = () => {
@@ -143,12 +163,12 @@ const Finance = () => {
     setDeleteConfirmationId(null);
   };
 
-  // Clear all filters
+  // Clear all filters - Reset to current month
   const clearFilters = () => {
     setDateFilter('');
     setNameFilter('');
     setClassificationFilter('');
-    setPeriodFilter({type: 'all', value: ''});
+    setPeriodFilter({type: 'month', value: getCurrentMonth()});
   };
 
   return (
@@ -156,15 +176,17 @@ const Finance = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Финансовый журнал</h1>
         <div className="flex flex-wrap gap-3">
-          <button 
-            onClick={() => openFormModal()}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
-            Добавить
-          </button>
+          {isAdmin && (
+            <button 
+              onClick={() => openFormModal()}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              Добавить
+            </button>
+          )}
         </div>
       </div>
       
@@ -201,13 +223,18 @@ const Finance = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Классификация</label>
-            <input
-              type="text"
-              placeholder="Фильтр по классификации"
+            <select
               value={classificationFilter}
               onChange={(e) => setClassificationFilter(e.target.value)}
               className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            />
+            >
+              <option value="">Все классификации</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div>
@@ -265,7 +292,7 @@ const Finance = () => {
       <FinanceCharts records={filteredData} />
       
       {/* Delete Confirmation Modal */}
-      {deleteConfirmationId && (
+      {isAdmin && deleteConfirmationId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
@@ -288,162 +315,180 @@ const Finance = () => {
         </div>
       )}
       
-      <div className="mt-2 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-        <div className="overflow-x-auto">
-          {/* Mobile View - Card Layout */}
-          <div className="block md:hidden">
-            {filteredData.length > 0 ? (
-              filteredData.map((record) => (
-                <div key={record.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
-                  <div className="flex justify-between items-start">
-                    <div 
-                      className="flex-1 cursor-pointer"
-                      onClick={() => openFormModal(record.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium text-gray-900">{record.name}</div>
-                        <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
-                      </div>
-                      <div className="mt-1 text-sm text-gray-500 truncate max-w-xs">{record.comment}</div>
-                      <div className="mt-2 text-xs text-gray-500 space-y-1">
-                        <div className="flex justify-between">
-                          <span>Цена:</span>
-                          <span className="font-medium">{record.price} ₽</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Кол-во:</span>
-                          <span className="font-medium">{record.quantity}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Сумма:</span>
-                          <span className="font-medium">{record.total} ₽</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Классификация:</span>
-                          <span className="font-medium">{record.classification}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="ml-4 flex-shrink-0">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          confirmDelete(record.id);
-                        }}
-                        className="text-red-600 hover:text-red-900"
-                        title="Удалить запись"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-4 text-center text-sm text-gray-500">
-                Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
+      <AnimatedAccordion title="Таблица финансов" defaultOpen={true}>
+        <div className="mt-2 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+          <div className="overflow-x-auto">
+            {isDataLoading ? (
+              <div className="py-12">
+                <LoadingSpinner message="Загрузка финансовых данных..." />
               </div>
+            ) : (
+              <>
+                {/* Mobile View - Card Layout */}
+                <div className="block md:hidden">
+                  {filteredData.length > 0 ? (
+                    filteredData.map((record) => (
+                      <div key={record.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
+                        <div className="flex justify-between items-start">
+                          <div 
+                            className={`flex-1 ${isAdmin ? 'cursor-pointer' : ''}`}
+                            onClick={isAdmin ? () => openFormModal(record.id) : undefined}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm font-medium text-gray-900">{record.name}</div>
+                              <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
+                            </div>
+                            <div className="mt-1 text-sm text-gray-500 truncate max-w-xs">{record.comment}</div>
+                            <div className="mt-2 text-xs text-gray-500 space-y-1">
+                              <div className="flex justify-between">
+                                <span>Цена:</span>
+                                <span className="font-medium">{formatCurrencyWithSeparators(record.price)} ₽</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Кол-во:</span>
+                                <span className="font-medium">{record.quantity}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Сумма:</span>
+                                <span className="font-medium">{formatCurrencyWithSeparators(record.total)} ₽</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Классификация:</span>
+                                <span className="font-medium">{record.classification}</span>
+                              </div>
+                            </div>
+                          </div>
+                          {isAdmin && (
+                            <div className="ml-4 flex-shrink-0">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  confirmDelete(record.id);
+                                }}
+                                className="text-red-600 hover:text-red-900"
+                                title="Удалить запись"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-sm text-gray-500">
+                      Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
+                    </div>
+                  )}
+                </div>
+                
+                {/* Desktop View - Table */}
+                <table className="hidden md:table divide-y divide-gray-200 min-w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Цена</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кол-во</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Классификация</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
+                      {isAdmin && (
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredData.length > 0 ? (
+                      filteredData.map((record, index) => (
+                        <tr 
+                          key={record.id} 
+                          className={`hover:bg-gray-50 ${isAdmin ? 'cursor-pointer' : ''}`}
+                          onClick={isAdmin ? () => openFormModal(record.id) : undefined}
+                        >
+                          <td 
+                            className="p-4 whitespace-nowrap text-sm text-gray-500"
+                          >
+                            {formatDate(record.date)}
+                          </td>
+                          <td 
+                            className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                          >
+                            {record.name}
+                          </td>
+                          <td 
+                            className="p-4 whitespace-nowrap text-sm text-gray-500"
+                          >
+                            {formatCurrencyWithSeparators(record.price)} ₽
+                          </td>
+                          <td 
+                            className="p-4 whitespace-nowrap text-sm text-gray-500"
+                          >
+                            {record.quantity}
+                          </td>
+                          <td 
+                            className="p4 whitespace-nowrap text-sm text-gray-500"
+                          >
+                            {formatCurrencyWithSeparators(record.total)} ₽
+                          </td>
+                          <td 
+                            className="p-4 whitespace-nowrap text-sm text-gray-500"
+                          >
+                            {record.classification}
+                          </td>
+                          <td 
+                            className="p-4 text-sm text-gray-500"
+                          >
+                            {record.comment}
+                          </td>
+                          {isAdmin && (
+                            <td className="p-4 whitespace-nowrap text-right text-sm font-medium">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  confirmDelete(record.id);
+                                }}
+                                className="text-red-600 hover:text-red-900"
+                                title="Удалить запись"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={isAdmin ? 8 : 7} className="p-4 text-center text-sm text-gray-500">
+                          Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </>
             )}
           </div>
-          
-          {/* Desktop View - Table */}
-          <table className="hidden md:table divide-y divide-gray-200 min-w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Цена</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кол-во</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Классификация</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.length > 0 ? (
-                filteredData.map((record, index) => (
-                  <tr 
-                    key={record.id} 
-                    className="hover:bg-gray-50 cursor-pointer"
-                    onClick={() => openFormModal(record.id)}
-                  >
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
-                    >
-                      {formatDate(record.date)}
-                    </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                    >
-                      {record.name}
-                    </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
-                    >
-                      {record.price} ₽
-                    </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
-                    >
-                      {record.quantity}
-                    </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
-                    >
-                      {record.total} ₽
-                    </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
-                    >
-                      {record.classification}
-                    </td>
-                    <td 
-                      className="p-4 text-sm text-gray-500"
-                    >
-                      {record.comment}
-                    </td>
-                    <td className="p-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          confirmDelete(record.id);
-                        }}
-                        className="text-red-600 hover:text-red-900"
-                        title="Удалить запись"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className="p-4 text-center text-sm text-gray-500">
-                    Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
         </div>
-      </div>
+      </AnimatedAccordion>
       
       <AnimatedAccordion title="Управление категориями" defaultOpen={false}>
         <CategoriesManager />
       </AnimatedAccordion>
       
-      <FinanceFormModal 
-        isOpen={isFormModalOpen} 
-        onClose={closeFormModal} 
-        recordId={selectedRecordId} 
-        onAdd={addFinanceRecord} 
-        onUpdate={updateFinanceRecord} 
-      />
+      {isAdmin && (
+        <FinanceFormModal 
+          isOpen={isFormModalOpen} 
+          onClose={closeFormModal} 
+          recordId={selectedRecordId} 
+          onAdd={addFinanceRecord} 
+          onUpdate={updateFinanceRecord} 
+        />
+      )}
     </div>
   );
 };

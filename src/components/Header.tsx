@@ -3,6 +3,8 @@ import {
   MdMenu as MdMenuBase, 
   MdOutlineMenu as MdOutlineMenuBase
 } from 'react-icons/md'; // Material Design icons
+import { useAuth } from '../contexts/AuthContext';
+import { signOutUser } from '../firebase/authService';
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -12,11 +14,22 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
   const MdMenu = MdMenuBase as any;
   const MdOutlineMenu = MdOutlineMenuBase as any;
+  
+  const { user, loading } = useAuth();
+  
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      // Optionally redirect or update UI after logout
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <header className="bg-[#033835] shadow-md">
       <div className="mx-auto px-6">
-        <div className="flex  h-16">
+        <div className="flex h-16">
           
           <div className="flex items-center md:hidden">
             {/* Mobile menu button */}
@@ -36,10 +49,39 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
               className="text-gray-700 hover:text-indigo-600 cursor-pointer w-6 h-6" 
             />
             <div className="ms-12" onClick={ ()=> console.log('click logo') }>
-              <a href="#">
-                <img src="C:\Users\pc1\Documents\workingdir\sample-table\src\assets\images\logo.png" alt="logo" />
+              <a href="/">
+                <img src="/logo.png" alt="logo" className="h-10 w-10" />
               </a>
             </div>
+          </div>
+          
+          {/* Auth section - right aligned */}
+          <div className="ml-auto flex items-center space-x-4">
+            {loading ? (
+              <div className="text-white">Загрузка...</div>
+            ) : user ? (
+              // User is authenticated - show user info and sign out
+              <div className="flex items-center space-x-4">
+                <div className="hidden md:block text-sm text-white">
+                  <div className="font-medium">{user.email}</div>
+                  <div className="text-xs opacity-80">UID: {user.uid.substring(0, 8)}...</div>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors"
+                >
+                  Выйти
+                </button>
+              </div>
+            ) : (
+              // User is not authenticated - show sign in
+              <a 
+                href="/login" 
+                className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
+              >
+                Войти
+              </a>
+            )}
           </div>
         </div>
       </div>

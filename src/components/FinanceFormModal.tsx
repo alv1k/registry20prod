@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import Modal from './Modal';
+import { formatCurrencyWithSeparators } from '../utils/formatUtils';
 
 interface FinanceRecord {
   id: number | string;
@@ -216,7 +217,7 @@ const FinanceFormModal: React.FC<FinanceFormModalProps> = ({
             <input
               type="text"
               name="total"
-              value={calculateTotal()}
+              value={formatCurrencyWithSeparators(calculateTotal())}
               readOnly
               className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
               placeholder="Сумма"

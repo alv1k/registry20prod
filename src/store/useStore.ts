@@ -458,7 +458,7 @@ export const useStore = create<AppState>((set, get) => ({
       };
       
       set((state) => ({
-        financeData: [...state.financeData, newRecord]
+        financeData: [newRecord, ...state.financeData]
       }));
     } catch (error) {
       console.error('Error adding finance record:', error);

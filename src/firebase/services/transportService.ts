@@ -64,8 +64,12 @@ export const addTransportRecord = async (record: Omit<TransportRecord, 'id'>): P
   try {
     const docRef = await addDoc(collection(db, COLLECTION_NAME), record);
     return docRef.id;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error adding transport record:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };
@@ -75,8 +79,12 @@ export const updateTransportRecord = async (id: string, record: Partial<Transpor
   try {
     const recordRef = doc(db, COLLECTION_NAME, id);
     await updateDoc(recordRef, record);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating transport record:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };
@@ -85,8 +93,12 @@ export const updateTransportRecord = async (id: string, record: Partial<Transpor
 export const deleteTransportRecord = async (id: string): Promise<void> => {
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, id));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting transport record:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };

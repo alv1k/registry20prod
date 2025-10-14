@@ -11,6 +11,7 @@ import {
   where
 } from 'firebase/firestore';
 import { db } from '../firestore';
+import { isValidFinanceRecord } from '../../utils/validation';
 
 // Тип для финансовой записи
 export interface FinanceRecord {
@@ -58,10 +59,20 @@ export const getAllFinanceRecords = async (): Promise<FinanceRecord[]> => {
 // Добавить новую финансовую запись
 export const addFinanceRecord = async (record: Omit<FinanceRecord, 'id'>): Promise<string> => {
   try {
+    // Валидация данных перед сохранением
+    const validation = isValidFinanceRecord(record);
+    if (!validation.isValid) {
+      throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+    }
+    
     const docRef = await addDoc(collection(db, COLLECTION_NAME), record);
     return docRef.id;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error adding finance record:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };
@@ -69,10 +80,35 @@ export const addFinanceRecord = async (record: Omit<FinanceRecord, 'id'>): Promi
 // Обновить финансовую запись
 export const updateFinanceRecord = async (id: string, record: Partial<FinanceRecord>): Promise<void> => {
   try {
+    // Валидация данных перед обновлением
+    if (record.date !== undefined || record.name !== undefined || record.price !== undefined || 
+        record.quantity !== undefined || record.total !== undefined || 
+        record.classification !== undefined || record.comment !== undefined) {
+      // Create a temporary object to validate
+      const tempRecord = {
+        date: record.date !== undefined ? record.date : '',
+        name: record.name !== undefined ? record.name : '',
+        price: record.price !== undefined ? record.price : 0,
+        quantity: record.quantity !== undefined ? record.quantity : 0,
+        total: record.total !== undefined ? record.total : 0,
+        classification: record.classification !== undefined ? record.classification : '',
+        comment: record.comment !== undefined ? record.comment : ''
+      };
+      
+      const validation = isValidFinanceRecord(tempRecord);
+      if (!validation.isValid) {
+        throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
+      }
+    }
+    
     const recordRef = doc(db, COLLECTION_NAME, id);
     await updateDoc(recordRef, record);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating finance record:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };
@@ -81,8 +117,12 @@ export const updateFinanceRecord = async (id: string, record: Partial<FinanceRec
 export const deleteFinanceRecord = async (id: string): Promise<void> => {
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, id));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting finance record:', error);
+    // Check if it's an authentication error
+    if (error.code && (error.code.includes('unauthenticated') || error.code.includes('permission'))) {
+      throw new Error('У вас нет прав для выполнения этого действия. Обратитесь к администратору.');
+    }
     throw error;
   }
 };
