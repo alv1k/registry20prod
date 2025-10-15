@@ -364,8 +364,10 @@ const Finance = () => {
         </div>
       </div>
 
-      {/* Chart section */}      
-      <FinanceCharts records={filteredData} />
+      {/* Chart section */}
+      <div className="md:block hidden overflow-y-scroll">
+        <FinanceCharts records={filteredData} />
+      </div>
       
       {/* Delete Confirmation Modal */}
       {isAdmin && deleteConfirmationId && (

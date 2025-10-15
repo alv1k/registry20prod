@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import AnimatedAccordion from '../components/AnimatedAccordion';
 import TransportFormModal from '../components/TransportFormModal';
 import VehicleFormModal from '../components/VehicleFormModal';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
 
@@ -292,7 +293,7 @@ const Transport = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
-              Добавить обслуживание
+              Добавить запись
             </button>
           )}
         </div>
@@ -432,8 +433,18 @@ const Transport = () => {
       
       <AnimatedAccordion title="Записи" defaultOpen={false}>
         <div className="overflow-x-auto">
-          {/* Mobile View - Card Layout */}
-          <div className="block md:hidden">
+          {isTransportDataLoading ? (
+            <div className="py-12">
+              <LoadingSpinner message="Загрузка данных технического обслуживания..." />
+            </div>
+          ) : transportDataError ? (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {transportDataError}
+            </div>
+          ) : (
+            <>
+              {/* Mobile View - Card Layout */}
+              <div className="block md:hidden">
             {filteredData.length > 0 ? (
               filteredData.map((record) => (
                 <div key={record.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
@@ -578,8 +589,10 @@ const Transport = () => {
               )}
             </tbody>
           </table>
-        </div>
-      </AnimatedAccordion>
+        </>
+      )}
+    </div>
+  </AnimatedAccordion>
       
       {/* Vehicle Management Section */}
       <div className="mt-8">
@@ -600,8 +613,18 @@ const Transport = () => {
         
         <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
           <div className="overflow-x-auto">
-            {/* Mobile View - Card Layout */}
-            <div className="block md:hidden">
+            {isVehicleDataLoading ? (
+              <div className="py-12">
+                <LoadingSpinner message="Загрузка данных об автомобилях..." />
+              </div>
+            ) : vehicleDataError ? (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {vehicleDataError}
+              </div>
+            ) : (
+              <>
+                {/* Mobile View - Card Layout */}
+                <div className="block md:hidden">
               {vehicleData.length > 0 ? (
                 vehicleData.map(vehicle => (
                   <div key={vehicle.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
@@ -722,9 +745,11 @@ const Transport = () => {
                 )}
               </tbody>
             </table>
-          </div>
-        </div>
+          </>
+        )}
       </div>
+    </div>
+  </div>
       
       {/* Maintenance Form Modal */}
       {isAdmin && (

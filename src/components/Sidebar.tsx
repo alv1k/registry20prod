@@ -9,11 +9,11 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }) => {
   const navItems = [
-    { name: 'Корреспондентский', icon: '✉️', path: '/correspondent' },
-    { name: 'Транспортный', icon: '🚗', path: '/transport' },
-    { name: 'Финансовый', icon: '💰', path: '/finance' },
-    { name: 'Бытовой', icon: '🏠', path: '/domestic' },
-    { name: 'Вкладки', icon: '📋', path: '/tabs-demo' },
+    // { name: 'Корреспондентский', icon: '✉️', path: '/correspondent' },
+    { name: 'ТО авто', icon: '🚗', path: '/vehicles_maintenance' },
+    { name: 'Финансы', icon: '💰', path: '/finance' },
+    { name: 'Быт', icon: '🏠', path: '/domestic' },
+    // { name: 'Вкладки', icon: '📋', path: '/tabs-demo' },
   ];
 
   const location = useLocation();

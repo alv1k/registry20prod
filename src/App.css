@@ -27,7 +27,7 @@
   color: #61dafb;
 }
 
-input {
+input, select, * {
   outline: none;
 }
 

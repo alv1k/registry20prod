@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import Correspondent from '../pages/Correspondent';
-import Transport from '../pages/Transport';
+import VehiclesMaintenance from '../pages/VehiclesMaintenance';
 import Finance from '../pages/Finance';
 import Domestic from '../pages/Domestic';
 import TabsDemo from '../pages/TabsDemo';
@@ -15,7 +15,7 @@ const AppRoutes: React.FC = () => {
     <div data-current-page={currentPage}>
       <Routes>
         <Route path="/correspondent" element={<Correspondent />} />
-        <Route path="/transport" element={<Transport />} />
+        <Route path="/vehicles_maintenance" element={<VehiclesMaintenance />} />
         <Route path="/finance" element={<Finance />} />
         <Route path="/domestic" element={<Domestic />} />
         <Route path="/tabs-demo" element={<TabsDemo />} />
