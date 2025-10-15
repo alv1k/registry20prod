@@ -12,8 +12,7 @@ const Correspondent = () => {
   const isDataLoading = useStore((state) => state.isCorrespondentDataLoading);
   const dataError = useStore((state) => state.correspondentDataError);
   
-  const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { user, isAdmin } = useAuth();
   
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
@@ -27,25 +26,7 @@ const Correspondent = () => {
   const [toFilter, setToFilter] = useState<string>('');
   const [signedFilter, setSignedFilter] = useState<string>('all'); // 'all', 'signed', 'not_signed'
 
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user) {
-        try {
-          const idTokenResult = await user.getIdTokenResult();
-          setIsAdmin(idTokenResult.claims.admin === true || user.uid === 'kpXIs5bBpdYsP5NKW7P1ZecgYwr2');
-        } catch (error) {
-          console.error('Error checking admin status:', error);
-          // As a fallback, check if it's the specific UID
-          setIsAdmin(user.uid === 'kpXIs5bBpdYsP5NKW7P1ZecgYwr2');
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    };
 
-    checkAdminStatus();
-  }, [user]);
 
   useEffect(() => {
     // Load data from Firebase when component mounts

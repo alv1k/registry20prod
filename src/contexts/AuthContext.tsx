@@ -7,6 +7,7 @@ import { isTokenExpiringSoon, refreshToken } from '../utils/authUtils';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +19,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [tokenCheckInterval, setTokenCheckInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -34,6 +36,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     return unsubscribe;
   }, []);
+
+  // Check if user has admin privileges
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        try {
+          const idTokenResult = await user.getIdTokenResult();
+          setIsAdmin(idTokenResult.claims.admin === true || user.uid === 'kpXIs5bBpdYsP5NKW7P1ZecgYwr2');
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          // As a fallback, check if it's the specific UID
+          setIsAdmin(user.uid === 'kpXIs5bBpdYsP5NKW7P1ZecgYwr2');
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   // Monitor token expiration and refresh if needed
   useEffect(() => {
@@ -67,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

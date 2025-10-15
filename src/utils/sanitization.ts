@@ -288,4 +288,52 @@ export const deepSanitize = (obj: any): any => {
   }
   
   return sanitizedObj;
-};
+}
+
+/**
+ * Sanitizes a vehicle record before saving
+ * @param record - The vehicle record to sanitize
+ * @returns Sanitized vehicle record
+ */
+export const sanitizeVehicleRecord = (record: any): any => {
+  if (!record || typeof record !== 'object') {
+    return record;
+  }
+
+  const sanitizedRecord = { ...record };
+  
+  // Sanitize text fields
+  if (sanitizedRecord.name) {
+    sanitizedRecord.name = sanitizeInput(sanitizedRecord.name);
+  }
+  
+  if (sanitizedRecord.manufacturer) {
+    sanitizedRecord.manufacturer = sanitizeInput(sanitizedRecord.manufacturer);
+  }
+  
+  if (sanitizedRecord.model) {
+    sanitizedRecord.model = sanitizeInput(sanitizedRecord.model);
+  }
+  
+  if (sanitizedRecord.engineVolume) {
+    sanitizedRecord.engineVolume = sanitizeInput(sanitizedRecord.engineVolume);
+  }
+  
+  if (sanitizedRecord.engineNumber) {
+    sanitizedRecord.engineNumber = sanitizeInput(sanitizedRecord.engineNumber);
+  }
+  
+  if (sanitizedRecord.vin) {
+    sanitizedRecord.vin = sanitizeInput(sanitizedRecord.vin);
+  }
+  
+  if (sanitizedRecord.stsData) {
+    sanitizedRecord.stsData = sanitizeInput(sanitizedRecord.stsData);
+  }
+  
+  if (sanitizedRecord.ptsData) {
+    sanitizedRecord.ptsData = sanitizeInput(sanitizedRecord.ptsData);
+  }
+  
+  return sanitizedRecord;
+};;

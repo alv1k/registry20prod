@@ -23,7 +23,13 @@ import {
   addCategory as firebaseAddCategory,
   updateCategory as firebaseUpdateCategory,
   deleteCategory as firebaseDeleteCategory,
-  Category as FirebaseCategory
+  Category as FirebaseCategory,
+  // Vehicle services
+  getAllVehicleRecords,
+  addVehicleRecord as firebaseAddVehicleRecord,
+  updateVehicleRecord as firebaseUpdateVehicleRecord,
+  deleteVehicleRecord as firebaseDeleteVehicleRecord,
+  VehicleRecord as FirebaseVehicleRecord
 } from '../firebase/services';
 
 // Тип для записи корреспондента во внутреннем store
@@ -73,6 +79,19 @@ export interface AppCategory {
   type: 'expense' | 'income'; // тип: расход или доход
 }
 
+// Тип для записи автомобиля во внутреннем store
+export interface AppVehicleRecord {
+  id: number | string; // может быть как number (локальный ID), так и string (Firebase ID)
+  name: string; // название
+  manufacturer: string; // производитель
+  model: string; // марка
+  engineVolume?: string; // объем двигателя
+  engineNumber?: string; // номер двигателя
+  vin?: string; // номер VIN/кузова
+  stsData?: string; // данные СТС
+  ptsData?: string; // данные ПТС
+}
+
 interface AppState {
   // Navigation state
   currentPage: string;
@@ -85,20 +104,24 @@ interface AppState {
   // Data for the different sections
   correspondentData: AppCorrespondentRecord[];
   transportData: AppTransportRecord[];
+  vehicleData: AppVehicleRecord[];
   financeData: AppFinanceRecord[];
   domesticData: any[];
   
   // Loading states
   isCorrespondentDataLoading: boolean;
   isTransportDataLoading: boolean;
+  isVehicleDataLoading: boolean;
   isFinanceDataLoading: boolean;
   correspondentDataError: string | null;
   transportDataError: string | null;
+  vehicleDataError: string | null;
   financeDataError: string | null;
   
   // Firebase sync actions
   syncCorrespondentData: () => Promise<void>;
   syncTransportData: () => Promise<void>;
+  syncVehicleData: () => Promise<void>;  // Added this line
   syncFinanceData: () => Promise<void>;
   
   // Actions to update data (with Firebase sync)
@@ -111,6 +134,12 @@ interface AppState {
   addTransportRecord: (record: Omit<AppTransportRecord, 'id'>) => Promise<void>;
   updateTransportRecord: (id: number | string, record: Partial<AppTransportRecord>) => Promise<void>;
   deleteTransportRecord: (id: number | string) => Promise<void>;
+  
+  // Vehicle data and functions
+  setVehicleData: (data: AppVehicleRecord[]) => void;
+  addVehicleRecord: (record: Omit<AppVehicleRecord, 'id'>) => Promise<void>;
+  updateVehicleRecord: (id: number | string, record: Partial<AppVehicleRecord>) => Promise<void>;
+  deleteVehicleRecord: (id: number | string) => Promise<void>;
   
   setFinanceData: (data: AppFinanceRecord[]) => void;
   addFinanceRecord: (record: Omit<AppFinanceRecord, 'id'>) => Promise<void>;
@@ -142,12 +171,15 @@ export const useStore = create<AppState>((set, get) => ({
   // Section data
   correspondentData: [],
   transportData: [],
+  vehicleData: [],
   financeData: [],
   domesticData: [],
   
   // Loading states
   isCorrespondentDataLoading: false,
+  isVehicleDataLoading: false,
   correspondentDataError: null,
+  vehicleDataError: null,
   
   // Sync data from Firebase
   syncCorrespondentData: async () => {
@@ -389,6 +421,126 @@ export const useStore = create<AppState>((set, get) => ({
       }));
     } catch (error) {
       console.error('Error deleting transport record:', error);
+      throw error;
+    }
+  },
+
+  // Vehicle sync actions
+  syncVehicleData: async () => {
+    try {
+      set({ isVehicleDataLoading: true, vehicleDataError: null });
+      const firebaseRecords = await getAllVehicleRecords();
+      
+      // Convert Firebase records to app format
+      const convertedRecords: AppVehicleRecord[] = firebaseRecords.map(record => {
+        // Explicit type conversion
+        const appRecord: AppVehicleRecord = {
+          id: record.id || Date.now().toString(), // fallback if no id
+          name: record.name,
+          manufacturer: record.manufacturer,
+          model: record.model,
+          engineVolume: record.engineVolume,
+          engineNumber: record.engineNumber,
+          vin: record.vin,
+          stsData: record.stsData,
+          ptsData: record.ptsData
+        };
+        return appRecord;
+      });
+      
+      set({ 
+        vehicleData: convertedRecords,
+        isVehicleDataLoading: false 
+      });
+    } catch (error) {
+      console.error('Error syncing vehicle data:', error);
+      set({ 
+        vehicleDataError: (error as Error).message || 'Error syncing data',
+        isVehicleDataLoading: false 
+      });
+      throw error;
+    }
+  },
+
+  // Actions to update vehicle data
+  setVehicleData: (data) => set({ vehicleData: data }),
+
+  addVehicleRecord: async (record) => {
+    try {
+      // First, add to Firebase
+      const firebaseRecord: Omit<FirebaseVehicleRecord, 'id'> = {
+        name: record.name,
+        manufacturer: record.manufacturer,
+        model: record.model,
+        engineVolume: record.engineVolume,
+        engineNumber: record.engineNumber,
+        vin: record.vin,
+        stsData: record.stsData,
+        ptsData: record.ptsData
+      };
+      
+      const firebaseId = await firebaseAddVehicleRecord(firebaseRecord);
+      
+      // Then add to local state with Firebase ID
+      const newVehicle: AppVehicleRecord = {
+        ...record,
+        id: firebaseId
+      };
+      
+      set((state) => ({
+        vehicleData: [...state.vehicleData, newVehicle]
+      }));
+    } catch (error) {
+      console.error('Error adding vehicle record:', error);
+      throw error;
+    }
+  },
+
+  updateVehicleRecord: async (id, updatedFields) => {
+    try {
+      // Update in Firebase - need to convert our record type to match Firebase service
+      // Create a new object without the id property to avoid type conflicts
+      const firebaseData: Partial<Omit<FirebaseVehicleRecord, 'id'>> = {
+        name: updatedFields.name,
+        manufacturer: updatedFields.manufacturer,
+        model: updatedFields.model,
+        engineVolume: updatedFields.engineVolume,
+        engineNumber: updatedFields.engineNumber,
+        vin: updatedFields.vin,
+        stsData: updatedFields.stsData,
+        ptsData: updatedFields.ptsData
+      };
+      // Remove any undefined values
+      Object.keys(firebaseData).forEach(key => {
+        // @ts-ignore - we're filtering out undefined values
+        if (firebaseData[key] === undefined) delete firebaseData[key];
+      });
+      
+      await firebaseUpdateVehicleRecord(id.toString(), firebaseData);
+      
+      // Then update local state
+      set((state) => ({
+        vehicleData: state.vehicleData.map(vehicle =>
+          vehicle.id === id ? { ...vehicle, ...updatedFields } : vehicle
+        )
+      }));
+    } catch (error) {
+      console.error('Error updating vehicle record:', error);
+      throw error;
+    }
+  },
+
+  deleteVehicleRecord: async (id) => {
+    try {
+      // Delete from Firebase - convert id to string
+      await firebaseDeleteVehicleRecord(id.toString());
+      
+      // Then remove from local state
+      set((state) => ({
+        vehicleData: state.vehicleData.filter(vehicle => vehicle.id !== id)
+      }));
+    } catch (error) {
+      console.error('Error deleting vehicle record:', error);
       throw error;
     }
   },

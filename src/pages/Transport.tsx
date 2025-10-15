@@ -3,32 +3,44 @@ import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import AnimatedAccordion from '../components/AnimatedAccordion';
 import TransportFormModal from '../components/TransportFormModal';
+import VehicleFormModal from '../components/VehicleFormModal';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
 
+interface MaintenanceRecord {
+  id: number | string;
+  vehicleId: string;
+  date: string;
+  workType: string;
+  cost: number;
+  comment: string;
+  frequency: string;
+  mileage?: number;
+}
+
 const Transport = () => {
   const transportData = useStore((state) => state.transportData);
+  const vehicleData = useStore((state) => state.vehicleData);
   const syncTransportData = useStore((state) => state.syncTransportData);
+  const syncVehicleData = useStore((state) => state.syncVehicleData);
   const addTransportRecord = useStore((state) => state.addTransportRecord);
   const updateTransportRecord = useStore((state) => state.updateTransportRecord);
   const deleteTransportRecord = useStore((state) => state.deleteTransportRecord);
-  const isDataLoading = useStore((state) => state.isTransportDataLoading);
-  const dataError = useStore((state) => state.transportDataError);
+  const addVehicleRecord = useStore((state) => state.addVehicleRecord);
+  const updateVehicleRecord = useStore((state) => state.updateVehicleRecord);
+  const deleteVehicleRecord = useStore((state) => state.deleteVehicleRecord);
+  const isTransportDataLoading = useStore((state) => state.isTransportDataLoading);
+  const isVehicleDataLoading = useStore((state) => state.isVehicleDataLoading);
+  const transportDataError = useStore((state) => state.transportDataError);
+  const vehicleDataError = useStore((state) => state.vehicleDataError);
 
   const { user, isAdmin } = useAuth();
   
-  // State for filters
-  const [dateFilter, setDateFilter] = useState<string>('');
-  const [workTypeFilter, setWorkTypeFilter] = useState<string>('');
-  const [minCostFilter, setMinCostFilter] = useState<string>('');
-  const [maxCostFilter, setMaxCostFilter] = useState<string>('');
-  const [frequencyFilter, setFrequencyFilter] = useState<string>('');
-  const [nextRepeatFilter, setNextRepeatFilter] = useState<string>('');
-  const [commentFilter, setCommentFilter] = useState<string>('');
-  
-  // State for modal
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  // State for modals
+  const [isMaintenanceFormModalOpen, setIsMaintenanceFormModalOpen] = useState(false);
+  const [isVehicleFormModalOpen, setIsVehicleFormModalOpen] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
 
   useEffect(() => {
@@ -36,8 +48,59 @@ const Transport = () => {
     syncTransportData().catch(error => {
       console.error('Error loading transport data:', error);
     });
-  }, [syncTransportData]);
+    
+    syncVehicleData().catch(error => {
+      console.error('Error loading vehicle data:', error);
+    });
+  }, [syncTransportData, syncVehicleData]);
   
+  // Transform the original transport data to maintenance records format
+  const maintenanceData: MaintenanceRecord[] = useMemo(() => {
+    return transportData.map(record => {
+      // Try to match with vehicle data by checking if the transport's driverLicense matches any vehicle property
+      // We'll check if the transport's driverLicense field matches any of the vehicle's identifying fields
+      const matchingVehicle = vehicleData.find(vehicle => 
+        vehicle.name === record.driverLicense || 
+        vehicle.vin === record.driverLicense ||
+        record.driverLicense.includes(vehicle.name) ||
+        vehicle.name.includes(record.driverLicense)
+      );
+      
+      return {
+        id: record.id,
+        vehicleId: matchingVehicle ? matchingVehicle.name : record.driverLicense || 'Unknown',
+        date: record.shippingDate,
+        workType: record.cargoName, // Use cargo name as work type
+        cost: record.shippingWeight, // Use shipping weight as cost (in rubles)
+        comment: record.carNumber, // Use car number as comment
+        frequency: record.driver, // Use driver name as frequency
+        mileage: record.deliveryWeight || undefined // Use delivery weight as mileage
+      };
+    });
+  }, [transportData, vehicleData]);
+
+  // State for filters
+  const [dateFilter, setDateFilter] = useState<string>('');
+  const [workTypeFilter, setWorkTypeFilter] = useState<string>('');
+  const [minCostFilter, setMinCostFilter] = useState<string>('');
+  const [maxCostFilter, setMaxCostFilter] = useState<string>('');
+  const [frequencyFilter, setFrequencyFilter] = useState<string>('');
+  const [commentFilter, setCommentFilter] = useState<string>('');
+  const [vehicleFilter, setVehicleFilter] = useState<string>('');
+  const [minMileageFilter, setMinMileageFilter] = useState<string>('');
+  const [maxMileageFilter, setMaxMileageFilter] = useState<string>('');
+
+  // Get unique frequency values from maintenance data for dropdown
+  const frequencyOptions = useMemo(() => {
+    const frequencies = new Set<string>();
+    maintenanceData.forEach(record => {
+      if (record.frequency) {
+        frequencies.add(record.frequency);
+      }
+    });
+    return Array.from(frequencies).sort();
+  }, [maintenanceData]);
+
   // Confirmation functions for deletion
   const confirmDelete = (id: number | string) => {
     if (isAdmin) {
@@ -55,71 +118,151 @@ const Transport = () => {
   const cancelDelete = () => {
     setDeleteConfirmationId(null);
   };
-  
+
   // Apply filters to the data
   const filteredData = useMemo(() => {
-    return transportData.filter(record => {
+    return maintenanceData.filter(record => {
       // Date filter
-      if (dateFilter && record.shippingDate !== dateFilter) {
+      if (dateFilter && record.date !== dateFilter) {
         return false;
       }
       
       // Work type filter (partial match)
-      if (workTypeFilter && !record.cargoName.toLowerCase().includes(workTypeFilter.toLowerCase())) {
+      if (workTypeFilter && !record.workType.toLowerCase().includes(workTypeFilter.toLowerCase())) {
         return false;
       }
       
       // Min cost filter
-      if (minCostFilter && record.shippingWeight < parseFloat(minCostFilter)) {
+      if (minCostFilter && record.cost < parseFloat(minCostFilter)) {
         return false;
       }
       
       // Max cost filter
-      if (maxCostFilter && record.shippingWeight > parseFloat(maxCostFilter)) {
+      if (maxCostFilter && record.cost > parseFloat(maxCostFilter)) {
         return false;
       }
       
-      // Frequency filter (partial match)
-      if (frequencyFilter && !record.driver.toLowerCase().includes(frequencyFilter.toLowerCase())) {
-        return false;
-      }
-      
-      // Next repeat filter
-      if (nextRepeatFilter && record.departureDate !== nextRepeatFilter) {
+      // Frequency filter (exact match)
+      if (frequencyFilter && record.frequency !== frequencyFilter) {
         return false;
       }
       
       // Comment filter (partial match)
-      if (commentFilter && !record.driverLicense.toLowerCase().includes(commentFilter.toLowerCase())) {
+      if (commentFilter && !record.comment.toLowerCase().includes(commentFilter.toLowerCase())) {
+        return false;
+      }
+      
+      // Vehicle filter
+      if (vehicleFilter && record.vehicleId !== vehicleFilter) {
+        return false;
+      }
+      
+      // Min mileage filter
+      if (minMileageFilter && record.mileage !== undefined && record.mileage < parseFloat(minMileageFilter)) {
+        return false;
+      }
+      
+      // Max mileage filter
+      if (maxMileageFilter && record.mileage !== undefined && record.mileage > parseFloat(maxMileageFilter)) {
         return false;
       }
       
       return true;
     });
   }, [
-    transportData, 
+    maintenanceData, 
     dateFilter, 
     workTypeFilter, 
     minCostFilter, 
     maxCostFilter, 
     frequencyFilter, 
-    nextRepeatFilter, 
-    commentFilter
+    commentFilter,
+    vehicleFilter,
+    minMileageFilter,
+    maxMileageFilter,
+    vehicleData
   ]);
 
-  // Functions to handle modal
-  const openFormModal = (id?: number | string | null) => {
+  // Functions to handle modals
+  const openMaintenanceFormModal = (id?: number | string | null) => {
     if (id !== undefined) {
       setSelectedRecordId(id);
     } else {
       setSelectedRecordId(null);
     }
-    setIsFormModalOpen(true);
+    setIsMaintenanceFormModalOpen(true);
   };
 
-  const closeFormModal = () => {
-    setIsFormModalOpen(false);
+  const closeMaintenanceFormModal = () => {
+    setIsMaintenanceFormModalOpen(false);
     setSelectedRecordId(null);
+  };
+
+  const openVehicleFormModal = (id?: number | string | null) => {
+    if (id !== undefined) {
+      setSelectedVehicleId(id);
+    } else {
+      setSelectedVehicleId(null);
+    }
+    setIsVehicleFormModalOpen(true);
+  };
+
+  const closeVehicleFormModal = () => {
+    setIsVehicleFormModalOpen(false);
+    setSelectedVehicleId(null);
+  };
+
+  // Handle adding a new maintenance record
+  const handleAddMaintenanceRecord = async (record: Omit<MaintenanceRecord, 'id'>) => {
+    // Convert maintenance record to transport record format
+    const transportRecord = {
+      shippingDate: record.date,
+      departureDate: record.date, // Using date as departure date since we removed nextRepeat
+      arrivalDate: record.date, // Using date as arrival date
+      cargoName: record.workType,
+      driver: record.frequency,
+      carNumber: record.comment,
+      driverLicense: record.vehicleId,
+      shippingWeight: record.cost,
+      deliveryWeight: record.mileage || 0 // Using mileage as delivery weight
+    };
+
+    await addTransportRecord(transportRecord);
+  };
+
+  // Handle updating a maintenance record
+  const handleUpdateMaintenanceRecord = async (id: number | string, record: Partial<MaintenanceRecord>) => {
+    const updatedRecord: Partial<MaintenanceRecord> = {};
+    
+    if (record.date) updatedRecord.date = record.date;
+    if (record.workType) updatedRecord.workType = record.workType;
+    if (record.frequency) updatedRecord.frequency = record.frequency;
+    if (record.comment) updatedRecord.comment = record.comment;
+    if (record.vehicleId) updatedRecord.vehicleId = record.vehicleId;
+    if (record.cost !== undefined) updatedRecord.cost = record.cost;
+    if (record.mileage !== undefined) updatedRecord.mileage = record.mileage;
+
+    // Convert to transport record format for update
+    const transportUpdates: Partial<any> = {};
+    if (record.date !== undefined) transportUpdates.shippingDate = record.date;
+    if (record.workType !== undefined) transportUpdates.cargoName = record.workType;
+    if (record.frequency !== undefined) transportUpdates.driver = record.frequency;
+    if (record.comment !== undefined) transportUpdates.carNumber = record.comment;
+    if (record.vehicleId !== undefined) transportUpdates.driverLicense = record.vehicleId;
+    if (record.cost !== undefined) transportUpdates.shippingWeight = record.cost;
+    if (record.mileage !== undefined) transportUpdates.deliveryWeight = record.mileage;
+
+    await updateTransportRecord(id, transportUpdates);
+  };
+
+  // Handle adding a new vehicle
+  const handleAddVehicle = async (vehicle: any) => {
+    await addVehicleRecord(vehicle);
+  };
+
+  // Handle updating a vehicle
+  const handleUpdateVehicle = async (id: number | string, vehicle: any) => {
+    await updateVehicleRecord(id, vehicle);
   };
 
   // Clear all filters
@@ -129,8 +272,10 @@ const Transport = () => {
     setMinCostFilter('');
     setMaxCostFilter('');
     setFrequencyFilter('');
-    setNextRepeatFilter('');
     setCommentFilter('');
+    setVehicleFilter('');
+    setMinMileageFilter('');
+    setMaxMileageFilter('');
   };
 
   return (
@@ -140,22 +285,34 @@ const Transport = () => {
         <div className="flex flex-wrap gap-3">
           {isAdmin && (
             <button 
-              onClick={() => openFormModal()}
+              onClick={() => openMaintenanceFormModal()}
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
-              Добавить
+              Добавить обслуживание
+            </button>
+          )}
+          {isAdmin && (
+            <button 
+              onClick={() => openVehicleFormModal()}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              Добавить автомобиль
             </button>
           )}
         </div>
       </div>
       
-      {/* Error message */}
-      {dataError && (
+      {/* Error messages */}
+      {(transportDataError || vehicleDataError) && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {dataError}
+          {transportDataError && <div>{transportDataError}</div>}
+          {vehicleDataError && <div>{vehicleDataError}</div>}
         </div>
       )}
       
@@ -207,23 +364,18 @@ const Transport = () => {
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Частота</label>
-            <input
-              type="text"
-              placeholder="Фильтр по частоте"
+            <select
               value={frequencyFilter}
               onChange={(e) => setFrequencyFilter(e.target.value)}
               className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ближайший повтор</label>
-            <input
-              type="date"
-              value={nextRepeatFilter}
-              onChange={(e) => setNextRepeatFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            />
+            >
+              <option value="">Все частоты</option>
+              {frequencyOptions.map(frequency => (
+                <option key={frequency} value={frequency}>
+                  {frequency}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div>
@@ -233,6 +385,44 @@ const Transport = () => {
               placeholder="Фильтр по комментарию"
               value={commentFilter}
               onChange={(e) => setCommentFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Автомобиль</label>
+            <select
+              value={vehicleFilter}
+              onChange={(e) => setVehicleFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            >
+              <option value="">Все автомобили</option>
+              {vehicleData.map(vehicle => (
+                <option key={vehicle.id} value={vehicle.name}>
+                  {vehicle.name} ({vehicle.manufacturer} {vehicle.model})
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Мин. пробег</label>
+            <input
+              type="number"
+              placeholder="Мин. пробег"
+              value={minMileageFilter}
+              onChange={(e) => setMinMileageFilter(e.target.value)}
+              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Макс. пробег</label>
+            <input
+              type="number"
+              placeholder="Макс. пробег"
+              value={maxMileageFilter}
+              onChange={(e) => setMaxMileageFilter(e.target.value)}
               className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
@@ -282,25 +472,29 @@ const Transport = () => {
                   <div className="flex justify-between items-start">
                     <div 
                       className={`flex-1 ${isAdmin ? 'cursor-pointer' : ''}`}
-                      onClick={isAdmin ? () => openFormModal(record.id) : undefined}
+                      onClick={isAdmin ? () => openMaintenanceFormModal(record.id) : undefined}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium text-gray-900">{record.cargoName}</div>
-                        <div className="text-sm text-gray-500">{formatDate(record.shippingDate)}</div>
+                        <div className="text-sm font-medium text-gray-900">{record.workType}</div>
+                        <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
                       </div>
-                      <div className="mt-1 text-sm text-gray-500 truncate max-w-xs">{record.driverLicense}</div>
+                      <div className="mt-1 text-sm text-gray-500 truncate max-w-xs">{record.comment}</div>
                       <div className="mt-2 text-xs text-gray-500 space-y-1">
                         <div className="flex justify-between">
                           <span>Стоимость:</span>
-                          <span className="font-medium">{formatCurrencyWithSeparators(record.shippingWeight)} ₽</span>
+                          <span className="font-medium">{formatCurrencyWithSeparators(record.cost)} ₽</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Частота:</span>
-                          <span className="font-medium">{record.driver}</span>
+                          <span className="font-medium">{record.frequency}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Повтор:</span>
-                          <span className="font-medium">{formatDate(record.departureDate)}</span>
+                          <span>Пробег:</span>
+                          <span className="font-medium">{record.mileage !== undefined ? `${record.mileage} км` : 'Не указан'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Автомобиль:</span>
+                          <span className="font-medium">{record.vehicleId}</span>
                         </div>
                       </div>
                     </div>
@@ -338,8 +532,9 @@ const Transport = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Вид работ</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Стоимость</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Частота</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ближайший повтор</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пробег</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Автомобиль</th>
                 {isAdmin && (
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                 )}
@@ -351,37 +546,42 @@ const Transport = () => {
                   <tr 
                     key={record.id} 
                     className={`hover:bg-gray-50 ${isAdmin ? 'cursor-pointer' : ''}`}
-                    onClick={isAdmin ? () => openFormModal(record.id) : undefined}
+                    onClick={isAdmin ? () => openMaintenanceFormModal(record.id) : undefined}
                   >
                     <td 
                       className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
-                      {formatDate(record.shippingDate)}
+                      {formatDate(record.date)}
                     </td>
                     <td 
                       className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
                     >
-                      {record.cargoName}
+                      {record.workType}
                     </td>
                     <td 
                       className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
-                      {formatCurrencyWithSeparators(record.shippingWeight)} ₽
+                      {formatCurrencyWithSeparators(record.cost)} ₽
                     </td>
                     <td 
                       className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
-                      {record.driver}
+                      {record.frequency}
                     </td>
                     <td 
                       className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
-                      {formatDate(record.departureDate)}
+                      {record.mileage !== undefined ? `${record.mileage} км` : 'Не указан'}
                     </td>
                     <td 
                       className="p-4 text-sm text-gray-500"
                     >
-                      {record.driverLicense}
+                      {record.comment}
+                    </td>
+                    <td 
+                      className="p-4 text-sm text-gray-500"
+                    >
+                      {record.vehicleId}
                     </td>
                     {isAdmin && (
                       <td className="p-4 whitespace-nowrap text-right text-sm font-medium">
@@ -403,7 +603,7 @@ const Transport = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={isAdmin ? 7 : 6} className="p-4 text-center text-sm text-gray-500">
+                  <td colSpan={isAdmin ? 9 : 8} className="p-4 text-center text-sm text-gray-500">
                     Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                   </td>
                 </tr>
@@ -413,13 +613,28 @@ const Transport = () => {
         </div>
       </div>
       
+      {/* Maintenance Form Modal */}
       {isAdmin && (
         <TransportFormModal 
-          isOpen={isFormModalOpen} 
-          onClose={closeFormModal} 
+          isOpen={isMaintenanceFormModalOpen} 
+          onClose={closeMaintenanceFormModal} 
           recordId={selectedRecordId} 
-          onAdd={addTransportRecord} 
-          onUpdate={updateTransportRecord} 
+          record={selectedRecordId ? maintenanceData.find(r => r.id === selectedRecordId) as any : undefined}
+          vehicleData={vehicleData}
+          onAdd={handleAddMaintenanceRecord} 
+          onUpdate={handleUpdateMaintenanceRecord} 
+        />
+      )}
+      
+      {/* Vehicle Form Modal */}
+      {isAdmin && (
+        <VehicleFormModal 
+          isOpen={isVehicleFormModalOpen} 
+          onClose={closeVehicleFormModal} 
+          recordId={selectedVehicleId} 
+          record={selectedVehicleId ? vehicleData.find(v => v.id === selectedVehicleId) as any : undefined}
+          onAdd={handleAddVehicle} 
+          onUpdate={handleUpdateVehicle} 
         />
       )}
     </div>
