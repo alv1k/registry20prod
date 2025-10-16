@@ -29,7 +29,13 @@ import {
   addVehicleRecord as firebaseAddVehicleRecord,
   updateVehicleRecord as firebaseUpdateVehicleRecord,
   deleteVehicleRecord as firebaseDeleteVehicleRecord,
-  VehicleRecord as FirebaseVehicleRecord
+  VehicleRecord as FirebaseVehicleRecord,
+  // Household services
+  getAllHouseholdRecords,
+  addHouseholdRecord as firebaseAddHouseholdRecord,
+  updateHouseholdRecord as firebaseUpdateHouseholdRecord,
+  deleteHouseholdRecord as firebaseDeleteHouseholdRecord,
+  HouseholdRecord as FirebaseHouseholdRecord
 } from '../firebase/services';
 
 // Тип для записи корреспондента во внутреннем store
@@ -92,6 +98,14 @@ export interface AppVehicleRecord {
   ptsData?: string; // данные ПТС
 }
 
+// Тип для бытовой записи во внутреннем store
+export interface AppHouseholdRecord {
+  id: number | string; // может быть как number (локальный ID), так и string (Firebase ID)
+  date: string; // дата
+  description: string; // описание
+  area: string; // область
+}
+
 interface AppState {
   // Navigation state
   currentPage: string;
@@ -106,23 +120,26 @@ interface AppState {
   transportData: AppTransportRecord[];
   vehicleData: AppVehicleRecord[];
   financeData: AppFinanceRecord[];
-  domesticData: any[];
+  householdData: AppHouseholdRecord[];
   
   // Loading states
   isCorrespondentDataLoading: boolean;
   isTransportDataLoading: boolean;
   isVehicleDataLoading: boolean;
   isFinanceDataLoading: boolean;
+  isHouseholdDataLoading: boolean;
   correspondentDataError: string | null;
   transportDataError: string | null;
   vehicleDataError: string | null;
   financeDataError: string | null;
+  householdDataError: string | null;
   
   // Firebase sync actions
   syncCorrespondentData: () => Promise<void>;
   syncTransportData: () => Promise<void>;
   syncVehicleData: () => Promise<void>;  // Added this line
   syncFinanceData: () => Promise<void>;
+  syncHouseholdData: () => Promise<void>;
   
   // Actions to update data (with Firebase sync)
   setCorrespondentData: (data: AppCorrespondentRecord[]) => void;
@@ -146,6 +163,12 @@ interface AppState {
   updateFinanceRecord: (id: number | string, record: Partial<AppFinanceRecord>) => Promise<void>;
   deleteFinanceRecord: (id: number | string) => Promise<void>;
   
+  // Household data and functions
+  setHouseholdData: (data: AppHouseholdRecord[]) => void;
+  addHouseholdRecord: (record: Omit<AppHouseholdRecord, 'id'>) => Promise<void>;
+  updateHouseholdRecord: (id: number | string, record: Partial<AppHouseholdRecord>) => Promise<void>;
+  deleteHouseholdRecord: (id: number | string) => Promise<void>;
+  
   // Categories data and functions
   categories: AppCategory[];
   isCategoriesLoading: boolean;
@@ -155,8 +178,6 @@ interface AppState {
   updateCategory: (id: number | string, category: Partial<AppCategory>) => Promise<void>;
   deleteCategory: (id: number | string) => Promise<void>;
   setCategories: (data: AppCategory[]) => void;
-  
-  setDomesticData: (data: any[]) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -173,7 +194,7 @@ export const useStore = create<AppState>((set, get) => ({
   transportData: [],
   vehicleData: [],
   financeData: [],
-  domesticData: [],
+  householdData: [],
   
   // Loading states
   isCorrespondentDataLoading: false,
@@ -584,6 +605,42 @@ export const useStore = create<AppState>((set, get) => ({
       throw error;
     }
   },
+
+  // Loading states for household data
+  isHouseholdDataLoading: false,
+  householdDataError: null,
+  
+  // Household sync actions
+  syncHouseholdData: async () => {
+    try {
+      set({ isHouseholdDataLoading: true, householdDataError: null });
+      const firebaseRecords = await getAllHouseholdRecords();
+      
+      // Convert Firebase records to app format
+      const convertedRecords: AppHouseholdRecord[] = firebaseRecords.map(record => {
+        // Explicit type conversion
+        const appRecord: AppHouseholdRecord = {
+          id: record.id || Date.now().toString(), // fallback if no id
+          date: record.date,
+          description: record.description,
+          area: record.area
+        };
+        return appRecord;
+      });
+      
+      set({ 
+        householdData: convertedRecords,
+        isHouseholdDataLoading: false 
+      });
+    } catch (error) {
+      console.error('Error syncing household data:', error);
+      set({ 
+        householdDataError: (error as Error).message || 'Error syncing data',
+        isHouseholdDataLoading: false 
+      });
+      throw error;
+    }
+  },
   
   // Actions to update finance data
   setFinanceData: (data) => set({ financeData: data }),
@@ -662,6 +719,79 @@ export const useStore = create<AppState>((set, get) => ({
       }));
     } catch (error) {
       console.error('Error deleting finance record:', error);
+      throw error;
+    }
+  },
+
+  // Actions to update household data
+  setHouseholdData: (data) => set({ householdData: data }),
+  
+  addHouseholdRecord: async (record) => {
+    try {
+      // First, add to Firebase
+      const firebaseRecord: Omit<FirebaseHouseholdRecord, 'id'> = {
+        date: record.date,
+        description: record.description,
+        area: record.area
+      };
+      
+      const firebaseId = await firebaseAddHouseholdRecord(firebaseRecord);
+      
+      // Then add to local state with Firebase ID
+      const newRecord: AppHouseholdRecord = {
+        ...record,
+        id: firebaseId
+      };
+      
+      set((state) => ({
+        householdData: [...state.householdData, newRecord]
+      }));
+    } catch (error) {
+      console.error('Error adding household record:', error);
+      throw error;
+    }
+  },
+  
+  updateHouseholdRecord: async (id, updatedFields) => {
+    try {
+      // Update in Firebase - need to convert our record type to match Firebase service
+      // Create a new object without the id property to avoid type conflicts
+      const firebaseData: Partial<Omit<FirebaseHouseholdRecord, 'id'>> = {
+        date: updatedFields.date,
+        description: updatedFields.description,
+        area: updatedFields.area
+      };
+      // Remove any undefined values
+      Object.keys(firebaseData).forEach(key => {
+        // @ts-ignore - we're filtering out undefined values
+        if (firebaseData[key] === undefined) delete firebaseData[key];
+      });
+      
+      await firebaseUpdateHouseholdRecord(id.toString(), firebaseData);
+      
+      // Then update local state
+      set((state) => ({
+        householdData: state.householdData.map(record =>
+          record.id === id ? { ...record, ...updatedFields } : record
+        )
+      }));
+    } catch (error) {
+      console.error('Error updating household record:', error);
+      throw error;
+    }
+  },
+  
+  deleteHouseholdRecord: async (id) => {
+    try {
+      // Delete from Firebase - convert id to string
+      await firebaseDeleteHouseholdRecord(id.toString());
+      
+      // Then remove from local state
+      set((state) => ({
+        householdData: state.householdData.filter(record => record.id !== id)
+      }));
+    } catch (error) {
+      console.error('Error deleting household record:', error);
       throw error;
     }
   },
@@ -776,5 +906,4 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
   
-  setDomesticData: (data) => set({ domesticData: data }),
 }));
