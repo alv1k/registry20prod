@@ -5,6 +5,7 @@ import AnimatedAccordion from '../components/AnimatedAccordion';
 import TransportFormModal from '../components/TransportFormModal';
 import VehicleFormModal from '../components/VehicleFormModal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import TransportCharts from '../components/TransportCharts';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
 
@@ -406,6 +407,13 @@ const Transport = () => {
           </button>
         </div>
       </AnimatedAccordion>
+      
+      {/* Transport Charts */}
+      <div className="mt-6">
+        <AnimatedAccordion title="Аналитика расходов" defaultOpen={true}>
+          <TransportCharts records={filteredData} />
+        </AnimatedAccordion>
+      </div>
       
       {/* Delete Confirmation Modal */}
       {isAdmin && deleteConfirmationId && (
