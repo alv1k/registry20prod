@@ -104,6 +104,7 @@ export interface AppHouseholdRecord {
   date: string; // дата
   description: string; // описание
   area: string; // область
+  completed?: boolean; // выполнено/не выполнено (опционально)
 }
 
 interface AppState {
@@ -623,7 +624,8 @@ export const useStore = create<AppState>((set, get) => ({
           id: record.id || Date.now().toString(), // fallback if no id
           date: record.date,
           description: record.description,
-          area: record.area
+          area: record.area,
+          completed: record.completed || false // добавляем новое поле completed
         };
         return appRecord;
       });
@@ -732,7 +734,8 @@ export const useStore = create<AppState>((set, get) => ({
       const firebaseRecord: Omit<FirebaseHouseholdRecord, 'id'> = {
         date: record.date,
         description: record.description,
-        area: record.area
+        area: record.area,
+        completed: record.completed || false // добавляем новое поле completed
       };
       
       const firebaseId = await firebaseAddHouseholdRecord(firebaseRecord);
@@ -759,7 +762,8 @@ export const useStore = create<AppState>((set, get) => ({
       const firebaseData: Partial<Omit<FirebaseHouseholdRecord, 'id'>> = {
         date: updatedFields.date,
         description: updatedFields.description,
-        area: updatedFields.area
+        area: updatedFields.area,
+        completed: updatedFields.completed
       };
       // Remove any undefined values
       Object.keys(firebaseData).forEach(key => {

@@ -20,6 +20,7 @@ export interface HouseholdRecord {
   date: string; // дата
   description: string; // описание
   area: string; // область
+  completed?: boolean; // выполнено/не выполнено (опционально)
 }
 
 // Имя коллекции в Firestore
@@ -38,7 +39,8 @@ export const getAllHouseholdRecords = async (): Promise<HouseholdRecord[]> => {
         id: doc.id,
         date: data.date || '',
         description: data.description || '',
-        area: data.area || ''
+        area: data.area || '',
+        completed: data.completed || false
       });
     });
     

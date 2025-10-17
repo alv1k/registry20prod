@@ -20,7 +20,8 @@ const HouseholdFormModal: React.FC<HouseholdFormModalProps> = ({
   const [formData, setFormData] = useState<Omit<AppHouseholdRecord, 'id'>>({
     date: new Date().toISOString().split('T')[0],
     description: '',
-    area: ''
+    area: '',
+    completed: false
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -36,7 +37,8 @@ const HouseholdFormModal: React.FC<HouseholdFormModalProps> = ({
         setFormData({
           date: existingRecord.date,
           description: existingRecord.description,
-          area: existingRecord.area
+          area: existingRecord.area,
+          completed: existingRecord.completed || false
         });
       }
     } else {
@@ -44,17 +46,27 @@ const HouseholdFormModal: React.FC<HouseholdFormModalProps> = ({
       setFormData({
         date: new Date().toISOString().split('T')[0],
         description: '',
-        area: ''
+        area: '',
+        completed: false
       });
     }
   }, [recordId, householdData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    // Проверяем, является ли элемент чекбоксом
+    if (e.target.type === 'checkbox') {
+      const target = e.target as HTMLInputElement;
+      setFormData({
+        ...formData,
+        [name]: target.checked
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
     
     // Clear error when user types
     if (errors[name]) {
@@ -175,6 +187,21 @@ const HouseholdFormModal: React.FC<HouseholdFormModalProps> = ({
                 placeholder="Кухня, гостиная и т.д."
               />
               {errors.area && <p className="text-red-500 text-sm mt-1">{errors.area}</p>}
+            </div>
+
+            <div className="mb-4">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="completed"
+                  checked={formData.completed || false}
+                  onChange={(e) => setFormData({...formData, completed: e.target.checked})}
+                  className="rounded text-blue-600 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">
+                  Выполнено
+                </span>
+              </label>
             </div>
 
             {errors.form && <p className="text-red-500 text-sm mb-4">{errors.form}</p>}

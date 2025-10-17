@@ -13,6 +13,7 @@ interface HouseholdRecord {
   date: string;
   description: string;
   area: string;
+  completed?: boolean;
 }
 
 const Domestic: React.FC = () => {
@@ -314,7 +315,7 @@ const Domestic: React.FC = () => {
               ))}
             </div>
             
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-4">
               {calendarDays.map((day, index) => {
                 const isToday = day.dateString === todayString;
                 const hasRecord = day.hasRecord && day.isCurrentMonth;
@@ -353,7 +354,7 @@ const Domestic: React.FC = () => {
 
         {/* Notes section for selected date's records */}
         <AnimatedAccordion title="Заметки" defaultOpen={true}>
-          <div className="mt-2 bg-white rounded-lg shadow-md border border-gray-200 p-4">
+          <div className="mt-2 bg-white rounded-lg shadow-md border border-gray-200 p-4 h-96 overflow-y-auto">
             {/* Filter Controls */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Фильтр по периоду</label>
@@ -445,9 +446,9 @@ const Domestic: React.FC = () => {
                 }
                 
                 return (
-                  <div>
+                  <div className="flex flex-col h-full">
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">{headerText}</h3>
-                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                    <div className="space-y-3 overflow-y-auto flex-grow">
                       {recordsToShow.map((record) => (
                         <div key={record.id} className="border-l-4 border-blue-500 pl-3 py-2 bg-gray-50 rounded">
                           <div className="space-y-1">
@@ -462,6 +463,12 @@ const Domestic: React.FC = () => {
                             <div>
                               <span className="font-medium text-gray-700">Область:</span> 
                               <span className="ml-2">{record.area}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Статус:</span> 
+                              <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${record.completed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {record.completed ? 'Выполнено' : 'Не выполнено'}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -480,7 +487,7 @@ const Domestic: React.FC = () => {
                 }
                 
                 return (
-                  <div className="text-gray-500 italic">
+                  <div className="text-gray-500 italic flex-grow">
                     {message}
                   </div>
                 );
@@ -516,6 +523,12 @@ const Domestic: React.FC = () => {
                             </div>
                             <div className="mt-1 text-sm text-gray-500">
                               <span className="font-medium">Область:</span> {record.area}
+                            </div>
+                            <div className="mt-1 text-sm">
+                              <span className="font-medium">Статус:</span> 
+                              <span className={`ml-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${record.completed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {record.completed ? 'Выполнено' : 'Не выполнено'}
+                              </span>
                             </div>
                           </div>
                           {isAdmin && (
@@ -563,6 +576,7 @@ const Domestic: React.FC = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Область</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Выполнено</th>
                       {isAdmin && (
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                       )}
@@ -571,10 +585,15 @@ const Domestic: React.FC = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {householdData.length > 0 ? (
                       householdData.map((record) => (
-                        <tr key={record.id} className="hover:bg-gray-50">
+                        <tr key={record.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => openFormModal(record.id)}>
                           <td className="p-4 whitespace-nowrap text-sm text-gray-500">{formatDate(record.date)}</td>
                           <td className="p-4 whitespace-nowrap text-sm text-gray-900">{record.description}</td>
                           <td className="p-4 whitespace-nowrap text-sm text-gray-500">{record.area}</td>
+                          <td className="p-4 whitespace-nowrap text-sm">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${record.completed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                              {record.completed ? 'Выполнено' : 'Не выполнено'}
+                            </span>
+                          </td>
                           {isAdmin && (
                             <td className="p-4 whitespace-nowrap text-right text-sm font-medium flex justify-end space-x-2">
                               <button
@@ -601,7 +620,7 @@ const Domestic: React.FC = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={isAdmin ? 4 : 3} className="p-4 text-center text-sm text-gray-500">
+                        <td colSpan={isAdmin ? 5 : 4} className="p-4 text-center text-sm text-gray-500">
                           Нет данных для отображения
                         </td>
                       </tr>
