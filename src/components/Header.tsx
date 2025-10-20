@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
             />
             <div className="ms-12" onClick={ ()=> console.log('click logo') }>
               <a href="/">
-                <img src="/logo.svg" alt="logo" className="h-10 w-10" />
+                <img src="/favicon.png" alt="logo" className="h-10 w-10" />
               </a>
             </div>
           </div>

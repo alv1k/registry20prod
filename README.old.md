@@ -1,1 +1,1 @@
-# sample-table
+# registry2.0
