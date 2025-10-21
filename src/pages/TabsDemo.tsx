@@ -8,7 +8,7 @@ const TabsDemo: React.FC = () => {
       title: 'Финансы',
       content: (
         <div className="p-4 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Финансовый журнал</h3>
+          <h3 className="text-lg font-semibold mb-2">Финансовый каталог</h3>
           <p>Здесь будет отображаться информация о финансовых операциях.</p>
           <ul className="mt-2 space-y-1">
             <li className="flex items-center">
@@ -32,7 +32,7 @@ const TabsDemo: React.FC = () => {
       title: 'Транспорт',
       content: (
         <div className="p-4 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Транспортный журнал</h3>
+          <h3 className="text-lg font-semibold mb-2">Транспортный каталог</h3>
           <p>Здесь будет отображаться информация об автомобилях и ТО.</p>
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border p-3 rounded">
@@ -52,7 +52,7 @@ const TabsDemo: React.FC = () => {
       title: 'Корреспонденты',
       content: (
         <div className="p-4 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Корреспондентский журнал</h3>
+          <h3 className="text-lg font-semibold mb-2">Корреспондентский каталог</h3>
           <p>Здесь будет отображаться информация о корреспондентах.</p>
           <table className="min-w-full mt-3">
             <thead>

@@ -133,7 +133,7 @@ const CorrespondentFormModal: React.FC<CorrespondentFormModalProps> = ({ isOpen,
     <Modal 
       isOpen={isOpen} 
       onClose={onClose} 
-      title={recordId ? "Редактировать корреспондентскую запись" : "Добавить запись в корреспондентский журнал"}
+      title={recordId ? "Редактировать корреспондентскую запись" : "Добавить запись в корреспондентский каталог"}
     >
       <form onSubmit={handleSubmit} className="space-y-4">      
         <div className="space-y-4">

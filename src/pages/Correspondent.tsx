@@ -119,7 +119,7 @@ const Correspondent = () => {
   return (
     <div className="p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Корреспондентский журнал</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Корреспондентский каталог</h1>
         <div className="flex flex-wrap gap-3">
           {isAdmin && (
             <button 

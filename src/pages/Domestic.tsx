@@ -258,7 +258,7 @@ const Domestic: React.FC = () => {
   return (
     <div className="p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Бытовой</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Бытовой каталог</h1>
         <div className="flex flex-wrap gap-3">
           {isAdmin && (
             <button 
@@ -480,7 +480,7 @@ const Domestic: React.FC = () => {
                 let message = '';
                 if (notesFilter === 'today') {
                   message = selectedDate 
-                    ? `На дату ${formatDate(selectedDate)} нет записей в домашнем журнале.` 
+                    ? `На дату ${formatDate(selectedDate)} нет записей в домашнем каталоге.` 
                     : 'Выберите дату в календаре для просмотра записей.';
                 } else {
                   message = `Нет записей для выбранного периода (${notesFilter}).`;

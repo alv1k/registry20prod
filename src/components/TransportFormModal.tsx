@@ -121,7 +121,7 @@ const TransportFormModal: React.FC<TransportFormModalProps> = ({
     <Modal 
       isOpen={isOpen} 
       onClose={onClose} 
-      title={recordId ? "Редактировать транспортную запись" : "Добавить запись в транспортный журнал"}
+      title={recordId ? "Редактировать транспортную запись" : "Добавить запись в транспортный каталог"}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
