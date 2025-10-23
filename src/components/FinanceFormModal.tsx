@@ -236,7 +236,9 @@ const FinanceFormModal: React.FC<FinanceFormModalProps> = ({
               required
             >
               <option value="">Выберите категорию</option>
-              {categories.map((category) => (
+              {categories
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((category) => (
                 <option key={category.id} value={category.name}>
                   {category.name}
                 </option>

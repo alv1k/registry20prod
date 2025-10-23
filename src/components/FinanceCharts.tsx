@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -14,6 +15,7 @@ import {
   LineChart,
   Line
 } from 'recharts';
+import useIsMobile from '../hooks/useIsMobile';
 import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
 
 interface FinanceRecord {
@@ -46,6 +48,8 @@ interface DateData {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
 
 const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
+  const isMobile = useIsMobile();
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   // Подготовка данных для диаграммы по классификациям
   const classificationData = Object.values(
     records.reduce((acc: Record<string, any>, record) => {
@@ -93,19 +97,36 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
                   data={classificationData}
                   cx="50%"
                   cy="50%"
-                  labelLine={true}
-                  outerRadius={80}
+                  labelLine={isMobile ? false : true}
+                  outerRadius={isMobile ? 50 : 80}
                   fill="#8884d8"
                   dataKey="total"
                   nameKey="name"
-                  label={(entry: any) => `${entry.name}: ${(entry.percent * 100).toFixed(0)}%`}
+                  label={(entry: any) => isMobile ? '' : `${entry.name}: ${(entry.percent * 100).toFixed(0)}%`}
+                  onMouseEnter={(data, index) => setActiveIndex(index)}
+                  onMouseLeave={() => setActiveIndex(null)}
                 >
                   {classificationData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={COLORS[index % COLORS.length]} 
+                      stroke={activeIndex === index ? "#000" : "none"}
+                      strokeWidth={activeIndex === index ? 2 : 0}
+                    />
                   ))}
                 </Pie>
                 <Tooltip formatter={(value: number) => [`${formatCurrencyWithSeparators(value)} ₽`]} />
-                <Legend />
+                <Legend 
+                  onMouseEnter={(payload) => {
+                    const index = classificationData.findIndex(item => item.name === payload.value);
+                    if (index !== -1) {
+                      setActiveIndex(index);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    setActiveIndex(null);
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -144,7 +165,7 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
           </div>
         </div>
       </div>
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      {/* <div className="bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Распределение по классификациям</h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -169,7 +190,7 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

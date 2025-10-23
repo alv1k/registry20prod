@@ -229,18 +229,8 @@ const Finance = () => {
       )}
       
       {/* Filter Controls - Accordion */}
-      <AnimatedAccordion title="Фильтры" defaultOpen={false}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            />
-          </div>
-          
+      <AnimatedAccordion title="Фильтры" defaultOpen={true}>
+        <div className="md:flex gap-4">          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Название</label>
             <input
@@ -259,8 +249,10 @@ const Finance = () => {
               onChange={(e) => setClassificationFilter(e.target.value)}
               className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             >
-              <option value="">Все классификации</option>
-              {categories.map((category) => (
+              <option value="">Не выбрано</option>
+              {categories
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((category) => (
                 <option key={category.id} value={category.name}>
                   {category.name}
                 </option>
@@ -274,9 +266,9 @@ const Finance = () => {
               <select
                 value={periodFilter.type}
                 onChange={(e) => setPeriodFilter({type: e.target.value as any, value: periodFilter.value})}
-                className="w-1/2 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                className="w-32 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               >
-                <option value="all">Все</option>
+                <option value="all">Весь</option>
                 <option value="month">Месяц</option>
                 <option value="quarter">Квартал</option>
                 <option value="year">Год</option>
@@ -285,7 +277,7 @@ const Finance = () => {
                 <select
                   value={periodFilter.value}
                   onChange={(e) => setPeriodFilter({...periodFilter, value: e.target.value})}
-                  className="w-1/2 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                  className="w-32 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
                 >
                   {periodFilter.type === 'year' && Array.from({length: 10}, (_, i) => {
                     const year = new Date().getFullYear() - i;
@@ -312,7 +304,7 @@ const Finance = () => {
         <div className="flex justify-end mt-3">
           <button
             onClick={clearFilters}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="text-xs p-1 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
             Очистить фильтры
           </button>
@@ -365,7 +357,7 @@ const Finance = () => {
       </div>
 
       {/* Chart section */}
-      <div className="md:block hidden overflow-y-scroll">
+      <div>
         <FinanceCharts records={filteredData} />
       </div>
       

@@ -27,8 +27,24 @@
   color: #61dafb;
 }
 
-input, select, * {
+input, * {
   outline: none;
+}
+
+/* Custom select with custom arrow */
+select {
+  outline: none;
+  /* Remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* Add padding to make space for custom arrow */
+  padding-right: 2rem;
+  /* Add custom arrow using background */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.2rem 1.2rem;
 }
 
 @keyframes App-logo-spin {

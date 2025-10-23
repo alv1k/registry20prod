@@ -132,7 +132,9 @@ const CategoriesManager: React.FC = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredCategories.length > 0 ? (
-              filteredCategories.map((category) => (
+              filteredCategories
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((category) => (
                 <tr 
                   key={category.id} 
                   className="hover:bg-gray-50"
@@ -197,7 +199,9 @@ const CategoriesManager: React.FC = () => {
         {/* Mobile View - Card Layout */}
         <div className="block md:hidden divide-y divide-gray-200">
           {filteredCategories.length > 0 ? (
-            filteredCategories.map((category) => (
+            filteredCategories
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((category) => (
               <div key={category.id} className="p-4 hover:bg-gray-50">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
