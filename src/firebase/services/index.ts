@@ -5,3 +5,4 @@ export * from './financeService';
 export * from './categoryService';
 export * from './vehicleService';
 export * from './householdService';
+export * from './plannedBudgetService';

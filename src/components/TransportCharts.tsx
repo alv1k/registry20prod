@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -13,6 +13,7 @@ import {
   ResponsiveContainer,
   PieLabelRenderProps
 } from 'recharts';
+import useIsMobile from '../hooks/useIsMobile';
 
 // Define a type that extends PieLabelRenderProps with the percent property
 type ExtendedPieLabelRenderProps = PieLabelRenderProps & {
@@ -38,6 +39,10 @@ interface TransportChartsProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
 
 const TransportCharts: React.FC<TransportChartsProps> = ({ records }) => {
+  const [activeWorkTypeIndex, setActiveWorkTypeIndex] = useState<number | null>(null);
+  const [activeFrequencyIndex, setActiveFrequencyIndex] = useState<number | null>(null);
+  const isMobile = useIsMobile();
+
   // Подготовка данных для диаграммы по видам работ (workType)
   const workTypeData = Object.values(
     records.reduce((acc: Record<string, any>, record) => {
@@ -106,22 +111,39 @@ const TransportCharts: React.FC<TransportChartsProps> = ({ records }) => {
               data={workTypeData}
               cx="50%"
               cy="50%"
-              labelLine={true}
+              labelLine={isMobile ? false : true}
               label={(props: ExtendedPieLabelRenderProps) => {
                 const { name, percent } = props;
                 const percentValue = percent ? (percent * 100).toFixed(0) : '0';
-                return `${name}: ${percentValue}%`;
+                return isMobile ? '' : `${name}: ${percentValue}%`;
               }}
-              outerRadius={80}
+              outerRadius={isMobile ? 50 : 80}
               fill="#8884d8"
               dataKey="total"
+              onMouseEnter={(data, index) => setActiveWorkTypeIndex(index)}
+              onMouseLeave={() => setActiveWorkTypeIndex(null)}
             >
               {workTypeData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[index % COLORS.length]} 
+                  stroke={activeWorkTypeIndex === index ? "#000" : "none"}
+                  strokeWidth={activeWorkTypeIndex === index ? 2 : 0}
+                />
               ))}
             </Pie>
             <Tooltip formatter={(value) => [`${value} ₽`, 'Сумма']} />
-            <Legend />
+            <Legend 
+              onMouseEnter={(payload) => {
+                const index = workTypeData.findIndex(item => item.name === payload.value);
+                if (index !== -1) {
+                  setActiveWorkTypeIndex(index);
+                }
+              }}
+              onMouseLeave={() => {
+                setActiveWorkTypeIndex(null);
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
         <div className="mt-4 text-sm text-gray-600 text-center">
@@ -170,22 +192,39 @@ const TransportCharts: React.FC<TransportChartsProps> = ({ records }) => {
               data={frequencyData}
               cx="50%"
               cy="50%"
-              labelLine={true}
+              labelLine={isMobile ? false : true}
               label={(props: ExtendedPieLabelRenderProps) => {
                 const { name, percent } = props;
                 const percentValue = percent ? (percent * 100).toFixed(0) : '0';
-                return `${name}: ${percentValue}%`;
+                return isMobile ? '' : `${name}: ${percentValue}%`;
               }}
-              outerRadius={80}
+              outerRadius={isMobile ? 50 : 80}
               fill="#8884d8"
               dataKey="total"
+              onMouseEnter={(data, index) => setActiveFrequencyIndex(index)}
+              onMouseLeave={() => setActiveFrequencyIndex(null)}
             >
               {frequencyData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[index % COLORS.length]} 
+                  stroke={activeFrequencyIndex === index ? "#000" : "none"}
+                  strokeWidth={activeFrequencyIndex === index ? 2 : 0}
+                />
               ))}
             </Pie>
             <Tooltip formatter={(value) => [`${value} ₽`, 'Сумма']} />
-            <Legend />
+            <Legend 
+              onMouseEnter={(payload) => {
+                const index = frequencyData.findIndex(item => item.name === payload.value);
+                if (index !== -1) {
+                  setActiveFrequencyIndex(index);
+                }
+              }}
+              onMouseLeave={() => {
+                setActiveFrequencyIndex(null);
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
         <div className="mt-4 text-sm text-gray-600 text-center">

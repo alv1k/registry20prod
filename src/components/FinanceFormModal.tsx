@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import Modal from './Modal';
+import Button from './Button';
 import { formatCurrencyWithSeparators } from '../utils/formatUtils';
 
 interface FinanceRecord {
@@ -262,21 +263,21 @@ const FinanceFormModal: React.FC<FinanceFormModalProps> = ({
         </div>
         
         <div className="flex justify-end space-x-3 mt-6">
-          <button
+          <Button
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            variant="secondary"
           >
             Отмена
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             disabled={submitting}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+            variant="primary"
           >
             {submitting ? 'Сохранение...' : (recordId ? 'Сохранить изменения' : 'Добавить')}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

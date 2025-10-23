@@ -5,6 +5,7 @@ import { useStore } from '../store/useStore';
 import { AppHouseholdRecord } from '../store/useStore';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Button from '../components/Button';
 import { formatDate } from '../utils/formatUtils';
 
 // Define type for household record
@@ -20,6 +21,7 @@ const Domestic: React.FC = () => {
   // Use the store for household records
   const householdData = useStore((state) => state.householdData);
   const syncHouseholdData = useStore((state) => state.syncHouseholdData);
+  const updateHouseholdRecord = useStore((state) => state.updateHouseholdRecord);
   const isDataLoading = useStore((state) => state.isHouseholdDataLoading);
   const dataError = useStore((state) => state.householdDataError);
 
@@ -46,12 +48,13 @@ const Domestic: React.FC = () => {
     });
   }, [syncHouseholdData]);
 
-  // Find records for the default date (today)
+  // Set initial default to show week records
   useEffect(() => {
-    const records = householdData.filter(record => record.date === todayString);
-    setSelectedDate(todayString);
-    setSelectedDateRecords(records.length > 0 ? records : null);
-  }, [householdData, todayString]);
+    // Don't set a specific date when default filter is 'week'
+    // The week filter will be handled by getFilteredRecords function
+    setSelectedDate(null);
+    setSelectedDateRecords(null);
+  }, []);
 
   // Function to handle date click in calendar
   const handleDateClick = (dateString: string) => {
@@ -190,7 +193,7 @@ const Domestic: React.FC = () => {
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
 
   // State for notes filters
-  const [notesFilter, setNotesFilter] = useState<'today' | 'week' | 'month' | 'quarter' | 'halfYear' | 'year' | 'fiveYears'>('today');
+  const [notesFilter, setNotesFilter] = useState<'today' | 'week' | 'month' | 'quarter' | 'halfYear' | 'year' | 'fiveYears'>('week');
 
   const { user, isAdmin } = useAuth();
   
@@ -253,6 +256,15 @@ const Domestic: React.FC = () => {
       const recordDate = new Date(year, month - 1, day); // month is 0-indexed
       return recordDate >= startOfDay && recordDate <= endDate;
     });
+  };
+
+  const handleToggleCompleted = async (id: number | string, completed: boolean) => {
+    try {
+      await updateHouseholdRecord(id, { completed });
+    } catch (error) {
+      console.error('Error updating household record completion status:', error);
+      // Optionally show an error message to the user
+    }
   };
 
   return (
@@ -333,7 +345,7 @@ const Domestic: React.FC = () => {
                   <div 
                     key={index}
                     onClick={() => handleDateClick(day.dateString)}
-                    className={`min-h-12 flex flex-col items-center justify-center p-1 border rounded-lg cursor-pointer
+                    className={`min-h-8 flex flex-col items-center justify-center p-1 border rounded-lg cursor-pointer
                       ${bgColorClass}
                       ${day.isCurrentMonth ? 'hover:bg-gray-50' : 'text-gray-400'}
                       ${isToday ? 'border-blue-500' : 'border-gray-200'}
@@ -342,9 +354,6 @@ const Domestic: React.FC = () => {
                     <span className={`text-sm ${isToday ? 'font-bold text-blue-600' : ''}`}>
                       {day.date.getDate()}
                     </span>
-                    {hasRecord && day.areas && day.areas.length > 1 && (
-                      <div className="text-xs text-gray-500 mt-1">+{day.areas.length - 1}</div>
-                    )}
                   </div>
                 );
               })}
@@ -354,7 +363,7 @@ const Domestic: React.FC = () => {
 
         {/* Notes section for selected date's records */}
         <AnimatedAccordion title="Заметки" defaultOpen={true}>
-          <div className="mt-2 bg-white rounded-lg shadow-md border border-gray-200 p-4 h-96 overflow-y-auto">
+          <div className="mt-2 bg-white rounded-lg shadow-md border border-gray-200 p-4 h-fit overflow-y-auto">
             {/* Filter Controls */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Фильтр по периоду</label>
@@ -446,29 +455,21 @@ const Domestic: React.FC = () => {
                 }
                 
                 return (
-                  <div className="flex flex-col h-full">
+                  <div className="flex flex-col">
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">{headerText}</h3>
-                    <div className="space-y-3 overflow-y-auto flex-grow">
+                    <div className="space-y-3 flex-grow">
                       {recordsToShow.map((record) => (
-                        <div key={record.id} className="border-l-4 border-blue-500 pl-3 py-2 bg-gray-50 rounded">
-                          <div className="space-y-1">
-                            <div>
-                              <span className="font-medium text-gray-700">Дата:</span> 
-                              <span className="ml-2">{formatDate(record.date)}</span>
-                            </div>
+                        <div key={record.id} className="border-l-4 border-blue-500 pl-3 py-2 bg-gray-50 rounded flex items-start">
+                          <input
+                            type="checkbox"
+                            checked={record.completed || false}
+                            onChange={() => handleToggleCompleted(record.id, !record.completed)}
+                            className="mt-1 mr-2 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                          />
+                          <div className="flex-grow space-y-1">
                             <div>
                               <span className="font-medium text-gray-700">Описание:</span> 
-                              <span className="ml-2">{record.description}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-700">Область:</span> 
-                              <span className="ml-2">{record.area}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-700">Статус:</span> 
-                              <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${record.completed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                {record.completed ? 'Выполнено' : 'Не выполнено'}
-                              </span>
+                              <span className={`ml-2 ${record.completed ? 'line-through text-gray-500' : ''}`}>{record.description}</span>
                             </div>
                           </div>
                         </div>

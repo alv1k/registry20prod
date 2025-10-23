@@ -35,8 +35,14 @@ import {
   addHouseholdRecord as firebaseAddHouseholdRecord,
   updateHouseholdRecord as firebaseUpdateHouseholdRecord,
   deleteHouseholdRecord as firebaseDeleteHouseholdRecord,
-  HouseholdRecord as FirebaseHouseholdRecord
+  HouseholdRecord as FirebaseHouseholdRecord,
+  // Planned Budget services
+  getAllPlannedBudgetRecords,
+  addPlannedBudgetRecord as firebaseAddPlannedBudgetRecord,
+  updatePlannedBudgetRecord as firebaseUpdatePlannedBudgetRecord,
+  deletePlannedBudgetRecord as firebaseDeletePlannedBudgetRecord
 } from '../firebase/services';
+import { PlannedBudgetRecord } from '../firebase/models/PlannedBudget';
 
 // Тип для записи корреспондента во внутреннем store
 // Поддерживает как локальные ID (number), так и Firebase ID (string)
@@ -75,6 +81,18 @@ export interface AppFinanceRecord {
   total: number; // сумма
   classification: string; // классификация
   comment: string; // комментарий
+}
+
+// Тип для запланированного бюджета во внутреннем store
+export interface AppPlannedBudgetRecord {
+  id: string | number;
+  plannedAmount: number;
+  actualAmount?: number;
+  classification: string;
+  plannedDate: string;
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Тип для категории во внутреннем store
@@ -122,6 +140,7 @@ interface AppState {
   vehicleData: AppVehicleRecord[];
   financeData: AppFinanceRecord[];
   householdData: AppHouseholdRecord[];
+  plannedBudgetData: AppPlannedBudgetRecord[];
   
   // Loading states
   isCorrespondentDataLoading: boolean;
@@ -129,11 +148,13 @@ interface AppState {
   isVehicleDataLoading: boolean;
   isFinanceDataLoading: boolean;
   isHouseholdDataLoading: boolean;
+  isPlannedBudgetDataLoading: boolean;
   correspondentDataError: string | null;
   transportDataError: string | null;
   vehicleDataError: string | null;
   financeDataError: string | null;
   householdDataError: string | null;
+  plannedBudgetDataError: string | null;
   
   // Firebase sync actions
   syncCorrespondentData: () => Promise<void>;
@@ -141,6 +162,7 @@ interface AppState {
   syncVehicleData: () => Promise<void>;  // Added this line
   syncFinanceData: () => Promise<void>;
   syncHouseholdData: () => Promise<void>;
+  syncPlannedBudgetData: () => Promise<void>;
   
   // Actions to update data (with Firebase sync)
   setCorrespondentData: (data: AppCorrespondentRecord[]) => void;
@@ -169,6 +191,10 @@ interface AppState {
   addHouseholdRecord: (record: Omit<AppHouseholdRecord, 'id'>) => Promise<void>;
   updateHouseholdRecord: (id: number | string, record: Partial<AppHouseholdRecord>) => Promise<void>;
   deleteHouseholdRecord: (id: number | string) => Promise<void>;
+  setPlannedBudgetData: (data: AppPlannedBudgetRecord[]) => void;
+  addPlannedBudgetRecord: (record: Omit<AppPlannedBudgetRecord, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updatePlannedBudgetRecord: (id: number | string, record: Partial<Omit<AppPlannedBudgetRecord, 'id' | 'createdAt' | 'updatedAt'>>) => Promise<void>;
+  deletePlannedBudgetRecord: (id: number | string) => Promise<void>;
   
   // Categories data and functions
   categories: AppCategory[];
@@ -196,12 +222,15 @@ export const useStore = create<AppState>((set, get) => ({
   vehicleData: [],
   financeData: [],
   householdData: [],
+  plannedBudgetData: [],
   
   // Loading states
   isCorrespondentDataLoading: false,
   isVehicleDataLoading: false,
+  isPlannedBudgetDataLoading: false,
   correspondentDataError: null,
   vehicleDataError: null,
+  plannedBudgetDataError: null,
   
   // Sync data from Firebase
   syncCorrespondentData: async () => {
@@ -644,6 +673,42 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
   
+  // Planned Budget sync actions
+  syncPlannedBudgetData: async () => {
+    try {
+      set({ isPlannedBudgetDataLoading: true, plannedBudgetDataError: null });
+      const firebaseRecords = await getAllPlannedBudgetRecords();
+      
+      // Convert Firebase records to app format
+      const convertedRecords: AppPlannedBudgetRecord[] = firebaseRecords.map(record => {
+        // Explicit type conversion
+        const appRecord: AppPlannedBudgetRecord = {
+          id: record.id || Date.now().toString(), // fallback if no id
+          plannedAmount: record.plannedAmount,
+          actualAmount: record.actualAmount,
+          classification: record.classification,
+          plannedDate: record.plannedDate,
+          comment: record.comment,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt
+        };
+        return appRecord;
+      });
+      
+      set({ 
+        plannedBudgetData: convertedRecords,
+        isPlannedBudgetDataLoading: false 
+      });
+    } catch (error) {
+      console.error('Error syncing planned budget data:', error);
+      set({ 
+        plannedBudgetDataError: (error as Error).message || 'Error syncing data',
+        isPlannedBudgetDataLoading: false 
+      });
+      throw error;
+    }
+  },
+  
   // Actions to update finance data
   setFinanceData: (data) => set({ financeData: data }),
   
@@ -796,6 +861,85 @@ export const useStore = create<AppState>((set, get) => ({
       }));
     } catch (error) {
       console.error('Error deleting household record:', error);
+      throw error;
+    }
+  },
+  
+  // Actions to update planned budget data
+  setPlannedBudgetData: (data) => set({ plannedBudgetData: data }),
+  
+  addPlannedBudgetRecord: async (record) => {
+    try {
+      // First, add to Firebase
+      const firebaseRecord: Omit<PlannedBudgetRecord, 'id' | 'createdAt' | 'updatedAt'> = {
+        plannedAmount: record.plannedAmount,
+        actualAmount: record.actualAmount,
+        classification: record.classification,
+        plannedDate: record.plannedDate,
+        comment: record.comment
+      };
+      
+      const firebaseId = await firebaseAddPlannedBudgetRecord(firebaseRecord);
+      
+      // Then add to local state with Firebase ID
+      const newRecord: AppPlannedBudgetRecord = {
+        ...record,
+        id: firebaseId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      set((state) => ({
+        plannedBudgetData: [...state.plannedBudgetData, newRecord]
+      }));
+    } catch (error) {
+      console.error('Error adding planned budget record:', error);
+      throw error;
+    }
+  },
+  
+  updatePlannedBudgetRecord: async (id, updatedFields) => {
+    try {
+      // Update in Firebase - need to convert our record type to match Firebase service
+      // Create a new object without the id property to avoid type conflicts
+      const firebaseData: Partial<Omit<PlannedBudgetRecord, 'id' | 'createdAt' | 'updatedAt'>> = {
+        plannedAmount: updatedFields.plannedAmount,
+        actualAmount: updatedFields.actualAmount,
+        classification: updatedFields.classification,
+        plannedDate: updatedFields.plannedDate,
+        comment: updatedFields.comment
+      };
+      // Remove any undefined values
+      Object.keys(firebaseData).forEach(key => {
+        // @ts-ignore - we're filtering out undefined values
+        if (firebaseData[key] === undefined) delete firebaseData[key];
+      });
+      
+      await firebaseUpdatePlannedBudgetRecord(id.toString(), firebaseData);
+      
+      // Then update local state
+      set((state) => ({
+        plannedBudgetData: state.plannedBudgetData.map(record =>
+          record.id === id ? { ...record, ...updatedFields, updatedAt: new Date().toISOString() } : record
+        )
+      }));
+    } catch (error) {
+      console.error('Error updating planned budget record:', error);
+      throw error;
+    }
+  },
+  
+  deletePlannedBudgetRecord: async (id) => {
+    try {
+      // Delete from Firebase - convert id to string
+      await firebaseDeletePlannedBudgetRecord(id.toString());
+      
+      // Then remove from local state
+      set((state) => ({
+        plannedBudgetData: state.plannedBudgetData.filter(record => record.id !== id)
+      }));
+    } catch (error) {
+      console.error('Error deleting planned budget record:', error);
       throw error;
     }
   },

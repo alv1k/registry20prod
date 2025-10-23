@@ -6,6 +6,7 @@ import TransportFormModal from '../components/TransportFormModal';
 import VehicleFormModal from '../components/VehicleFormModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import TransportCharts from '../components/TransportCharts';
+import Button from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
 
@@ -287,15 +288,15 @@ const Transport = () => {
         <h1 className="text-2xl font-bold text-gray-800">Каталог технического обслуживания автомобилей</h1>
         <div className="flex flex-wrap gap-3">
           {isAdmin && (
-            <button 
+            <Button 
               onClick={() => openMaintenanceFormModal()}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
+              variant="primary" className="flex items-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
               Добавить запись
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -399,12 +400,12 @@ const Transport = () => {
         </div>
         
         <div className="flex justify-end mt-3">
-          <button
+          <Button
             onClick={clearFilters}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            variant="secondary"
           >
             Очистить фильтры
-          </button>
+          </Button>
         </div>
       </AnimatedAccordion>
       
@@ -422,18 +423,18 @@ const Transport = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
             <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
-              <button
+              <Button
                 onClick={cancelDelete}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                variant="secondary"
               >
                 Отмена
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                variant="danger"
               >
                 Удалить
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -607,15 +608,15 @@ const Transport = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Управление автомобилями</h2>
           {isAdmin && (
-            <button 
+            <Button 
               onClick={() => openVehicleFormModal()}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors flex items-center"
+              variant="primary" className="flex items-center"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
               Добавить автомобиль
-            </button>
+            </Button>
           )}
         </div>
         
@@ -791,13 +792,13 @@ const Transport = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
             <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить этот автомобиль? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
-              <button
+              <Button
                 onClick={() => setDeleteConfirmationVehicleId(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                variant="secondary"
               >
                 Отмена
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={async () => {
                   try {
                     await deleteVehicleRecord(deleteConfirmationVehicleId);
@@ -807,10 +808,10 @@ const Transport = () => {
                     alert('Ошибка при удалении автомобиля. Попробуйте еще раз.');
                   }
                 }}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                variant="danger"
               >
                 Удалить
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import CorrespondentFormModal from '../components/CorrespondentFormModal';
 import AnimatedAccordion from '../components/AnimatedAccordion';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Button from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
 
 const Correspondent = () => {
@@ -207,12 +208,12 @@ const Correspondent = () => {
         </div>
         
         <div className="flex justify-end mt-3">
-          <button
+          <Button
             onClick={clearFilters}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            variant="secondary"
           >
             Очистить фильтры
-          </button>
+          </Button>
         </div>
       </AnimatedAccordion>
       
@@ -223,18 +224,18 @@ const Correspondent = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
             <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
-              <button
+              <Button
                 onClick={cancelDelete}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                variant="secondary"
               >
                 Отмена
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                variant="danger"
               >
                 Удалить
-              </button>
+              </Button>
             </div>
           </div>
         </div>
