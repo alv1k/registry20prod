@@ -31,14 +31,14 @@ interface MaintenanceRecord {
   mileage?: number;
 }
 
-interface TransportChartsProps {
+interface VehiclesChartsProps {
   records: MaintenanceRecord[];
 }
 
 // Цветовая палитра для диаграмм
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
 
-const TransportCharts: React.FC<TransportChartsProps> = ({ records }) => {
+const VehiclesCharts: React.FC<VehiclesChartsProps> = ({ records }) => {
   const [activeWorkTypeIndex, setActiveWorkTypeIndex] = useState<number | null>(null);
   const [activeFrequencyIndex, setActiveFrequencyIndex] = useState<number | null>(null);
   const isMobile = useIsMobile();
@@ -235,4 +235,4 @@ const TransportCharts: React.FC<TransportChartsProps> = ({ records }) => {
   );
 };
 
-export default TransportCharts;
+export default VehiclesCharts;

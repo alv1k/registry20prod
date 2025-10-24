@@ -2,10 +2,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import AnimatedAccordion from '../components/AnimatedAccordion';
-import TransportFormModal from '../components/TransportFormModal';
 import VehicleFormModal from '../components/VehicleFormModal';
 import LoadingSpinner from '../components/LoadingSpinner';
-import TransportCharts from '../components/TransportCharts';
+import VehiclesCharts from '../components/VehiclesCharts';
 import Button from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
@@ -412,7 +411,7 @@ const Transport = () => {
       {/* Transport Charts */}
       <div className="mt-6">
         <AnimatedAccordion title="Аналитика расходов" defaultOpen={true}>
-          <TransportCharts records={filteredData} />
+          <VehiclesCharts records={filteredData} />
         </AnimatedAccordion>
       </div>
       
@@ -758,20 +757,7 @@ const Transport = () => {
         )}
       </div>
     </div>
-  </div>
-      
-      {/* Maintenance Form Modal */}
-      {isAdmin && (
-        <TransportFormModal 
-          isOpen={isMaintenanceFormModalOpen} 
-          onClose={closeMaintenanceFormModal} 
-          recordId={selectedRecordId} 
-          record={selectedRecordId ? maintenanceData.find(r => r.id === selectedRecordId) as any : undefined}
-          vehicleData={vehicleData}
-          onAdd={handleAddMaintenanceRecord} 
-          onUpdate={handleUpdateMaintenanceRecord} 
-        />
-      )}
+  </div>      
       
       {/* Vehicle Form Modal */}
       {isAdmin && (

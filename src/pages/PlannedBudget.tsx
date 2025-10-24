@@ -447,7 +447,7 @@ const PlannedBudget = () => {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Запланировано</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Потрачено22</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Потрачено</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
                       {isAdmin && (
@@ -476,15 +476,10 @@ const PlannedBudget = () => {
                           <td
                             className="p-4 whitespace-nowrap text-sm text-gray-500"
                           >
-                            {Object.entries(record).map(([key, value]) => {
-                                console.log(key, value, 'test');
-                                return key;
-                              }) 
-                            }
-                            {/* {(() => {
+                            {(() => {
                               const actualSpending = calculateActualSpendingByClassification[record.classification] || 0;
                               return formatCurrencyWithSeparators(actualSpending) + ' ₽';
-                            })()} */}
+                            })()}
                           </td>
                           <td 
                             className="p-4 whitespace-nowrap text-sm text-gray-500"
