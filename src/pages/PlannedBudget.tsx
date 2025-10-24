@@ -100,6 +100,64 @@ const PlannedBudget = () => {
         return dateA.getTime() - dateB.getTime(); // Ascending order (soonest first)
       });
   }, [plannedBudgetData, classificationFilter, periodFilter]);
+  
+  console.log(filteredData, 'filteredData');
+  
+  // Get all finance data to calculate actual spending
+  const financeData = useStore((state) => state.financeData);
+  
+  // Calculate actual spending by classification based on current filters
+  const calculateActualSpendingByClassification = useMemo(() => {
+    // First, filter finance data by the same period filter as planned budget
+    const filteredFinanceData = financeData.filter(record => {
+      console.log(record, 'here');
+      
+      // Period filter
+      if (periodFilter.type !== 'all') {
+        const recordDate = new Date(record.date);
+        const recordYear = recordDate.getFullYear().toString();
+        const recordMonth = recordDate.getMonth() + 1; // месяцы в JS от 0 до 11
+        const recordQuarter = Math.floor(recordDate.getMonth() / 3) + 1;
+        
+        switch(periodFilter.type) {
+          case 'month':
+            // periodFilter.value format: 'YYYY-MM'
+            if (recordYear !== periodFilter.value.split('-')[0] ||
+                recordMonth !== parseInt(periodFilter.value.split('-')[1])) {
+              return false;
+            }
+            break;
+          case 'quarter':
+            // periodFilter.value format: 'YYYY-Q' where Q is quarter number
+            const [year, quarter] = periodFilter.value.split('-');
+            if (recordYear !== year || recordQuarter !== parseInt(quarter.charAt(1))) {
+              return false;
+            }
+            break;
+          case 'year':
+            // periodFilter.value format: 'YYYY'
+            if (recordYear !== periodFilter.value) {
+              return false;
+            }
+            break;
+        }
+      }
+      
+      return true;
+    });
+    
+    // Group finance data by classification and sum the totals
+    const spendingByClassification: Record<string, number> = {};
+    filteredFinanceData.forEach(record => {
+      if (spendingByClassification[record.classification]) {
+        spendingByClassification[record.classification] += record.total;
+      } else {
+        spendingByClassification[record.classification] = record.total;
+      }
+    });
+    
+    return spendingByClassification;
+  }, [financeData, periodFilter]);
 
   const openFormModal = (id?: number | string | null) => {
     if (id !== undefined) {
@@ -143,10 +201,10 @@ const PlannedBudget = () => {
     return filteredData.reduce((sum, record) => sum + record.plannedAmount, 0);
   }, [filteredData]);
 
-  // Calculate total actual amount for filtered data
+  // Calculate total actual amount based on filtered finance data
   const calculateTotalActualAmount = useMemo(() => {
-    return filteredData.reduce((sum, record) => sum + (record.actualAmount || 0), 0);
-  }, [filteredData]);
+    return Object.values(calculateActualSpendingByClassification).reduce((sum, amount) => sum + amount, 0);
+  }, [calculateActualSpendingByClassification]);
 
   // Calculate variance (planned vs actual)
   const calculateVariance = useMemo(() => {
@@ -348,12 +406,10 @@ const PlannedBudget = () => {
                               <span>Запланировано:</span>
                               <span className="font-medium">{formatCurrencyWithSeparators(record.plannedAmount)} ₽</span>
                             </div>
-                            {record.actualAmount !== undefined && (
-                              <div className="flex justify-between">
-                                <span>Потрачено:</span>
-                                <span className="font-medium">{formatCurrencyWithSeparators(record.actualAmount)} ₽</span>
-                              </div>
-                            )}
+                            <div className="flex justify-between">
+                              <span>Потрачено:</span>
+                              <span className="font-medium">{formatCurrencyWithSeparators(record.plannedAmount)} ₽</span>
+                            </div>
                             <div className="flex justify-between">
                               <span>Категория:</span>
                               <span className="font-medium">{record.classification}</span>
@@ -391,7 +447,7 @@ const PlannedBudget = () => {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Запланировано</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Потрачено</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Потрачено22</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
                       {isAdmin && (
@@ -417,10 +473,18 @@ const PlannedBudget = () => {
                           >
                             {formatCurrencyWithSeparators(record.plannedAmount)} ₽
                           </td>
-                          <td 
+                          <td
                             className="p-4 whitespace-nowrap text-sm text-gray-500"
                           >
-                            {record.actualAmount !== undefined ? formatCurrencyWithSeparators(record.actualAmount) + ' ₽' : '—'}
+                            {Object.entries(record).map(([key, value]) => {
+                                console.log(key, value, 'test');
+                                return key;
+                              }) 
+                            }
+                            {/* {(() => {
+                              const actualSpending = calculateActualSpendingByClassification[record.classification] || 0;
+                              return formatCurrencyWithSeparators(actualSpending) + ' ₽';
+                            })()} */}
                           </td>
                           <td 
                             className="p-4 whitespace-nowrap text-sm text-gray-500"

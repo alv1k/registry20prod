@@ -6,6 +6,7 @@ import VehiclesMaintenance from '../pages/VehiclesMaintenance';
 import Finance from '../pages/Finance';
 import Domestic from '../pages/Domestic';
 import PlannedBudget from '../pages/PlannedBudget';
+import UnifiedFinance from '../pages/UnifiedFinance';
 import TabsDemo from '../pages/TabsDemo';
 import LoginForm from './LoginForm';
 
@@ -19,6 +20,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/vehicles_maintenance" element={<VehiclesMaintenance />} />
         <Route path="/finance" element={<Finance />} />
         <Route path="/planned-budget" element={<PlannedBudget />} />
+        <Route path="/unified-finance" element={<UnifiedFinance />} />
         <Route path="/domestic" element={<Domestic />} />
         <Route path="/tabs-demo" element={<TabsDemo />} />
         <Route path="/login" element={<LoginForm onSuccess={() => {}} />} />

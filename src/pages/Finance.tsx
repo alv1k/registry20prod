@@ -500,7 +500,7 @@ const Finance = () => {
                             {record.quantity}
                           </td>
                           <td 
-                            className="p4 whitespace-nowrap text-sm text-gray-500"
+                            className="p-4 whitespace-nowrap text-sm text-gray-500"
                           >
                             {formatCurrencyWithSeparators(record.total)} ₽
                           </td>

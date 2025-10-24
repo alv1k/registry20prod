@@ -31,10 +31,12 @@ const PlannedBudgetFormModal: React.FC<PlannedBudgetFormModalProps> = ({
   // Remove name state since we're using classification only
   const [plannedAmount, setPlannedAmount] = useState<string>('');
   const [classification, setClassification] = useState<string>('');
-  // For planned date, we'll use plannedMonthYear in format YYYY-MM
-  const [plannedMonthYear, setPlannedMonthYear] = useState<string>(new Date().toISOString().slice(0, 7)); // Format: YYYY-MM
+  // Split planned date into separate month and year inputs
+  const currentYear = new Date().getFullYear();
+  const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+  const [plannedYear, setPlannedYear] = useState<string>(currentYear.toString());
+  const [plannedMonth, setPlannedMonth] = useState<string>(currentMonth);
   const [comment, setComment] = useState<string>('');
-  const [actualAmount, setActualAmount] = useState<string>('');
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
@@ -57,9 +59,9 @@ const PlannedBudgetFormModal: React.FC<PlannedBudgetFormModalProps> = ({
       // Reset form for new records
       setPlannedAmount('');
       setClassification('');
-      setPlannedMonthYear(new Date().toISOString().slice(0, 7)); // Format: YYYY-MM
+      setPlannedYear(currentYear.toString());
+      setPlannedMonth(currentMonth);
       setComment('');
-      setActualAmount('');
     }
   }, [recordId, isOpen]);
 
@@ -67,21 +69,15 @@ const PlannedBudgetFormModal: React.FC<PlannedBudgetFormModalProps> = ({
     e.preventDefault();
     
     // Validate required fields
-    if (!plannedAmount || !classification || !plannedMonthYear) {
+    if (!plannedAmount || !classification || !plannedYear || !plannedMonth) {
       alert('Пожалуйста, заполните все обязательные поля');
       return;
     }
     
     const plannedAmountNum = parseFloat(plannedAmount);
-    const actualAmountNum = actualAmount ? parseFloat(actualAmount) : undefined;
     
     if (isNaN(plannedAmountNum)) {
       alert('Запланированная сумма должна быть числовым значением');
-      return;
-    }
-    
-    if (actualAmount && isNaN(actualAmountNum!)) {
-      alert('Фактическая сумма должна быть числовым значением');
       return;
     }
     
@@ -93,7 +89,7 @@ const PlannedBudgetFormModal: React.FC<PlannedBudgetFormModalProps> = ({
         await onUpdate(recordId, {
           plannedAmount: plannedAmountNum,
           classification,
-          plannedDate: `${plannedMonthYear}-01`, // Convert YYYY-MM to first day of the month
+          plannedDate: `${plannedYear}-${plannedMonth}-01`, // Combine year and month to first day of the month
           comment: comment || ''
         });
       } else {
@@ -101,7 +97,7 @@ const PlannedBudgetFormModal: React.FC<PlannedBudgetFormModalProps> = ({
         await onAdd({
           plannedAmount: plannedAmountNum,
           classification,
-          plannedDate: `${plannedMonthYear}-01`, // Convert YYYY-MM to first day of the month
+          plannedDate: `${plannedYear}-${plannedMonth}-01`, // Combine year and month to first day of the month
           comment: comment || ''
         });
       }
@@ -163,25 +159,43 @@ const PlannedBudgetFormModal: React.FC<PlannedBudgetFormModalProps> = ({
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Планируемый месяц/год *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Планируемый месяц *</label>
             <select
-              name="plannedMonthYear"
-              value={plannedMonthYear}
-              onChange={(e) => setPlannedMonthYear(e.target.value)}
+              name="plannedMonth"
+              value={plannedMonth}
+              onChange={(e) => setPlannedMonth(e.target.value)}
+              onFocus={(e) => setFocusedInput(e.target.name)}
+              onBlur={() => setFocusedInput(null)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              required
+            >
+              {['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map((month, index) => {
+                const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+                return (
+                  <option key={month} value={month}>
+                    {monthNames[index]} ({month})
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Планируемый год *</label>
+            <select
+              name="plannedYear"
+              value={plannedYear}
+              onChange={(e) => setPlannedYear(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               required
             >
               {Array.from({length: 24}, (_, i) => {
-                const date = new Date();
-                date.setMonth(date.getMonth() - 11 + i); // Last 11 months + next 12 months
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const monthName = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][date.getMonth()];
+                const year = (currentYear - 11 + i).toString();
                 return (
-                  <option key={`${year}-${month}`} value={`${year}-${month}`}>
-                    {monthName} {year}
+                  <option key={year} value={year}>
+                    {year}
                   </option>
                 );
               })}
