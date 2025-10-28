@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useStore } from '../store/useStore';
-import Modal from './Modal';
-import Button from './Button';
+import { useStore } from '../../../store/useStore';
+import Modal from '../../../components/Modal';
+import Button from '../../../components/Button';
 
 interface CategoryRecord {
   id: number | string;
@@ -10,7 +10,7 @@ interface CategoryRecord {
   type: 'expense' | 'income';
 }
 
-interface CategoryFormModalProps {
+interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   recordId?: number | string | null;
@@ -18,7 +18,7 @@ interface CategoryFormModalProps {
   onUpdate: (id: number | string, updatedRecord: Partial<CategoryRecord>) => void | Promise<void>;
 }
 
-const CategoryFormModal: React.FC<CategoryFormModalProps> = ({ 
+const CategoryModal: React.FC<CategoryModalProps> = ({ 
   isOpen, 
   onClose, 
   recordId, 
@@ -168,4 +168,4 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   );
 };
 
-export default CategoryFormModal;
+export default CategoryModal;

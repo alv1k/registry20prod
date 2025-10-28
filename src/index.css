@@ -13,3 +13,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Ensure consistent viewport width by always reserving scrollbar space */
+html {
+  /* margin-left: calc(100vw - 100%); */
+  overflow-y: scroll;
+}

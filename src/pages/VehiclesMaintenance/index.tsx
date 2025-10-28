@@ -1,14 +1,15 @@
 // src/pages/VehiclesMaintenance.tsx
 import { useState, useMemo, useEffect } from 'react';
-import { useStore } from '../store/useStore';
-import AnimatedAccordion from '../components/AnimatedAccordion';
-import VehicleFormModal from '../components/VehicleFormModal';
-import MaintenanceFormModal from '../components/MaintenanceFormModal';
-import LoadingSpinner from '../components/LoadingSpinner';
-import VehiclesCharts from '../components/VehiclesCharts';
-import Button from '../components/Button';
-import { useAuth } from '../contexts/AuthContext';
-import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
+import { useStore } from '../../store/useStore';
+import AnimatedAccordion from '../../components/AnimatedAccordion';
+import VehicleModal from './components/vehicleModal';
+import MaintenanceModal from './components/maintenanceModal';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import Charts from './components/charts';
+import Button from '../../components/Button';
+import { useAuth } from '../../contexts/AuthContext';
+import { formatCurrencyWithSeparators, formatDate } from '../../utils/formatUtils';
+import { exportRecordsToExcel, exportMaintenanceRecordsToExcel } from '../../utils/exportUtils';
 
 interface VehicleMaintenanceRecord {
   id: number | string;
@@ -346,7 +347,7 @@ const VehiclesMaintenance = () => {
       {/* Vehicles Charts */}
       <div className="mt-6">
         <AnimatedAccordion title="Аналитика расходов" defaultOpen={true}>
-          <VehiclesCharts records={filteredData} vehicles={vehicleData} />
+          <Charts records={filteredData} vehicles={vehicleData} />
         </AnimatedAccordion>
       </div>
       
@@ -375,6 +376,16 @@ const VehiclesMaintenance = () => {
       )}
       
       <AnimatedAccordion title="Записи" defaultOpen={false}>
+        <div className="flex justify-between mb-4">
+          <h3 className="text-lg font-semibold mb-2">Записи технического обслуживания</h3>
+          <button onClick={() => exportMaintenanceRecordsToExcel(
+            filteredData,
+            `Техническое_обслуживание_${new Date().toISOString().slice(0, 10)}.xlsx`,
+            'Записи ТО'
+          )} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Скачать в .xlsx
+          </button>
+        </div>
         <div className="overflow-x-auto">
           {isMaintenanceDataLoading ? (
             <div className="py-12">
@@ -696,7 +707,7 @@ const VehiclesMaintenance = () => {
       
       {/* Maintenance Form Modal */}
       {isAdmin && (
-        <MaintenanceFormModal 
+        <MaintenanceModal 
           isOpen={isMaintenanceFormModalOpen} 
           onClose={closeMaintenanceFormModal} 
           recordId={selectedRecordId} 
@@ -709,7 +720,7 @@ const VehiclesMaintenance = () => {
       
       {/* Vehicle Form Modal */}
       {isAdmin && (
-        <VehicleFormModal 
+        <VehicleModal 
           isOpen={isVehicleFormModalOpen} 
           onClose={closeVehicleFormModal} 
           recordId={selectedVehicleId} 

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import AnimatedAccordion from '../components/AnimatedAccordion';
-import DomesticFormModal from '../components/DomesticFormModal';
-import { useStore } from '../store/useStore';
-import { AppHouseholdRecord } from '../store/useStore';
-import { useAuth } from '../contexts/AuthContext';
-import LoadingSpinner from '../components/LoadingSpinner';
-import Button from '../components/Button';
-import { formatDate } from '../utils/formatUtils';
+import AnimatedAccordion from '../../components/AnimatedAccordion';
+import DomesticModal from './components/domesticModal';
+import { useStore } from '../../store/useStore';
+import { AppHouseholdRecord } from '../../store/useStore';
+import { useAuth } from '../../contexts/AuthContext';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import Button from '../../components/Button';
+import { formatDate } from '../../utils/formatUtils';
 
 // Define type for household record
 interface HouseholdRecord {
@@ -659,7 +659,7 @@ const Domestic: React.FC = () => {
       )}
 
       {isAdmin && (
-        <DomesticFormModal 
+        <DomesticModal 
           isOpen={isFormModalOpen} 
           onClose={closeFormModal} 
           recordId={editingRecordId}

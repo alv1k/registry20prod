@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Modal from './Modal';
+import Modal from '../../../components/Modal';
 
 interface MaintenanceRecord {
   id: number | string;
@@ -29,7 +29,7 @@ interface MaintenanceFormModalProps {
   onUpdate: (id: number | string, record: Partial<MaintenanceRecord>) => void;
 }
 
-const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({ 
+const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({ 
   isOpen, 
   onClose, 
   recordId, 
@@ -246,4 +246,4 @@ const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({
   );
 };
 
-export default MaintenanceFormModal;
+export default MaintenanceModal;

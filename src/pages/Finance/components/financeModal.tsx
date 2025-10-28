@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useStore } from '../store/useStore';
-import Modal from './Modal';
-import Button from './Button';
-import { formatCurrencyWithSeparators } from '../utils/formatUtils';
+import { useStore } from '../../../store/useStore';
+import Modal from '../../../components/Modal';
+import Button from '../../../components/Button';
+import { formatCurrencyWithSeparators } from '../../../utils/formatUtils';
 
 interface FinanceRecord {
   id: number | string;
@@ -23,7 +23,7 @@ interface FinanceFormModalProps {
   onUpdate: (id: number | string, updatedRecord: Partial<FinanceRecord>) => void | Promise<void>;
 }
 
-const FinanceFormModal: React.FC<FinanceFormModalProps> = ({ 
+const FinanceModal: React.FC<FinanceFormModalProps> = ({ 
   isOpen, 
   onClose, 
   recordId, 
@@ -284,4 +284,4 @@ const FinanceFormModal: React.FC<FinanceFormModalProps> = ({
   );
 };
 
-export default FinanceFormModal;
+export default FinanceModal;

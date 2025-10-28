@@ -13,7 +13,7 @@ import {
   ResponsiveContainer,
   PieLabelRenderProps
 } from 'recharts';
-import useIsMobile from '../hooks/useIsMobile';
+import useIsMobile from '../../../hooks/useIsMobile';
 
 // Define a type that extends PieLabelRenderProps with the percent property
 type ExtendedPieLabelRenderProps = PieLabelRenderProps & {
@@ -39,7 +39,7 @@ interface Vehicle {
   model: string;
 }
 
-interface VehiclesChartsProps {
+interface ChartsProps {
   records: MaintenanceRecord[];
   vehicles?: Vehicle[];
 }
@@ -47,7 +47,7 @@ interface VehiclesChartsProps {
 // Цветовая палитра для диаграмм
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
 
-const VehiclesCharts: React.FC<VehiclesChartsProps> = ({ records }) => {
+const Charts: React.FC<ChartsProps> = ({ records }) => {
   const [activeWorkTypeIndex, setActiveWorkTypeIndex] = useState<number | null>(null);
   const [activeFrequencyIndex, setActiveFrequencyIndex] = useState<number | null>(null);
   const isMobile = useIsMobile();
@@ -77,9 +77,9 @@ const VehiclesCharts: React.FC<VehiclesChartsProps> = ({ records }) => {
         if (record.vehicleName) {
           // Use the stored vehicle name if available
           vehicleName = record.vehicleName;
-        } else if (vehicles) {
-          // Otherwise, try to look up the vehicle name
-          const vehicle = vehicles.find(v => v.id === record.vehicleId);
+        } else if (record && Array.isArray(record)) {
+          // Otherwise, try to look up the vehicle name in the vehicles prop
+          const vehicle = record.find(v => v.id === record.vehicleId);
           if (vehicle) {
             vehicleName = `${vehicle.name} (${vehicle.manufacturer} ${vehicle.model})`;
           }
@@ -256,4 +256,4 @@ const VehiclesCharts: React.FC<VehiclesChartsProps> = ({ records }) => {
   );
 };
 
-export default VehiclesCharts;
+export default Charts;

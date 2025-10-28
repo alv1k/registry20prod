@@ -15,8 +15,8 @@ import {
   LineChart,
   Line
 } from 'recharts';
-import useIsMobile from '../hooks/useIsMobile';
-import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
+import useIsMobile from '../../../hooks/useIsMobile';
+import { formatCurrencyWithSeparators, formatDate } from '../../../utils/formatUtils';
 
 interface FinanceRecord {
   id: number | string;
@@ -29,7 +29,7 @@ interface FinanceRecord {
   comment: string;
 }
 
-interface FinanceChartsProps {
+interface ChartsProps {
   records: FinanceRecord[];
 }
 
@@ -47,7 +47,7 @@ interface DateData {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
 
-const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
+const Charts: React.FC<ChartsProps> = ({ records }) => {
   const isMobile = useIsMobile();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   // Подготовка данных для диаграммы по классификациям
@@ -195,4 +195,4 @@ const FinanceCharts: React.FC<FinanceChartsProps> = ({ records }) => {
   );
 };
 
-export default FinanceCharts;
+export default Charts;

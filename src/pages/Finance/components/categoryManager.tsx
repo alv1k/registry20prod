@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useStore } from '../store/useStore';
-import CategoryFormModal from './CategoryFormModal';
-import { useAuth } from '../contexts/AuthContext';
+import { useStore } from '../../../store/useStore';
+import CategoryModal from './categoryModal';
+import { useAuth } from '../../../contexts/AuthContext';
 
-const CategoriesManager: React.FC = () => {
+interface CategoriesManagerProps {
+  onAddCategoryClick?: () => void;
+}
+
+const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick }) => {
   const categories = useStore((state) => state.categories);
   const syncCategories = useStore((state) => state.syncCategories);
   const deleteCategory = useStore((state) => state.deleteCategory);
@@ -17,6 +21,11 @@ const CategoriesManager: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
   const [filterType, setFilterType] = useState<'all' | 'expense' | 'income'>('all');
+
+  // Helper function to check if category matches filter
+  const matchesFilter = (categoryType: 'expense' | 'income') => {
+    return filterType === 'all' || categoryType === filterType;
+  };
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -43,18 +52,6 @@ const CategoriesManager: React.FC = () => {
       console.error('Error loading categories:', error);
     });
   }, [syncCategories]);
-
-  // Apply filter to the categories data
-  const filteredCategories = categories.filter(category => {
-    if (filterType === 'all') {
-      return true;
-    }
-    return category.type === filterType;
-  });
-
-  // Separate expense and income categories for grouped display
-  const expenseCategories = categories.filter(category => category.type === 'expense');
-  const incomeCategories = categories.filter(category => category.type === 'income');
 
   const openFormModal = (id?: number | string | null) => {
     if (id !== undefined) {
@@ -89,30 +86,6 @@ const CategoriesManager: React.FC = () => {
 
   return (
     <div className="bg-white overflow-hidden">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
-          <div className="flex flex-wrap gap-3">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as 'all' | 'expense' | 'income')}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            >
-              <option value="all">Все</option>
-              <option value="expense">Расход</option>
-              <option value="income">Доход</option>
-            </select>
-            {isAdmin && (
-              <button 
-                onClick={() => openFormModal()}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Добавить
-              </button>
-            )}
-          </div>
-        </div>
       
       {/* Error message */}
       {categoriesError && (
@@ -124,12 +97,12 @@ const CategoriesManager: React.FC = () => {
       <div className="overflow-x-auto">
         {/* Desktop View - Table with grouped sections when showing all categories */}
         {filterType === 'all' ? (
-          <div className="hidden md:block">
+          <div className="hidden md:flex md:gap-5">
             {/* Expenses Section */}
-            <div className="mb-8">
+            <div className="mb-8 w-full">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <span className="bg-red-100 text-red-800 px-2 py-1 rounded mr-2">Расходы</span>
-                <span className="text-gray-600 text-sm">({expenseCategories.length} {expenseCategories.length === 1 ? 'категория' : expenseCategories.length < 5 ? 'категории' : 'категорий'})</span>
+                <span className="text-gray-600 text-sm">({categories.filter(c => c.type === 'expense').length} {categories.filter(c => c.type === 'expense').length === 1 ? 'категория' : categories.filter(c => c.type === 'expense').length < 5 ? 'категории' : 'категорий'})</span>
               </h3>
               <table className="min-w-full">
                 <thead className="bg-gray-50">
@@ -142,8 +115,9 @@ const CategoriesManager: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {expenseCategories.length > 0 ? (
-                    expenseCategories
+                  {categories.filter(category => category.type === 'expense').length > 0 ? (
+                    categories
+                      .filter(category => category.type === 'expense')
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
                       <tr 
@@ -198,10 +172,10 @@ const CategoriesManager: React.FC = () => {
             </div>
 
             {/* Income Section */}
-            <div>
+            <div className="mb-8 w-full">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <span className="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">Доходы</span>
-                <span className="text-gray-600 text-sm">({incomeCategories.length} {incomeCategories.length === 1 ? 'категория' : incomeCategories.length < 5 ? 'категории' : 'категорий'})</span>
+                <span className="text-gray-600 text-sm">({categories.filter(c => c.type === 'income').length} {categories.filter(c => c.type === 'income').length === 1 ? 'категория' : categories.filter(c => c.type === 'income').length < 5 ? 'категории' : 'категорий'})</span>
               </h3>
               <table className="min-w-full">
                 <thead className="bg-gray-50">
@@ -214,8 +188,9 @@ const CategoriesManager: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {incomeCategories.length > 0 ? (
-                    incomeCategories
+                  {categories.filter(category => category.type === 'income').length > 0 ? (
+                    categories
+                      .filter(category => category.type === 'income')
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
                       <tr 
@@ -283,8 +258,9 @@ const CategoriesManager: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredCategories.length > 0 ? (
-                filteredCategories
+              {categories.filter(category => matchesFilter(category.type)).length > 0 ? (
+                categories
+                  .filter(category => matchesFilter(category.type))
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((category) => (
                   <tr 
@@ -357,11 +333,12 @@ const CategoriesManager: React.FC = () => {
               <div className="mb-6">
                 <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
                   <span className="bg-red-100 text-red-800 px-2 py-1 rounded mr-2">Расходы</span>
-                  <span className="text-gray-600 text-sm">({expenseCategories.length} {expenseCategories.length === 1 ? 'категория' : expenseCategories.length < 5 ? 'категории' : 'категорий'})</span>
+                  <span className="text-gray-600 text-sm">({categories.filter(c => c.type === 'expense').length} {categories.filter(c => c.type === 'expense').length === 1 ? 'категория' : categories.filter(c => c.type === 'expense').length < 5 ? 'категории' : 'категорий'})</span>
                 </h3>
                 <div className="divide-y divide-gray-200">
-                  {expenseCategories.length > 0 ? (
-                    expenseCategories
+                  {categories.filter(category => category.type === 'expense').length > 0 ? (
+                    categories
+                      .filter(category => category.type === 'expense')
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
                       <div key={category.id} className="p-4 hover:bg-gray-50">
@@ -413,11 +390,12 @@ const CategoriesManager: React.FC = () => {
               <div>
                 <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">Доходы</span>
-                  <span className="text-gray-600 text-sm">({incomeCategories.length} {incomeCategories.length === 1 ? 'категория' : incomeCategories.length < 5 ? 'категории' : 'категорий'})</span>
+                  <span className="text-gray-600 text-sm">({categories.filter(c => c.type === 'income').length} {categories.filter(c => c.type === 'income').length === 1 ? 'категория' : categories.filter(c => c.type === 'income').length < 5 ? 'категории' : 'категорий'})</span>
                 </h3>
                 <div className="divide-y divide-gray-200">
-                  {incomeCategories.length > 0 ? (
-                    incomeCategories
+                  {categories.filter(category => category.type === 'income').length > 0 ? (
+                    categories
+                      .filter(category => category.type === 'income')
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
                       <div key={category.id} className="p-4 hover:bg-gray-50">
@@ -467,8 +445,11 @@ const CategoriesManager: React.FC = () => {
             </div>
           ) : (
             // Mobile View - Card Layout with filtered categories
-            filteredCategories.length > 0 ? (
-              filteredCategories
+            categories
+              .filter(category => matchesFilter(category.type))
+              .length > 0 ? (
+              categories
+                .filter(category => matchesFilter(category.type))
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((category) => (
                 <div key={category.id} className="p-4 hover:bg-gray-50">
@@ -548,7 +529,7 @@ const CategoriesManager: React.FC = () => {
       )}
       
       {isAdmin && (
-        <CategoryFormModal 
+        <CategoryModal 
           isOpen={isFormModalOpen} 
           onClose={closeFormModal} 
           recordId={selectedCategoryId} 
@@ -564,4 +545,4 @@ const CategoriesManager: React.FC = () => {
   );
 };
 
-export default CategoriesManager;
+export default CategoryManager;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Modal from './Modal';
+import Modal from '../../../components/Modal';
 
 interface VehicleRecord {
   id: number | string;
@@ -22,7 +22,7 @@ interface VehicleFormModalProps {
   onUpdate: (id: number | string, record: Partial<VehicleRecord>) => void;
 }
 
-const VehicleFormModal: React.FC<VehicleFormModalProps> = ({ 
+const VehicleModal: React.FC<VehicleFormModalProps> = ({ 
   isOpen, 
   onClose, 
   recordId, 
@@ -247,4 +247,4 @@ const VehicleFormModal: React.FC<VehicleFormModalProps> = ({
   );
 };
 
-export default VehicleFormModal;
+export default VehicleModal;
