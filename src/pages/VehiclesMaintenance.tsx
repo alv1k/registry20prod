@@ -1,17 +1,19 @@
-// src/pages/Transport.tsx
+// src/pages/VehiclesMaintenance.tsx
 import { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import AnimatedAccordion from '../components/AnimatedAccordion';
 import VehicleFormModal from '../components/VehicleFormModal';
+import MaintenanceFormModal from '../components/MaintenanceFormModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import VehiclesCharts from '../components/VehiclesCharts';
 import Button from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../utils/formatUtils';
 
-interface MaintenanceRecord {
+interface VehicleMaintenanceRecord {
   id: number | string;
   vehicleId: string;
+  vehicleName?: string;
   date: string;
   workType: string;
   cost: number;
@@ -20,21 +22,23 @@ interface MaintenanceRecord {
   mileage?: number;
 }
 
-const Transport = () => {
-  const transportData = useStore((state) => state.transportData);
+const VehiclesMaintenance = () => {
   const vehicleData = useStore((state) => state.vehicleData);
-  const syncTransportData = useStore((state) => state.syncTransportData);
   const syncVehicleData = useStore((state) => state.syncVehicleData);
-  const addTransportRecord = useStore((state) => state.addTransportRecord);
-  const updateTransportRecord = useStore((state) => state.updateTransportRecord);
-  const deleteTransportRecord = useStore((state) => state.deleteTransportRecord);
   const addVehicleRecord = useStore((state) => state.addVehicleRecord);
   const updateVehicleRecord = useStore((state) => state.updateVehicleRecord);
   const deleteVehicleRecord = useStore((state) => state.deleteVehicleRecord);
-  const isTransportDataLoading = useStore((state) => state.isTransportDataLoading);
   const isVehicleDataLoading = useStore((state) => state.isVehicleDataLoading);
-  const transportDataError = useStore((state) => state.transportDataError);
   const vehicleDataError = useStore((state) => state.vehicleDataError);
+
+  // Maintenance records data
+  const maintenanceData: VehicleMaintenanceRecord[] = useStore((state) => state.maintenanceData);
+  const syncMaintenanceData = useStore((state) => state.syncMaintenanceData);
+  const addMaintenanceRecord = useStore((state) => state.addMaintenanceRecord);
+  const updateMaintenanceRecord = useStore((state) => state.updateMaintenanceRecord);
+  const deleteMaintenanceRecord = useStore((state) => state.deleteMaintenanceRecord);
+  const isMaintenanceDataLoading = useStore((state) => state.isMaintenanceDataLoading);
+  const maintenanceDataError = useStore((state) => state.maintenanceDataError);
 
   const { user, isAdmin } = useAuth();
   
@@ -48,39 +52,14 @@ const Transport = () => {
 
   useEffect(() => {
     // Load data from Firebase when component mounts
-    syncTransportData().catch(error => {
-      console.error('Error loading transport data:', error);
-    });
-    
     syncVehicleData().catch(error => {
       console.error('Error loading vehicle data:', error);
     });
-  }, [syncTransportData, syncVehicleData]);
-  
-  // Transform the original transport data to maintenance records format
-  const maintenanceData: MaintenanceRecord[] = useMemo(() => {
-    return transportData.map(record => {
-      // Try to match with vehicle data by checking if the transport's driverLicense matches any vehicle property
-      // We'll check if the transport's driverLicense field matches any of the vehicle's identifying fields
-      const matchingVehicle = vehicleData.find(vehicle => 
-        vehicle.name === record.driverLicense || 
-        vehicle.vin === record.driverLicense ||
-        record.driverLicense.includes(vehicle.name) ||
-        vehicle.name.includes(record.driverLicense)
-      );
-      
-      return {
-        id: record.id,
-        vehicleId: matchingVehicle ? matchingVehicle.name : record.driverLicense || 'Unknown',
-        date: record.shippingDate,
-        workType: record.cargoName, // Use cargo name as work type
-        cost: record.shippingWeight, // Use shipping weight as cost (in rubles)
-        comment: record.carNumber, // Use car number as comment
-        frequency: record.driver, // Use driver name as frequency
-        mileage: record.deliveryWeight || undefined // Use delivery weight as mileage
-      };
+    
+    syncMaintenanceData().catch(error => {
+      console.error('Error loading maintenance data:', error);
     });
-  }, [transportData, vehicleData]);
+  }, [syncVehicleData, syncMaintenanceData]);
 
   // State for filters
   const [dateFilter, setDateFilter] = useState<string>('');
@@ -113,7 +92,7 @@ const Transport = () => {
 
   const handleDelete = () => {
     if (deleteConfirmationId !== null) {
-      deleteTransportRecord(deleteConfirmationId);
+      deleteMaintenanceRecord(deleteConfirmationId);
       setDeleteConfirmationId(null);
     }
   };
@@ -124,7 +103,7 @@ const Transport = () => {
 
   // Apply filters to the data
   const filteredData = useMemo(() => {
-    return maintenanceData.filter(record => {
+    return maintenanceData.filter(record => {      
       // Date filter
       if (dateFilter && record.date !== dateFilter) {
         return false;
@@ -182,12 +161,11 @@ const Transport = () => {
     commentFilter,
     vehicleFilter,
     minMileageFilter,
-    maxMileageFilter,
-    vehicleData
+    maxMileageFilter
   ]);
 
   // Functions to handle modals
-  const openMaintenanceFormModal = (id?: number | string | null) => {
+  const openMaintenanceFormModal = (id?: number | string | null) => {    
     if (id !== undefined) {
       setSelectedRecordId(id);
     } else {
@@ -213,49 +191,6 @@ const Transport = () => {
   const closeVehicleFormModal = () => {
     setIsVehicleFormModalOpen(false);
     setSelectedVehicleId(null);
-  };
-
-  // Handle adding a new maintenance record
-  const handleAddMaintenanceRecord = async (record: Omit<MaintenanceRecord, 'id'>) => {
-    // Convert maintenance record to transport record format
-    const transportRecord = {
-      shippingDate: record.date,
-      departureDate: record.date, // Using date as departure date since we removed nextRepeat
-      arrivalDate: record.date, // Using date as arrival date
-      cargoName: record.workType,
-      driver: record.frequency,
-      carNumber: record.comment,
-      driverLicense: record.vehicleId,
-      shippingWeight: record.cost,
-      deliveryWeight: record.mileage || 0 // Using mileage as delivery weight
-    };
-
-    await addTransportRecord(transportRecord);
-  };
-
-  // Handle updating a maintenance record
-  const handleUpdateMaintenanceRecord = async (id: number | string, record: Partial<MaintenanceRecord>) => {
-    const updatedRecord: Partial<MaintenanceRecord> = {};
-    
-    if (record.date) updatedRecord.date = record.date;
-    if (record.workType) updatedRecord.workType = record.workType;
-    if (record.frequency) updatedRecord.frequency = record.frequency;
-    if (record.comment) updatedRecord.comment = record.comment;
-    if (record.vehicleId) updatedRecord.vehicleId = record.vehicleId;
-    if (record.cost !== undefined) updatedRecord.cost = record.cost;
-    if (record.mileage !== undefined) updatedRecord.mileage = record.mileage;
-
-    // Convert to transport record format for update
-    const transportUpdates: Partial<any> = {};
-    if (record.date !== undefined) transportUpdates.shippingDate = record.date;
-    if (record.workType !== undefined) transportUpdates.cargoName = record.workType;
-    if (record.frequency !== undefined) transportUpdates.driver = record.frequency;
-    if (record.comment !== undefined) transportUpdates.carNumber = record.comment;
-    if (record.vehicleId !== undefined) transportUpdates.driverLicense = record.vehicleId;
-    if (record.cost !== undefined) transportUpdates.shippingWeight = record.cost;
-    if (record.mileage !== undefined) transportUpdates.deliveryWeight = record.mileage;
-
-    await updateTransportRecord(id, transportUpdates);
   };
 
   // Handle adding a new vehicle
@@ -301,10 +236,10 @@ const Transport = () => {
       </div>
       
       {/* Error messages */}
-      {(transportDataError || vehicleDataError) && (
+      {(vehicleDataError || maintenanceDataError) && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {transportDataError && <div>{transportDataError}</div>}
           {vehicleDataError && <div>{vehicleDataError}</div>}
+          {maintenanceDataError && <div>{maintenanceDataError}</div>}
         </div>
       )}
       
@@ -368,7 +303,7 @@ const Transport = () => {
             >
               <option value="">Все автомобили</option>
               {vehicleData.map(vehicle => (
-                <option key={vehicle.id} value={vehicle.name}>
+                <option key={vehicle.id} value={vehicle.id}>
                   {vehicle.name} ({vehicle.manufacturer} {vehicle.model})
                 </option>
               ))}
@@ -408,10 +343,10 @@ const Transport = () => {
         </div>
       </AnimatedAccordion>
       
-      {/* Transport Charts */}
+      {/* Vehicles Charts */}
       <div className="mt-6">
         <AnimatedAccordion title="Аналитика расходов" defaultOpen={true}>
-          <VehiclesCharts records={filteredData} />
+          <VehiclesCharts records={filteredData} vehicles={vehicleData} />
         </AnimatedAccordion>
       </div>
       
@@ -441,13 +376,13 @@ const Transport = () => {
       
       <AnimatedAccordion title="Записи" defaultOpen={false}>
         <div className="overflow-x-auto">
-          {isTransportDataLoading ? (
+          {isMaintenanceDataLoading ? (
             <div className="py-12">
               <LoadingSpinner message="Загрузка данных технического обслуживания..." />
             </div>
-          ) : transportDataError ? (
+          ) : maintenanceDataError ? (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {transportDataError}
+              {maintenanceDataError}
             </div>
           ) : (
             <>
@@ -759,6 +694,19 @@ const Transport = () => {
     </div>
   </div>      
       
+      {/* Maintenance Form Modal */}
+      {isAdmin && (
+        <MaintenanceFormModal 
+          isOpen={isMaintenanceFormModalOpen} 
+          onClose={closeMaintenanceFormModal} 
+          recordId={selectedRecordId} 
+          record={selectedRecordId ? maintenanceData.find(m => m.id === selectedRecordId) as any : undefined}
+          vehicles={vehicleData}
+          onAdd={addMaintenanceRecord} 
+          onUpdate={updateMaintenanceRecord} 
+        />
+      )}
+      
       {/* Vehicle Form Modal */}
       {isAdmin && (
         <VehicleFormModal 
@@ -806,4 +754,4 @@ const Transport = () => {
   );
 };
 
-export default Transport;
+export default VehiclesMaintenance;

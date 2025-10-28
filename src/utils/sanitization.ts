@@ -336,4 +336,53 @@ export const sanitizeVehicleRecord = (record: any): any => {
   }
   
   return sanitizedRecord;
-};;
+};
+
+/**
+ * Sanitizes a maintenance record before saving
+ * @param record - The maintenance record to sanitize
+ * @returns Sanitized maintenance record
+ */
+export const sanitizeMaintenanceRecord = (record: any): any => {
+  if (!record || typeof record !== 'object') {
+    return record;
+  }
+
+  const sanitizedRecord = { ...record };
+  
+  // Sanitize text fields
+  if (sanitizedRecord.vehicleId) {
+    sanitizedRecord.vehicleId = sanitizeInput(sanitizedRecord.vehicleId);
+  }
+  
+  if (sanitizedRecord.vehicleName) {
+    sanitizedRecord.vehicleName = sanitizeInput(sanitizedRecord.vehicleName);
+  }
+  
+  if (sanitizedRecord.date) {
+    sanitizedRecord.date = sanitizeInput(sanitizedRecord.date);
+  }
+  
+  if (sanitizedRecord.workType) {
+    sanitizedRecord.workType = sanitizeInput(sanitizedRecord.workType);
+  }
+  
+  if (sanitizedRecord.comment) {
+    sanitizedRecord.comment = sanitizeInput(sanitizedRecord.comment);
+  }
+  
+  if (sanitizedRecord.frequency) {
+    sanitizedRecord.frequency = sanitizeInput(sanitizedRecord.frequency);
+  }
+  
+  // Ensure numeric fields are numbers
+  if (sanitizedRecord.cost !== undefined) {
+    sanitizedRecord.cost = Number(sanitizedRecord.cost);
+  }
+  
+  if (sanitizedRecord.mileage !== undefined) {
+    sanitizedRecord.mileage = Number(sanitizedRecord.mileage);
+  }
+  
+  return sanitizedRecord;
+};

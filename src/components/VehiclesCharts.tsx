@@ -23,6 +23,7 @@ type ExtendedPieLabelRenderProps = PieLabelRenderProps & {
 interface MaintenanceRecord {
   id: number | string;
   vehicleId: string;
+  vehicleName?: string;
   date: string;
   workType: string;
   cost: number;
@@ -31,8 +32,16 @@ interface MaintenanceRecord {
   mileage?: number;
 }
 
+interface Vehicle {
+  id: number | string;
+  name: string;
+  manufacturer: string;
+  model: string;
+}
+
 interface VehiclesChartsProps {
   records: MaintenanceRecord[];
+  vehicles?: Vehicle[];
 }
 
 // Цветовая палитра для диаграмм
@@ -63,8 +72,20 @@ const VehiclesCharts: React.FC<VehiclesChartsProps> = ({ records }) => {
   const vehicleData = Object.values(
     records.reduce((acc: Record<string, any>, record) => {
       if (!acc[record.vehicleId]) {
+        // Use stored vehicle name if available, otherwise use lookup from vehicles prop, fallback to ID
+        let vehicleName = record.vehicleId;
+        if (record.vehicleName) {
+          // Use the stored vehicle name if available
+          vehicleName = record.vehicleName;
+        } else if (vehicles) {
+          // Otherwise, try to look up the vehicle name
+          const vehicle = vehicles.find(v => v.id === record.vehicleId);
+          if (vehicle) {
+            vehicleName = `${vehicle.name} (${vehicle.manufacturer} ${vehicle.model})`;
+          }
+        }
         acc[record.vehicleId] = {
-          name: record.vehicleId,
+          name: vehicleName,
           total: 0,
           count: 0
         };

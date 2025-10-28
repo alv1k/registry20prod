@@ -1,0 +1,249 @@
+import { useState, useEffect } from 'react';
+import Modal from './Modal';
+
+interface MaintenanceRecord {
+  id: number | string;
+  vehicleId: string;
+  date: string;
+  workType: string;
+  cost: number;
+  comment: string;
+  frequency: string;
+  mileage?: number;
+}
+
+interface Vehicle {
+  id: number | string;
+  name: string;
+  manufacturer: string;
+  model: string;
+}
+
+interface MaintenanceFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  recordId?: number | string | null;
+  record?: MaintenanceRecord | null;
+  vehicles: Vehicle[];
+  onAdd: (record: Omit<MaintenanceRecord, 'id'>) => void;
+  onUpdate: (id: number | string, record: Partial<MaintenanceRecord>) => void;
+}
+
+const MaintenanceFormModal: React.FC<MaintenanceFormModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  recordId, 
+  record,
+  vehicles,
+  onAdd, 
+  onUpdate 
+}) => {
+  const [vehicleId, setVehicleId] = useState<string>('');
+  const [date, setDate] = useState<string>('');
+  const [workType, setWorkType] = useState<string>('');
+  const [cost, setCost] = useState<number>(0);
+  const [comment, setComment] = useState<string>('');
+  const [frequency, setFrequency] = useState<string>('');
+  const [mileage, setMileage] = useState<number | undefined>(undefined);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+
+  // Load record data if editing
+  useEffect(() => {
+    if (recordId && record && isOpen) {
+      // Load existing record data for editing
+      setVehicleId(record.vehicleId || '');
+      setDate(record.date || '');
+      setWorkType(record.workType || '');
+      setCost(record.cost || 0);
+      setComment(record.comment || '');
+      setFrequency(record.frequency || '');
+      setMileage(record.mileage || undefined);
+    } else if (isOpen) {
+      // Reset form for new records
+      setVehicleId('');
+      setDate(new Date().toISOString().split('T')[0]); // Default to today's date
+      setWorkType('');
+      setCost(0);
+      setComment('');
+      setFrequency('');
+      setMileage(undefined);
+    }
+  }, [recordId, record, isOpen]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate required fields
+    if (!vehicleId || !date || !workType || cost < 0) {
+      alert('Пожалуйста, заполните обязательные поля: автомобиль, дата, вид работ');
+      return;
+    }
+
+    // Find the selected vehicle to get its name
+    const selectedVehicle = vehicles.find(v => v.id === vehicleId);
+    const vehicleName = selectedVehicle ? `${selectedVehicle.name} (${selectedVehicle.manufacturer} ${selectedVehicle.model})` : undefined;
+
+    const recordData = {
+      vehicleId,
+      vehicleName,
+      date,
+      workType,
+      cost,
+      comment,
+      frequency,
+      mileage: mileage || undefined
+    };
+
+    if (recordId) {
+      onUpdate(recordId, recordData);
+    } else {
+      onAdd(recordData);
+    }
+
+    // Reset form
+    setVehicleId('');
+    setDate(new Date().toISOString().split('T')[0]);
+    setWorkType('');
+    setCost(0);
+    setComment('');
+    setFrequency('');
+    setMileage(undefined);
+    onClose();
+  };
+
+  return (
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={recordId ? "Редактировать запись ТО" : "Добавить запись ТО"}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Автомобиль *</label>
+            <select
+              value={vehicleId}
+              onChange={(e) => setVehicleId(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              required
+            >
+              <option value="">Выберите автомобиль</option>
+              {vehicles.map(vehicle => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.name} ({vehicle.manufacturer} {vehicle.model})
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Дата *</label>
+            <input
+              type="date"
+              name="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              onFocus={(e) => setFocusedInput(e.target.name)}
+              onBlur={() => setFocusedInput(null)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Вид работ *</label>
+            <input
+              type="text"
+              name="workType"
+              value={workType}
+              onChange={(e) => setWorkType(e.target.value)}
+              onFocus={(e) => setFocusedInput(e.target.name)}
+              onBlur={() => setFocusedInput(null)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              placeholder="Например: Техническое обслуживание, Замена масла"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Стоимость *</label>
+            <input
+              type="number"
+              name="cost"
+              value={cost}
+              onChange={(e) => setCost(Number(e.target.value))}
+              onFocus={(e) => setFocusedInput(e.target.name)}
+              onBlur={() => setFocusedInput(null)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              placeholder="Стоимость в рублях"
+              min="0"
+              step="0.01"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Частота</label>
+            <input
+              type="text"
+              name="frequency"
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
+              onFocus={(e) => setFocusedInput(e.target.name)}
+              onBlur={() => setFocusedInput(null)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              placeholder="Например: каждые 10000 км"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Пробег</label>
+            <input
+              type="number"
+              name="mileage"
+              value={mileage || ''}
+              onChange={(e) => setMileage(e.target.value ? Number(e.target.value) : undefined)}
+              onFocus={(e) => setFocusedInput(e.target.name)}
+              onBlur={() => setFocusedInput(null)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              placeholder="Пробег в км"
+              min="0"
+            />
+          </div>
+          
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+            <textarea
+              name="comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              onFocus={(e) => setFocusedInput(e.target.name)}
+              onBlur={() => setFocusedInput(null)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              placeholder="Дополнительная информация"
+              rows={3}
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-end space-x-3 mt-6">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            Отмена
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            {recordId ? 'Сохранить изменения' : 'Добавить'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+export default MaintenanceFormModal;

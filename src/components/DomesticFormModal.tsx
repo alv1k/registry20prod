@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { AppHouseholdRecord } from '../store/useStore';
 
-interface HouseholdFormModalProps {
+interface DomesticFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   recordId?: number | string | null;
@@ -10,7 +10,7 @@ interface HouseholdFormModalProps {
   onUpdate?: (id: number | string, updatedRecord: Partial<AppHouseholdRecord>) => void;
 }
 
-const HouseholdFormModal: React.FC<HouseholdFormModalProps> = ({
+const DomesticFormModal: React.FC<DomesticFormModalProps> = ({
   isOpen,
   onClose,
   recordId,
@@ -228,4 +228,4 @@ const HouseholdFormModal: React.FC<HouseholdFormModalProps> = ({
   );
 };
 
-export default HouseholdFormModal;
+export default DomesticFormModal;

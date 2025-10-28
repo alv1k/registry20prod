@@ -12,8 +12,6 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
     // { name: 'Корреспондентский', icon: '✉️', path: '/correspondent' },
     { name: 'ТО авто', icon: '🚗', path: '/vehicles_maintenance' },
     { name: 'Финансы', icon: '💰', path: '/finance' },
-    { name: 'Запланированный бюджет', icon: '📊', path: '/planned-budget' },
-    { name: 'Единый финансовый каталог', icon: '📈', path: '/unified-finance' },
     { name: 'Быт', icon: '🏠', path: '/domestic' },
     // { name: 'Вкладки', icon: '📋', path: '/tabs-demo' },
   ];

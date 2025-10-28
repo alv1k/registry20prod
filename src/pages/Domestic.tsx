@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AnimatedAccordion from '../components/AnimatedAccordion';
-import HouseholdFormModal from '../components/HouseholdFormModal';
+import DomesticFormModal from '../components/DomesticFormModal';
 import { useStore } from '../store/useStore';
 import { AppHouseholdRecord } from '../store/useStore';
 import { useAuth } from '../contexts/AuthContext';
@@ -659,7 +659,7 @@ const Domestic: React.FC = () => {
       )}
 
       {isAdmin && (
-        <HouseholdFormModal 
+        <DomesticFormModal 
           isOpen={isFormModalOpen} 
           onClose={closeFormModal} 
           recordId={editingRecordId}
