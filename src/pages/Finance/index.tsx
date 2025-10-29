@@ -52,7 +52,12 @@ const Finance = () => {
   const [nameFilter, setNameFilter] = useState<string>('');
   const [classificationFilter, setClassificationFilter] = useState<string>('');
   
-  // Set default period filter to current month
+  // Set default period filter to October 2025
+  const getOctober2025 = () => {
+    return '2025-10';
+  };
+  
+  // Keep getCurrentMonth function for clearFilters
   const getCurrentMonth = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -60,7 +65,7 @@ const Finance = () => {
     return `${year}-${month}`;
   };
   
-  const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'month', value: getCurrentMonth()});
+  const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'month', value: getOctober2025()});
 
   useEffect(() => {
     // Load data from Firebase when component mounts

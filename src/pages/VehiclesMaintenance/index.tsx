@@ -63,7 +63,7 @@ const VehiclesMaintenance = () => {
   }, [syncVehicleData, syncMaintenanceData]);
 
   // State for filters
-  const [dateFilter, setDateFilter] = useState<string>('');
+  const [dateFilter, setDateFilter] = useState<string>('2025-10-01');
   const [workTypeFilter, setWorkTypeFilter] = useState<string>('');
   const [minCostFilter, setMinCostFilter] = useState<string>('');
   const [maxCostFilter, setMaxCostFilter] = useState<string>('');
