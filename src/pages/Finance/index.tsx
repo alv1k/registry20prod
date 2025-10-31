@@ -255,7 +255,7 @@ const Finance = () => {
                 Добавить
               </Button>
             )}        
-            <button onClick={handleRecordsDownload}>Скачать в .xlsx</button>
+            <button className={isAdmin ? '' : 'ms-auto'} onClick={handleRecordsDownload}>Скачать в .xlsx</button>
           </div>
           <div ref={tableContainerRef} className="mt-2 bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[500px]">
             <div className="overflow-x-auto">

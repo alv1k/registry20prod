@@ -43,11 +43,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (user) {
         try {
           const idTokenResult = await user.getIdTokenResult();
-          setIsAdmin(idTokenResult.claims.admin === true || user.uid === 'kpXIs5bBpdYsP5NKW7P1ZecgYwr2');
+          setIsAdmin(idTokenResult.claims.admin === true || user.uid === 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2');
         } catch (error) {
           console.error('Error checking admin status:', error);
           // As a fallback, check if it's the specific UID
-          setIsAdmin(user.uid === 'kpXIs5bBpdYsP5NKW7P1ZecgYwr2');
+          setIsAdmin(user.uid === 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2');
         }
       } else {
         setIsAdmin(false);

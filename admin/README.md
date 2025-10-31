@@ -53,7 +53,7 @@ node listUsers.js
 
 1. Open `setAdmin.js`
 2. Find the commented lines at the bottom
-3. Uncomment the line: `setCustomUserClaims('kpXIs5bBpdYsP5NKW7P1ZecgYwr2');`
+3. Uncomment the line: `setCustomUserClaims('Rz9j7obzy7SBydiuF3VdRSuE1Ge2');`
 4. Execute: `node setAdmin.js`
 
 ## Security Notes

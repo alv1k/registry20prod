@@ -28,6 +28,9 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
     }
   };
 
+  console.log(user?.uid);
+  
+
   return (
     <header className="bg-[#033835] shadow-md">
       <div className="mx-auto px-6">

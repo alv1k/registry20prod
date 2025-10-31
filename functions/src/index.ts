@@ -2,7 +2,9 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 
-admin.initializeApp();
+admin.initializeApp({
+  projectId: 'registry20prod'
+});
 
 // Function to validate finance data before writing
 export const validateFinanceData = functions.firestore
