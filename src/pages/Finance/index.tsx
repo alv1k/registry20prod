@@ -52,20 +52,17 @@ const Finance = () => {
   const [nameFilter, setNameFilter] = useState<string>('');
   const [classificationFilter, setClassificationFilter] = useState<string>('');
   
-  // Set default period filter to October 2025
-  const getOctober2025 = () => {
-    return '2025-10';
-  };
-  
   // Keep getCurrentMonth function for clearFilters
   const getCurrentMonth = () => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    console.log(month, 'month');
+    
     return `${year}-${month}`;
   };
   
-  const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'month', value: getOctober2025()});
+  const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'month', value: getCurrentMonth()});
 
   useEffect(() => {
     // Load data from Firebase when component mounts
@@ -558,6 +555,7 @@ const Finance = () => {
               <option value="">Не выбрано</option>
               {categories
                 .sort((a, b) => a.name.localeCompare(b.name))
+                .filter((a) => a.type === 'expense')
                 .map((category) => (
                 <option key={category.id} value={category.name}>
                   {category.name}

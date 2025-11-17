@@ -1,7 +1,7 @@
 // src/store/useStore.ts
 import { create } from 'zustand';
-import { 
-  getAllCorrespondentRecords, 
+import {
+  getAllCorrespondentRecords,
   addCorrespondentRecord as firebaseAddCorrespondentRecord,
   updateCorrespondentRecord as firebaseUpdateCorrespondentRecord,
   deleteCorrespondentRecord as firebaseDeleteCorrespondentRecord,
@@ -30,6 +30,11 @@ import {
   addHouseholdRecord as firebaseAddHouseholdRecord,
   updateHouseholdRecord as firebaseUpdateHouseholdRecord,
   deleteHouseholdRecord as firebaseDeleteHouseholdRecord,
+  // Period services
+  getAllPeriodEvents,
+  addPeriodEvent as firebaseAddPeriodEvent,
+  updatePeriodEvent as firebaseUpdatePeriodEvent,
+  deletePeriodEvent as firebaseDeletePeriodEvent,
 } from '../firebase/services';
 
 // Общие интерфейсы
@@ -92,72 +97,88 @@ export interface AppHouseholdRecord extends BaseEntity {
   completed?: boolean;
 }
 
+export interface AppPeriodEvent extends BaseEntity {
+  date: string;
+  description?: string;
+  category?: string;
+}
+
 // Интерфейс общего состояния
 interface AppState {
   // Navigation state
   currentPage: string;
  setCurrentPage: (page: string) => void;
-  
+
   // User preferences
   theme: 'light' | 'dark';
   toggleTheme: () => void;
-  
+
   // Data for the different sections
   correspondentData: AppCorrespondentRecord[];
   vehicleData: AppVehicleRecord[];
   maintenanceData: AppMaintenanceRecord[];
   financeData: AppFinanceRecord[];
   householdData: AppHouseholdRecord[];
-  
+  periodData: AppPeriodEvent[];
+
   // Loading states
   isCorrespondentDataLoading: boolean;
   isVehicleDataLoading: boolean;
   isMaintenanceDataLoading: boolean;
   isFinanceDataLoading: boolean;
   isHouseholdDataLoading: boolean;
+  isPeriodDataLoading: boolean;
   correspondentDataError: string | null;
   vehicleDataError: string | null;
   maintenanceDataError: string | null;
   financeDataError: string | null;
   householdDataError: string | null;
-  
+  periodDataError: string | null;
+
   // Firebase sync actions
   syncCorrespondentData: () => Promise<void>;
   syncVehicleData: () => Promise<void>;
   syncMaintenanceData: () => Promise<void>;
   syncFinanceData: () => Promise<void>;
   syncHouseholdData: () => Promise<void>;
-  
+  syncPeriodData: () => Promise<void>;
+
   // Actions to update data (with Firebase sync)
   setCorrespondentData: (data: AppCorrespondentRecord[]) => void;
   addCorrespondentRecord: (record: Omit<AppCorrespondentRecord, 'id'>) => Promise<void>;
   updateCorrespondentRecord: (id: number | string, record: Partial<AppCorrespondentRecord>) => Promise<void>;
   deleteCorrespondentRecord: (id: number | string) => Promise<void>;
-  
+
   // Vehicle data and functions
   setVehicleData: (data: AppVehicleRecord[]) => void;
   addVehicleRecord: (record: Omit<AppVehicleRecord, 'id'>) => Promise<void>;
   updateVehicleRecord: (id: number | string, record: Partial<AppVehicleRecord>) => Promise<void>;
   deleteVehicleRecord: (id: number | string) => Promise<void>;
-  
+
   // Maintenance data and functions
   setMaintenanceData: (data: AppMaintenanceRecord[]) => void;
   addMaintenanceRecord: (record: Omit<AppMaintenanceRecord, 'id'>) => Promise<void>;
   updateMaintenanceRecord: (id: number | string, record: Partial<AppMaintenanceRecord>) => Promise<void>;
   deleteMaintenanceRecord: (id: number | string) => Promise<void>;
-  
+
   // Finance data and functions
   setFinanceData: (data: AppFinanceRecord[]) => void;
   addFinanceRecord: (record: Omit<AppFinanceRecord, 'id'>) => Promise<void>;
   updateFinanceRecord: (id: number | string, record: Partial<AppFinanceRecord>) => Promise<void>;
   deleteFinanceRecord: (id: number | string) => Promise<void>;
-  
+
   // Household data and functions
   setHouseholdData: (data: AppHouseholdRecord[]) => void;
   addHouseholdRecord: (record: Omit<AppHouseholdRecord, 'id'>) => Promise<void>;
   updateHouseholdRecord: (id: number | string, record: Partial<AppHouseholdRecord>) => Promise<void>;
   deleteHouseholdRecord: (id: number | string) => Promise<void>;
-  
+
+  // Period data and functions
+  setPeriodData: (data: AppPeriodEvent[]) => void;
+  addPeriodEvent: (record: Omit<AppPeriodEvent, 'id'>) => Promise<void>;
+  updatePeriodEvent: (id: number | string, record: Partial<AppPeriodEvent>) => Promise<void>;
+  deletePeriodEvent: (id: number | string) => Promise<void>;
+
   // Categories data and functions
  categories: AppCategory[];
   isCategoriesLoading: boolean;
@@ -274,6 +295,7 @@ export const useStore = create<AppState>((set, get) => {
     setMaintenanceData: (data: AppMaintenanceRecord[]) => set({ maintenanceData: data }),
     setFinanceData: (data: AppFinanceRecord[]) => set({ financeData: data }),
     setHouseholdData: (data: AppHouseholdRecord[]) => set({ householdData: data }),
+    setPeriodData: (data: AppPeriodEvent[]) => set({ periodData: data }),
     setCategories: (data: AppCategory[]) => set({ categories: data }),
   };
   
@@ -285,19 +307,22 @@ export const useStore = create<AppState>((set, get) => {
     maintenanceData: [],
     financeData: [],
     householdData: [],
-    
+    periodData: [],
+
     // Loading states
     isCorrespondentDataLoading: false,
     isVehicleDataLoading: false,
     isMaintenanceDataLoading: false,
     isFinanceDataLoading: false,
     isHouseholdDataLoading: false,
+    isPeriodDataLoading: false,
     correspondentDataError: null,
     vehicleDataError: null,
     maintenanceDataError: null,
     financeDataError: null,
     householdDataError: null,
-    
+    periodDataError: null,
+
     // Categories state
     categories: [],
     isCategoriesLoading: false,
@@ -503,7 +528,36 @@ export const useStore = create<AppState>((set, get) => {
     (data) => set({ householdData: data }),
     () => get().householdData
  );
-  
+
+  const periodHandlers = createEntityHandlers(
+    {
+      getAll: getAllPeriodEvents,
+      addFirebase: firebaseAddPeriodEvent,
+      updateFirebase: firebaseUpdatePeriodEvent,
+      deleteFirebase: firebaseDeletePeriodEvent,
+      convertToApp: (firebaseRecord) => ({
+        id: firebaseRecord.id || Date.now().toString(),
+        date: firebaseRecord.date,
+        description: firebaseRecord.description,
+        category: firebaseRecord.category
+      }),
+      convertToFirebase: (appRecord) => ({
+        date: appRecord.date,
+        description: appRecord.description,
+        category: appRecord.category
+      }),
+      convertToUpdate: (partial) => ({
+        date: partial.date,
+        description: partial.description,
+        category: partial.category
+      })
+    },
+    (loading) => set({ isPeriodDataLoading: loading }),
+    (error) => set({ periodDataError: error }),
+    (data) => set({ periodData: data }),
+    () => get().periodData
+ );
+
   const categoryHandlers = createEntityHandlers(
     {
       getAll: getAllCategories,
@@ -532,43 +586,47 @@ export const useStore = create<AppState>((set, get) => {
     (data) => set({ categories: data }),
     () => get().categories
   );
-  
+
   return {
     ...navigationState,
     ...themeState,
     ...initialState,
     ...stateSetters,
-    
+
     // Sync functions
     syncCorrespondentData: correspondentHandlers.sync,
     syncVehicleData: vehicleHandlers.sync,
     syncMaintenanceData: maintenanceHandlers.sync,
     syncFinanceData: financeHandlers.sync,
     syncHouseholdData: householdHandlers.sync,
+    syncPeriodData: periodHandlers.sync,
     syncCategories: categoryHandlers.sync,
-    
+
     // Add functions
     addCorrespondentRecord: correspondentHandlers.add,
     addVehicleRecord: vehicleHandlers.add,
     addMaintenanceRecord: maintenanceHandlers.add,
     addFinanceRecord: financeHandlers.add,
     addHouseholdRecord: householdHandlers.add,
+    addPeriodEvent: periodHandlers.add,
     addCategory: categoryHandlers.add,
-    
+
     // Update functions
     updateCorrespondentRecord: correspondentHandlers.update,
     updateVehicleRecord: vehicleHandlers.update,
     updateMaintenanceRecord: maintenanceHandlers.update,
     updateFinanceRecord: financeHandlers.update,
     updateHouseholdRecord: householdHandlers.update,
+    updatePeriodEvent: periodHandlers.update,
     updateCategory: categoryHandlers.update,
-    
+
     // Delete functions
     deleteCorrespondentRecord: correspondentHandlers.delete,
     deleteVehicleRecord: vehicleHandlers.delete,
     deleteMaintenanceRecord: maintenanceHandlers.delete,
     deleteFinanceRecord: financeHandlers.delete,
     deleteHouseholdRecord: householdHandlers.delete,
+    deletePeriodEvent: periodHandlers.delete,
     deleteCategory: categoryHandlers.delete,
   };
 });

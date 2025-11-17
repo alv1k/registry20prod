@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
               className="text-gray-700 hover:text-indigo-600 cursor-pointer w-6 h-6" 
             />
             <div className="ms-12 flex">
-              <a href="#" className="flex gap-5 justify-center items-center">
+              <a href="/" className="flex gap-5 justify-center items-center">
                 <img src="/favicon.png" alt="logo" className="h-10 w-10" />
                 <p className="text-xl text-white font-bold">
                   Реестр 2.0

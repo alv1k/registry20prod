@@ -349,40 +349,72 @@ export const sanitizeMaintenanceRecord = (record: any): any => {
   }
 
   const sanitizedRecord = { ...record };
-  
+
   // Sanitize text fields
   if (sanitizedRecord.vehicleId) {
     sanitizedRecord.vehicleId = sanitizeInput(sanitizedRecord.vehicleId);
   }
-  
+
   if (sanitizedRecord.vehicleName) {
     sanitizedRecord.vehicleName = sanitizeInput(sanitizedRecord.vehicleName);
   }
-  
+
   if (sanitizedRecord.date) {
     sanitizedRecord.date = sanitizeInput(sanitizedRecord.date);
   }
-  
+
   if (sanitizedRecord.workType) {
     sanitizedRecord.workType = sanitizeInput(sanitizedRecord.workType);
   }
-  
+
   if (sanitizedRecord.comment) {
     sanitizedRecord.comment = sanitizeInput(sanitizedRecord.comment);
   }
-  
+
   if (sanitizedRecord.frequency) {
     sanitizedRecord.frequency = sanitizeInput(sanitizedRecord.frequency);
   }
-  
+
   // Ensure numeric fields are numbers
   if (sanitizedRecord.cost !== undefined) {
     sanitizedRecord.cost = Number(sanitizedRecord.cost);
   }
-  
+
   if (sanitizedRecord.mileage !== undefined) {
     sanitizedRecord.mileage = Number(sanitizedRecord.mileage);
   }
-  
+
   return sanitizedRecord;
+};
+
+/**
+ * Sanitizes a period event before saving
+ * @param event - The period event to sanitize
+ * @returns Sanitized period event
+ */
+export const sanitizePeriodEvent = (event: any): any => {
+  if (!event || typeof event !== 'object') {
+    return event;
+  }
+
+  const sanitizedEvent = { ...event };
+
+  // Sanitize text fields
+  if (sanitizedEvent.title) {
+    sanitizedEvent.title = sanitizeInput(sanitizedEvent.title);
+  }
+
+  if (sanitizedEvent.date) {
+    sanitizedEvent.date = sanitizeInput(sanitizedEvent.date);
+  }
+
+  if (sanitizedEvent.description) {
+    sanitizedEvent.description = sanitizeInput(sanitizedEvent.description);
+  }
+
+  if (sanitizedEvent.category) {
+    sanitizedEvent.category = sanitizeInput(sanitizedEvent.category);
+  }
+
+  return sanitizedEvent;
 };
