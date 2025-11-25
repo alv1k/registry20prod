@@ -13,6 +13,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
     { name: 'Финансы', icon: '💰', path: '/finance' },
     { name: 'Быт', icon: '🏠', path: '/domestic' },
     { name: 'Каталог', icon: '📅', path: '/period' },
+    { name: 'Рецепты', icon: '🍽️', path: '/recipes' },
   ];
 
   const location = useLocation();

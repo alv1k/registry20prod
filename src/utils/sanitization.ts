@@ -379,3 +379,53 @@ export const sanitizePeriodEvent = (event: any): any => {
 
   return sanitizedEvent;
 };
+
+/**
+ * Sanitizes a recipe record before saving
+ * @param record - The recipe record to sanitize
+ * @returns Sanitized recipe record
+ */
+export const sanitizeRecipeRecord = (record: any): any => {
+  if (!record || typeof record !== 'object') {
+    return record;
+  }
+
+  const sanitizedRecord: any = {};
+
+  // Sanitize text fields
+  if (record.title !== undefined) {
+    sanitizedRecord.title = sanitizeInput(record.title);
+  }
+
+  if (record.category !== undefined) {
+    sanitizedRecord.category = sanitizeInput(record.category);
+  }
+
+  if (record.ingredients !== undefined) {
+    sanitizedRecord.ingredients = sanitizeRichText(record.ingredients);
+  }
+
+  if (record.instructions !== undefined) {
+    sanitizedRecord.instructions = sanitizeRichText(record.instructions);
+  }
+
+  // Ensure numeric fields are numbers
+  if (record.cookingTime !== undefined) {
+    sanitizedRecord.cookingTime = Number(record.cookingTime);
+  }
+
+  if (record.servings !== undefined) {
+    sanitizedRecord.servings = Number(record.servings);
+  }
+
+  // Handle tags array
+  if (record.tags !== undefined && Array.isArray(record.tags)) {
+    sanitizedRecord.tags = record.tags.map((tag: string) => sanitizeInput(tag));
+  }
+
+  if (record.date !== undefined) {
+    sanitizedRecord.date = sanitizeInput(record.date);
+  }
+
+  return sanitizedRecord;
+};

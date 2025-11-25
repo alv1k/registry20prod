@@ -31,6 +31,11 @@ import {
   addPeriodEvent as firebaseAddPeriodEvent,
   updatePeriodEvent as firebaseUpdatePeriodEvent,
   deletePeriodEvent as firebaseDeletePeriodEvent,
+  // Recipe services
+  getAllRecipeRecords,
+  addRecipeRecord as firebaseAddRecipeRecord,
+  updateRecipeRecord as firebaseUpdateRecipeRecord,
+  deleteRecipeRecord as firebaseDeleteRecipeRecord,
 } from '../firebase/services';
 
 // Общие интерфейсы
@@ -91,6 +96,17 @@ export interface AppPeriodEvent extends BaseEntity {
   category?: string;
 }
 
+export interface AppRecipeRecord extends BaseEntity {
+  title: string;
+  category: string;
+  ingredients: string;
+  instructions: string;
+  cookingTime?: number;
+  servings?: number;
+  tags?: string[];
+  date?: string;
+}
+
 // Интерфейс общего состояния
 interface AppState {
   // Navigation state
@@ -107,6 +123,7 @@ interface AppState {
   financeData: AppFinanceRecord[];
   householdData: AppHouseholdRecord[];
   periodData: AppPeriodEvent[];
+  recipeData: AppRecipeRecord[];
 
   // Loading states
   isVehicleDataLoading: boolean;
@@ -114,11 +131,13 @@ interface AppState {
   isFinanceDataLoading: boolean;
   isHouseholdDataLoading: boolean;
   isPeriodDataLoading: boolean;
+  isRecipeDataLoading: boolean;
   vehicleDataError: string | null;
   maintenanceDataError: string | null;
   financeDataError: string | null;
   householdDataError: string | null;
   periodDataError: string | null;
+  recipeDataError: string | null;
 
   // Firebase sync actions
   syncVehicleData: () => Promise<void>;
@@ -126,12 +145,19 @@ interface AppState {
   syncFinanceData: () => Promise<void>;
   syncHouseholdData: () => Promise<void>;
   syncPeriodData: () => Promise<void>;
+  syncRecipeData: () => Promise<void>;
 
   // Vehicle data and functions
   setVehicleData: (data: AppVehicleRecord[]) => void;
   addVehicleRecord: (record: Omit<AppVehicleRecord, 'id'>) => Promise<void>;
   updateVehicleRecord: (id: number | string, record: Partial<AppVehicleRecord>) => Promise<void>;
   deleteVehicleRecord: (id: number | string) => Promise<void>;
+
+  // Recipe data and functions
+  setRecipeData: (data: AppRecipeRecord[]) => void;
+  addRecipeRecord: (record: Omit<AppRecipeRecord, 'id'>) => Promise<void>;
+  updateRecipeRecord: (id: number | string, record: Partial<AppRecipeRecord>) => Promise<void>;
+  deleteRecipeRecord: (id: number | string) => Promise<void>;
 
   // Maintenance data and functions
   setMaintenanceData: (data: AppMaintenanceRecord[]) => void;
@@ -273,6 +299,7 @@ export const useStore = create<AppState>((set, get) => {
     setFinanceData: (data: AppFinanceRecord[]) => set({ financeData: data }),
     setHouseholdData: (data: AppHouseholdRecord[]) => set({ householdData: data }),
     setPeriodData: (data: AppPeriodEvent[]) => set({ periodData: data }),
+    setRecipeData: (data: AppRecipeRecord[]) => set({ recipeData: data }),
     setCategories: (data: AppCategory[]) => set({ categories: data }),
   };
   
@@ -284,6 +311,7 @@ export const useStore = create<AppState>((set, get) => {
     financeData: [],
     householdData: [],
     periodData: [],
+    recipeData: [],
 
     // Loading states
     isVehicleDataLoading: false,
@@ -291,11 +319,13 @@ export const useStore = create<AppState>((set, get) => {
     isFinanceDataLoading: false,
     isHouseholdDataLoading: false,
     isPeriodDataLoading: false,
+    isRecipeDataLoading: false,
     vehicleDataError: null,
     maintenanceDataError: null,
     financeDataError: null,
     householdDataError: null,
     periodDataError: null,
+    recipeDataError: null,
 
     // Categories state
     categories: [],
@@ -494,6 +524,50 @@ export const useStore = create<AppState>((set, get) => {
     () => get().periodData
  );
 
+  const recipeHandlers = createEntityHandlers(
+    {
+      getAll: getAllRecipeRecords,
+      addFirebase: firebaseAddRecipeRecord,
+      updateFirebase: firebaseUpdateRecipeRecord,
+      deleteFirebase: firebaseDeleteRecipeRecord,
+      convertToApp: (firebaseRecord) => ({
+        id: firebaseRecord.id || Date.now().toString(),
+        title: firebaseRecord.title,
+        category: firebaseRecord.category,
+        ingredients: firebaseRecord.ingredients,
+        instructions: firebaseRecord.instructions,
+        cookingTime: firebaseRecord.cookingTime,
+        servings: firebaseRecord.servings,
+        tags: firebaseRecord.tags,
+        date: firebaseRecord.date
+      }),
+      convertToFirebase: (appRecord) => ({
+        title: appRecord.title,
+        category: appRecord.category,
+        ingredients: appRecord.ingredients,
+        instructions: appRecord.instructions,
+        cookingTime: appRecord.cookingTime,
+        servings: appRecord.servings,
+        tags: appRecord.tags,
+        date: appRecord.date
+      }),
+      convertToUpdate: (partial) => ({
+        title: partial.title,
+        category: partial.category,
+        ingredients: partial.ingredients,
+        instructions: partial.instructions,
+        cookingTime: partial.cookingTime,
+        servings: partial.servings,
+        tags: partial.tags,
+        date: partial.date
+      })
+    },
+    (loading) => set({ isRecipeDataLoading: loading }),
+    (error) => set({ recipeDataError: error }),
+    (data) => set({ recipeData: data }),
+    () => get().recipeData
+  );
+
   const categoryHandlers = createEntityHandlers(
     {
       getAll: getAllCategories,
@@ -535,6 +609,7 @@ export const useStore = create<AppState>((set, get) => {
     syncFinanceData: financeHandlers.sync,
     syncHouseholdData: householdHandlers.sync,
     syncPeriodData: periodHandlers.sync,
+    syncRecipeData: recipeHandlers.sync,
     syncCategories: categoryHandlers.sync,
 
     // Add functions
@@ -543,6 +618,7 @@ export const useStore = create<AppState>((set, get) => {
     addFinanceRecord: financeHandlers.add,
     addHouseholdRecord: householdHandlers.add,
     addPeriodEvent: periodHandlers.add,
+    addRecipeRecord: recipeHandlers.add,
     addCategory: categoryHandlers.add,
 
     // Update functions
@@ -551,6 +627,7 @@ export const useStore = create<AppState>((set, get) => {
     updateFinanceRecord: financeHandlers.update,
     updateHouseholdRecord: householdHandlers.update,
     updatePeriodEvent: periodHandlers.update,
+    updateRecipeRecord: recipeHandlers.update,
     updateCategory: categoryHandlers.update,
 
     // Delete functions
@@ -559,6 +636,7 @@ export const useStore = create<AppState>((set, get) => {
     deleteFinanceRecord: financeHandlers.delete,
     deleteHouseholdRecord: householdHandlers.delete,
     deletePeriodEvent: periodHandlers.delete,
+    deleteRecipeRecord: recipeHandlers.delete,
     deleteCategory: categoryHandlers.delete,
   };
 });
