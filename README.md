@@ -43,7 +43,6 @@ This is a sample table application built with React, TypeScript, and Firebase.
 ## Features
 - Financial record management
 - Transport record management
-- Correspondent record management
 - Data visualization with charts
 - Responsive design for mobile and desktop
 - Role-based access control (admin/non-admin users)

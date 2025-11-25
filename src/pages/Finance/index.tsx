@@ -57,7 +57,6 @@ const Finance = () => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
-    console.log(month, 'month');
     
     return `${year}-${month}`;
   };

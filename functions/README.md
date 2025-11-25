@@ -42,7 +42,6 @@ Or use the deploy script:
 ## Functions Included
 
 - `validateFinanceData`: Validates finance records before writing to Firestore
-- `validateCorrespondentData`: Validates correspondent records before writing to Firestore
 - `validateTransportData`: Validates transport records before writing to Firestore
 - `validateCategoryData`: Validates category records before writing to Firestore
 - `validateFinanceRecord`: Callable function for client-side validation requests

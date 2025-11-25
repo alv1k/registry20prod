@@ -76,64 +76,6 @@ export const validateFinanceData = functions.firestore
     return null;
   });
 
-// Function to validate correspondent data before writing  
-export const validateCorrespondentData = functions.firestore
-  .document('correspondent/{correspondentId}')
-  .onWrite(async (change, context) => {
-    // Get the new document data
-    const newData = change.after.exists ? change.after.data() : null;
-
-    // If this is a deletion, we don't need to validate
-    if (!newData) {
-      return null;
-    }
-
-    // Validate required fields
-    if (!newData.date || !newData.incomingNumber || !newData.subject || !newData.from || !newData.to) {
-      throw new functions.https.HttpsError('invalid-argument', 'Missing required fields');
-    }
-
-    // Validate date format (YYYY-MM-DD)
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(newData.date)) {
-      throw new functions.https.HttpsError('invalid-argument', 'Invalid date format (expected YYYY-MM-DD)');
-    }
-
-    // Validate date is not in the future
-    const recordDate = new Date(newData.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (recordDate > today) {
-      throw new functions.https.HttpsError('invalid-argument', 'Date cannot be in the future');
-    }
-
-    // Validate incoming number
-    if (typeof newData.incomingNumber !== 'string' || newData.incomingNumber.trim().length === 0 || newData.incomingNumber.trim().length > 50) {
-      throw new functions.https.HttpsError('invalid-argument', 'Invalid incoming number');
-    }
-
-    // Validate subject
-    if (typeof newData.subject !== 'string' || newData.subject.trim().length === 0 || newData.subject.trim().length > 500) {
-      throw new functions.https.HttpsError('invalid-argument', 'Invalid subject');
-    }
-
-    // Validate from field
-    if (typeof newData.from !== 'string' || newData.from.trim().length === 0 || newData.from.trim().length > 200) {
-      throw new functions.https.HttpsError('invalid-argument', 'Invalid "from" field');
-    }
-
-    // Validate to field
-    if (typeof newData.to !== 'string' || newData.to.trim().length === 0 || newData.to.trim().length > 200) {
-      throw new functions.https.HttpsError('invalid-argument', 'Invalid "to" field');
-    }
-
-    // Validate optional signedBy field
-    if (newData.signedBy && typeof newData.signedBy !== 'string') {
-      throw new functions.https.HttpsError('invalid-argument', 'signedBy must be a string');
-    }
-
-    return null;
-  });
 
 // Function to validate transport data before writing  
 export const validateTransportData = functions.firestore

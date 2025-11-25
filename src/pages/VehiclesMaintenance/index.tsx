@@ -18,6 +18,7 @@ interface VehicleMaintenanceRecord {
   date: string;
   workType: string;
   cost: number;
+  quantity?: number;
   comment: string;
   frequency: string;
   mileage?: number;
@@ -63,15 +64,23 @@ const VehiclesMaintenance = () => {
   }, [syncVehicleData, syncMaintenanceData]);
 
   // State for filters
-  const [dateFilter, setDateFilter] = useState<string>('2025-10-01');
   const [workTypeFilter, setWorkTypeFilter] = useState<string>('');
   const [minCostFilter, setMinCostFilter] = useState<string>('');
   const [maxCostFilter, setMaxCostFilter] = useState<string>('');
   const [frequencyFilter, setFrequencyFilter] = useState<string>('');
   const [commentFilter, setCommentFilter] = useState<string>('');
   const [vehicleFilter, setVehicleFilter] = useState<string>('');
-  const [minMileageFilter, setMinMileageFilter] = useState<string>('');
-  const [maxMileageFilter, setMaxMileageFilter] = useState<string>('');
+
+  // Get unique work type values from maintenance data for dropdown
+  const workTypeOptions = useMemo(() => {
+    const workTypes = new Set<string>();
+    maintenanceData.forEach(record => {
+      if (record.workType) {
+        workTypes.add(record.workType);
+      }
+    });
+    return Array.from(workTypes).sort();
+  }, [maintenanceData]);
 
   // Get unique frequency values from maintenance data for dropdown
   const frequencyOptions = useMemo(() => {
@@ -104,65 +113,47 @@ const VehiclesMaintenance = () => {
 
   // Apply filters to the data
   const filteredData = useMemo(() => {
-    return maintenanceData.filter(record => {      
-      // Date filter
-      if (dateFilter && record.date !== dateFilter) {
-        return false;
-      }
-      
+    return maintenanceData.filter(record => {
       // Work type filter (partial match)
       if (workTypeFilter && !record.workType.toLowerCase().includes(workTypeFilter.toLowerCase())) {
         return false;
       }
-      
+
       // Min cost filter
       if (minCostFilter && record.cost < parseFloat(minCostFilter)) {
         return false;
       }
-      
+
       // Max cost filter
       if (maxCostFilter && record.cost > parseFloat(maxCostFilter)) {
         return false;
       }
-      
+
       // Frequency filter (exact match)
       if (frequencyFilter && record.frequency !== frequencyFilter) {
         return false;
       }
-      
+
       // Comment filter (partial match)
       if (commentFilter && !record.comment.toLowerCase().includes(commentFilter.toLowerCase())) {
         return false;
       }
-      
+
       // Vehicle filter
       if (vehicleFilter && record.vehicleId !== vehicleFilter) {
         return false;
       }
-      
-      // Min mileage filter
-      if (minMileageFilter && record.mileage !== undefined && record.mileage < parseFloat(minMileageFilter)) {
-        return false;
-      }
-      
-      // Max mileage filter
-      if (maxMileageFilter && record.mileage !== undefined && record.mileage > parseFloat(maxMileageFilter)) {
-        return false;
-      }
-      
+
       return true;
     });
   }, [
-    maintenanceData, 
-    dateFilter, 
-    workTypeFilter, 
-    minCostFilter, 
-    maxCostFilter, 
-    frequencyFilter, 
+    maintenanceData,
+    workTypeFilter,
+    minCostFilter,
+    maxCostFilter,
+    frequencyFilter,
     commentFilter,
     vehicleFilter,
-    minMileageFilter,
-    maxMileageFilter
   ]);
 
   // Functions to handle modals
@@ -206,15 +197,18 @@ const VehiclesMaintenance = () => {
 
   // Clear all filters
   const clearFilters = () => {
-    setDateFilter('');
     setWorkTypeFilter('');
     setMinCostFilter('');
     setMaxCostFilter('');
     setFrequencyFilter('');
     setCommentFilter('');
     setVehicleFilter('');
-    setMinMileageFilter('');
-    setMaxMileageFilter('');
+  };
+
+  // Function to get vehicle name by ID
+  const getVehicleName = (vehicleId: string) => {
+    const vehicle = vehicleData.find(v => v.id === vehicleId);
+    return vehicle ? `${vehicle.name} (${vehicle.manufacturer} ${vehicle.model})` : vehicleId;
   };
 
   return (
@@ -223,7 +217,7 @@ const VehiclesMaintenance = () => {
         <h1 className="text-2xl font-bold text-gray-800">Каталог технического обслуживания автомобилей</h1>
         <div className="flex flex-wrap gap-3">
           {isAdmin && (
-            <Button 
+            <Button
               onClick={() => openMaintenanceFormModal()}
               variant="primary" className="flex items-center"
             >
@@ -248,24 +242,19 @@ const VehiclesMaintenance = () => {
       <AnimatedAccordion title="Фильтры" defaultOpen={true}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Дата</label>
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            />
-          </div>
-          
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Вид работ</label>
-            <input
-              type="text"
-              placeholder="Фильтр по виду работ"
+            <select
               value={workTypeFilter}
               onChange={(e) => setWorkTypeFilter(e.target.value)}
               className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            />
+            >
+              <option value="">Все виды работ</option>
+              {workTypeOptions.map(workType => (
+                <option key={workType} value={workType}>
+                  {workType}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div>
@@ -311,27 +300,6 @@ const VehiclesMaintenance = () => {
             </select>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Мин. пробег</label>
-            <input
-              type="number"
-              placeholder="Мин. пробег"
-              value={minMileageFilter}
-              onChange={(e) => setMinMileageFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Макс. пробег</label>
-            <input
-              type="number"
-              placeholder="Макс. пробег"
-              value={maxMileageFilter}
-              onChange={(e) => setMaxMileageFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-            />
-          </div>
         </div>
         
         <div className="flex justify-end mt-3">
@@ -375,7 +343,7 @@ const VehiclesMaintenance = () => {
         </div>
       )}
       
-      <AnimatedAccordion title="Записи" defaultOpen={false}>
+      <AnimatedAccordion title="Записи" defaultOpen={true}>
         <div className="flex justify-between mb-4">
           <h3 className="text-lg font-semibold mb-2">Записи технического обслуживания</h3>
           <button onClick={() => exportMaintenanceRecordsToExcel(
@@ -415,7 +383,11 @@ const VehiclesMaintenance = () => {
                       <div className="mt-2 text-xs text-gray-500 space-y-1">
                         <div className="flex justify-between">
                           <span>Стоимость:</span>
-                          <span className="font-medium">{formatCurrencyWithSeparators(record.cost)} ₽</span>
+                          <span className="font-medium">
+                            {record.quantity !== undefined && record.quantity !== 1
+                              ? `${formatCurrencyWithSeparators(record.cost)} ₽ x ${record.quantity} = ${formatCurrencyWithSeparators(record.cost * record.quantity)} ₽`
+                              : `${formatCurrencyWithSeparators(record.cost)} ₽`}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Частота:</span>
@@ -427,7 +399,7 @@ const VehiclesMaintenance = () => {
                         </div>
                         <div className="flex justify-between">
                           <span>Автомобиль:</span>
-                          <span className="font-medium">{record.vehicleId}</span>
+                          <span className="font-medium">{getVehicleName(record.vehicleId)}</span>
                         </div>
                       </div>
                     </div>
@@ -463,7 +435,9 @@ const VehiclesMaintenance = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Вид работ</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Стоимость</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кол-во</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ед. стоимость</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Итог. стоимость</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Частота</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пробег</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
@@ -491,10 +465,20 @@ const VehiclesMaintenance = () => {
                     >
                       {record.workType}
                     </td>
-                    <td 
+                    <td
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      {record.quantity !== undefined ? record.quantity : 1}
+                    </td>
+                    <td
                       className="p-4 whitespace-nowrap text-sm text-gray-500"
                     >
                       {formatCurrencyWithSeparators(record.cost)} ₽
+                    </td>
+                    <td
+                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      {formatCurrencyWithSeparators(record.cost * (record.quantity || 1))} ₽
                     </td>
                     <td 
                       className="p-4 whitespace-nowrap text-sm text-gray-500"
@@ -511,10 +495,10 @@ const VehiclesMaintenance = () => {
                     >
                       {record.comment}
                     </td>
-                    <td 
+                    <td
                       className="p-4 text-sm text-gray-500"
                     >
-                      {record.vehicleId}
+                      {getVehicleName(record.vehicleId)}
                     </td>
                     {isAdmin && (
                       <td className="p-4 whitespace-nowrap text-right text-sm font-medium">
@@ -536,7 +520,7 @@ const VehiclesMaintenance = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={isAdmin ? 9 : 8} className="p-4 text-center text-sm text-gray-500">
+                  <td colSpan={isAdmin ? 10 : 9} className="p-4 text-center text-sm text-gray-500">
                     Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                   </td>
                 </tr>
@@ -707,14 +691,15 @@ const VehiclesMaintenance = () => {
       
       {/* Maintenance Form Modal */}
       {isAdmin && (
-        <MaintenanceModal 
-          isOpen={isMaintenanceFormModalOpen} 
-          onClose={closeMaintenanceFormModal} 
-          recordId={selectedRecordId} 
+        <MaintenanceModal
+          isOpen={isMaintenanceFormModalOpen}
+          onClose={closeMaintenanceFormModal}
+          recordId={selectedRecordId}
           record={selectedRecordId ? maintenanceData.find(m => m.id === selectedRecordId) as any : undefined}
           vehicles={vehicleData}
-          onAdd={addMaintenanceRecord} 
-          onUpdate={updateMaintenanceRecord} 
+          workTypeOptions={workTypeOptions}
+          onAdd={addMaintenanceRecord}
+          onUpdate={updateMaintenanceRecord}
         />
       )}
       

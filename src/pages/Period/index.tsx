@@ -72,6 +72,11 @@ const Period = () => {
     }
   };
 
+  const handlePeriodAnalytics = () => {
+    const filteredData = periodData.filter(a => a.category === 'Менструация');
+    return filteredData;
+  }
+
   if (isPeriodDataLoading) {
     return <div>Загрузка событий...</div>;
   }
@@ -90,28 +95,37 @@ const Period = () => {
           Добавить событие
         </button>
       </div>
-      <div className="bg-white p-6 rounded-lg shadow w-1/2 text-xs">
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          locale={ruLocale}
-          events={periodData.map(e => ({
-            id: typeof e.id === 'string' ? e.id : e.id.toString(),
-            date: e.date,
-            description: e.description,
-            backgroundColor: getCategoryColor(e.category || 'Другое')
-          }))}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: ''
-          }}
-          fixedWeekCount={false} // отображать все недели месяца
-          showNonCurrentDates={true} // показывать дни из других месяцев
-          eventClick={handleEventClick}
-          editable={true}
-          selectable={true}
-        />
+      <div className="flex">
+        <div className="bg-white p-6 rounded-lg shadow w-1/2 text-xs">
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            locale={ruLocale}
+            events={periodData.map(e => ({
+              id: typeof e.id === 'string' ? e.id : e.id.toString(),
+              date: e.date,
+              description: e.description,
+              backgroundColor: getCategoryColor(e.category || 'Другое')
+            }))}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: ''
+            }}
+            fixedWeekCount={false} // отображать все недели месяца
+            showNonCurrentDates={true} // показывать дни из других месяцев
+            eventClick={handleEventClick}
+            editable={true}
+            selectable={true}
+          />
+        </div>
+        <div>
+          {handlePeriodAnalytics().map((test) => (
+            <div>
+              {test.category}
+            </div>
+          ))}
+        </div>
       </div>
 
       <PeriodModal

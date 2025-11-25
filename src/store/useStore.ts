@@ -1,10 +1,6 @@
 // src/store/useStore.ts
 import { create } from 'zustand';
 import {
-  getAllCorrespondentRecords,
-  addCorrespondentRecord as firebaseAddCorrespondentRecord,
-  updateCorrespondentRecord as firebaseUpdateCorrespondentRecord,
-  deleteCorrespondentRecord as firebaseDeleteCorrespondentRecord,
   // Finance services
   getAllFinanceRecords,
   addFinanceRecord as firebaseAddFinanceRecord,
@@ -42,15 +38,6 @@ export interface BaseEntity {
   id: number | string;
 }
 
-export interface AppCorrespondentRecord extends BaseEntity {
-  date: string;
-  incomingNumber: string;
-  subject: string;
-  outgoingNumber: string;
-  from: string;
-  to: string;
-  signedBy: string;
-}
 
 export interface AppFinanceRecord extends BaseEntity {
   date: string;
@@ -85,6 +72,7 @@ export interface AppMaintenanceRecord extends BaseEntity {
   date: string;
   workType: string;
   cost: number;
+  quantity?: number;
   comment: string;
   frequency: string;
   mileage?: number;
@@ -114,7 +102,6 @@ interface AppState {
   toggleTheme: () => void;
 
   // Data for the different sections
-  correspondentData: AppCorrespondentRecord[];
   vehicleData: AppVehicleRecord[];
   maintenanceData: AppMaintenanceRecord[];
   financeData: AppFinanceRecord[];
@@ -122,13 +109,11 @@ interface AppState {
   periodData: AppPeriodEvent[];
 
   // Loading states
-  isCorrespondentDataLoading: boolean;
   isVehicleDataLoading: boolean;
   isMaintenanceDataLoading: boolean;
   isFinanceDataLoading: boolean;
   isHouseholdDataLoading: boolean;
   isPeriodDataLoading: boolean;
-  correspondentDataError: string | null;
   vehicleDataError: string | null;
   maintenanceDataError: string | null;
   financeDataError: string | null;
@@ -136,18 +121,11 @@ interface AppState {
   periodDataError: string | null;
 
   // Firebase sync actions
-  syncCorrespondentData: () => Promise<void>;
   syncVehicleData: () => Promise<void>;
   syncMaintenanceData: () => Promise<void>;
   syncFinanceData: () => Promise<void>;
   syncHouseholdData: () => Promise<void>;
   syncPeriodData: () => Promise<void>;
-
-  // Actions to update data (with Firebase sync)
-  setCorrespondentData: (data: AppCorrespondentRecord[]) => void;
-  addCorrespondentRecord: (record: Omit<AppCorrespondentRecord, 'id'>) => Promise<void>;
-  updateCorrespondentRecord: (id: number | string, record: Partial<AppCorrespondentRecord>) => Promise<void>;
-  deleteCorrespondentRecord: (id: number | string) => Promise<void>;
 
   // Vehicle data and functions
   setVehicleData: (data: AppVehicleRecord[]) => void;
@@ -290,7 +268,6 @@ export const useStore = create<AppState>((set, get) => {
   
   // Common state setters
   const stateSetters = {
-    setCorrespondentData: (data: AppCorrespondentRecord[]) => set({ correspondentData: data }),
     setVehicleData: (data: AppVehicleRecord[]) => set({ vehicleData: data }),
     setMaintenanceData: (data: AppMaintenanceRecord[]) => set({ maintenanceData: data }),
     setFinanceData: (data: AppFinanceRecord[]) => set({ financeData: data }),
@@ -302,7 +279,6 @@ export const useStore = create<AppState>((set, get) => {
   // Initial state
   const initialState = {
     // Section data
-    correspondentData: [],
     vehicleData: [],
     maintenanceData: [],
     financeData: [],
@@ -310,13 +286,11 @@ export const useStore = create<AppState>((set, get) => {
     periodData: [],
 
     // Loading states
-    isCorrespondentDataLoading: false,
     isVehicleDataLoading: false,
     isMaintenanceDataLoading: false,
     isFinanceDataLoading: false,
     isHouseholdDataLoading: false,
     isPeriodDataLoading: false,
-    correspondentDataError: null,
     vehicleDataError: null,
     maintenanceDataError: null,
     financeDataError: null,
@@ -329,47 +303,6 @@ export const useStore = create<AppState>((set, get) => {
     categoriesError: null,
   };
   
-  // Entity handlers
-  const correspondentHandlers = createEntityHandlers(
-    {
-      getAll: getAllCorrespondentRecords,
-      addFirebase: firebaseAddCorrespondentRecord,
-      updateFirebase: firebaseUpdateCorrespondentRecord,
-      deleteFirebase: firebaseDeleteCorrespondentRecord,
-      convertToApp: (firebaseRecord) => ({
-        id: firebaseRecord.id || Date.now().toString(),
-        date: firebaseRecord.date,
-        incomingNumber: firebaseRecord.incomingNumber,
-        subject: firebaseRecord.subject,
-        outgoingNumber: firebaseRecord.outgoingNumber,
-        from: firebaseRecord.from,
-        to: firebaseRecord.to,
-        signedBy: firebaseRecord.signedBy
-      }),
-      convertToFirebase: (appRecord) => ({
-        date: appRecord.date,
-        incomingNumber: appRecord.incomingNumber,
-        subject: appRecord.subject,
-        outgoingNumber: appRecord.outgoingNumber,
-        from: appRecord.from,
-        to: appRecord.to,
-        signedBy: appRecord.signedBy
-      }),
-      convertToUpdate: (partial) => ({
-        date: partial.date,
-        incomingNumber: partial.incomingNumber,
-        subject: partial.subject,
-        outgoingNumber: partial.outgoingNumber,
-        from: partial.from,
-        to: partial.to,
-        signedBy: partial.signedBy
-      })
-    },
-    (loading) => set({ isCorrespondentDataLoading: loading }),
-    (error) => set({ correspondentDataError: error }),
-    (data) => set({ correspondentData: data }),
-    () => get().correspondentData
-  );
   
   const vehicleHandlers = createEntityHandlers(
     {
@@ -427,6 +360,7 @@ export const useStore = create<AppState>((set, get) => {
         date: firebaseRecord.date,
         workType: firebaseRecord.workType,
         cost: firebaseRecord.cost,
+        quantity: firebaseRecord.quantity,
         comment: firebaseRecord.comment,
         frequency: firebaseRecord.frequency,
         mileage: firebaseRecord.mileage
@@ -436,6 +370,7 @@ export const useStore = create<AppState>((set, get) => {
         date: appRecord.date,
         workType: appRecord.workType,
         cost: appRecord.cost,
+        quantity: appRecord.quantity,
         comment: appRecord.comment,
         frequency: appRecord.frequency,
         mileage: appRecord.mileage
@@ -445,6 +380,7 @@ export const useStore = create<AppState>((set, get) => {
         date: partial.date,
         workType: partial.workType,
         cost: partial.cost,
+        quantity: partial.quantity,
         comment: partial.comment,
         frequency: partial.frequency,
         mileage: partial.mileage
@@ -594,7 +530,6 @@ export const useStore = create<AppState>((set, get) => {
     ...stateSetters,
 
     // Sync functions
-    syncCorrespondentData: correspondentHandlers.sync,
     syncVehicleData: vehicleHandlers.sync,
     syncMaintenanceData: maintenanceHandlers.sync,
     syncFinanceData: financeHandlers.sync,
@@ -603,7 +538,6 @@ export const useStore = create<AppState>((set, get) => {
     syncCategories: categoryHandlers.sync,
 
     // Add functions
-    addCorrespondentRecord: correspondentHandlers.add,
     addVehicleRecord: vehicleHandlers.add,
     addMaintenanceRecord: maintenanceHandlers.add,
     addFinanceRecord: financeHandlers.add,
@@ -612,7 +546,6 @@ export const useStore = create<AppState>((set, get) => {
     addCategory: categoryHandlers.add,
 
     // Update functions
-    updateCorrespondentRecord: correspondentHandlers.update,
     updateVehicleRecord: vehicleHandlers.update,
     updateMaintenanceRecord: maintenanceHandlers.update,
     updateFinanceRecord: financeHandlers.update,
@@ -621,7 +554,6 @@ export const useStore = create<AppState>((set, get) => {
     updateCategory: categoryHandlers.update,
 
     // Delete functions
-    deleteCorrespondentRecord: correspondentHandlers.delete,
     deleteVehicleRecord: vehicleHandlers.delete,
     deleteMaintenanceRecord: maintenanceHandlers.delete,
     deleteFinanceRecord: financeHandlers.delete,

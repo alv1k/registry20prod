@@ -96,39 +96,39 @@ export const sanitizeFinanceRecord = (record: any): any => {
     return record;
   }
 
-  const sanitizedRecord = { ...record };
-  
+  const sanitizedRecord: any = {};
+
   // Sanitize text fields
-  if (sanitizedRecord.name) {
-    sanitizedRecord.name = sanitizeInput(sanitizedRecord.name);
+  if (record.name !== undefined) {
+    sanitizedRecord.name = sanitizeInput(record.name);
   }
-  
-  if (sanitizedRecord.classification) {
-    sanitizedRecord.classification = sanitizeInput(sanitizedRecord.classification);
+
+  if (record.classification !== undefined) {
+    sanitizedRecord.classification = sanitizeInput(record.classification);
   }
-  
-  if (sanitizedRecord.comment) {
-    sanitizedRecord.comment = sanitizeInput(sanitizedRecord.comment);
+
+  if (record.comment !== undefined) {
+    sanitizedRecord.comment = sanitizeInput(record.comment);
   }
-  
+
   // Ensure numeric fields are numbers
-  if (sanitizedRecord.price !== undefined) {
-    sanitizedRecord.price = Number(sanitizedRecord.price);
+  if (record.price !== undefined) {
+    sanitizedRecord.price = Number(record.price);
   }
-  
-  if (sanitizedRecord.quantity !== undefined) {
-    sanitizedRecord.quantity = Number(sanitizedRecord.quantity);
+
+  if (record.quantity !== undefined) {
+    sanitizedRecord.quantity = Number(record.quantity);
   }
-  
-  if (sanitizedRecord.total !== undefined) {
-    sanitizedRecord.total = Number(sanitizedRecord.total);
+
+  if (record.total !== undefined) {
+    sanitizedRecord.total = Number(record.total);
   }
-  
+
   // Ensure date is a string
-  if (sanitizedRecord.date) {
-    sanitizedRecord.date = String(sanitizedRecord.date);
+  if (record.date !== undefined) {
+    sanitizedRecord.date = String(record.date);
   }
-  
+
   return sanitizedRecord;
 };
 
@@ -142,92 +142,49 @@ export const sanitizeTransportRecord = (record: any): any => {
     return record;
   }
 
-  const sanitizedRecord = { ...record };
-  
+  const sanitizedRecord: any = {};
+
   // Sanitize text fields
-  if (sanitizedRecord.shippingDate) {
-    sanitizedRecord.shippingDate = sanitizeInput(sanitizedRecord.shippingDate);
+  if (record.shippingDate !== undefined) {
+    sanitizedRecord.shippingDate = sanitizeInput(record.shippingDate);
   }
-  
-  if (sanitizedRecord.departureDate) {
-    sanitizedRecord.departureDate = sanitizeInput(sanitizedRecord.departureDate);
+
+  if (record.departureDate !== undefined) {
+    sanitizedRecord.departureDate = sanitizeInput(record.departureDate);
   }
-  
-  if (sanitizedRecord.arrivalDate) {
-    sanitizedRecord.arrivalDate = sanitizeInput(sanitizedRecord.arrivalDate);
+
+  if (record.arrivalDate !== undefined) {
+    sanitizedRecord.arrivalDate = sanitizeInput(record.arrivalDate);
   }
-  
-  if (sanitizedRecord.cargoName) {
-    sanitizedRecord.cargoName = sanitizeInput(sanitizedRecord.cargoName);
+
+  if (record.cargoName !== undefined) {
+    sanitizedRecord.cargoName = sanitizeInput(record.cargoName);
   }
-  
-  if (sanitizedRecord.driver) {
-    sanitizedRecord.driver = sanitizeInput(sanitizedRecord.driver);
+
+  if (record.driver !== undefined) {
+    sanitizedRecord.driver = sanitizeInput(record.driver);
   }
-  
-  if (sanitizedRecord.carNumber) {
-    sanitizedRecord.carNumber = sanitizeInput(sanitizedRecord.carNumber);
+
+  if (record.carNumber !== undefined) {
+    sanitizedRecord.carNumber = sanitizeInput(record.carNumber);
   }
-  
-  if (sanitizedRecord.driverLicense) {
-    sanitizedRecord.driverLicense = sanitizeInput(sanitizedRecord.driverLicense);
+
+  if (record.driverLicense !== undefined) {
+    sanitizedRecord.driverLicense = sanitizeInput(record.driverLicense);
   }
-  
+
   // Ensure numeric fields are numbers
-  if (sanitizedRecord.shippingWeight !== undefined) {
-    sanitizedRecord.shippingWeight = Number(sanitizedRecord.shippingWeight);
+  if (record.shippingWeight !== undefined) {
+    sanitizedRecord.shippingWeight = Number(record.shippingWeight);
   }
-  
-  if (sanitizedRecord.deliveryWeight !== undefined) {
-    sanitizedRecord.deliveryWeight = Number(sanitizedRecord.deliveryWeight);
+
+  if (record.deliveryWeight !== undefined) {
+    sanitizedRecord.deliveryWeight = Number(record.deliveryWeight);
   }
-  
+
   return sanitizedRecord;
 };
 
-/**
- * Sanitizes a correspondent record before saving
- * @param record - The correspondent record to sanitize
- * @returns Sanitized correspondent record
- */
-export const sanitizeCorrespondentRecord = (record: any): any => {
-  if (!record || typeof record !== 'object') {
-    return record;
-  }
-
-  const sanitizedRecord = { ...record };
-  
-  // Sanitize text fields
-  if (sanitizedRecord.date) {
-    sanitizedRecord.date = sanitizeInput(sanitizedRecord.date);
-  }
-  
-  if (sanitizedRecord.incomingNumber) {
-    sanitizedRecord.incomingNumber = sanitizeInput(sanitizedRecord.incomingNumber);
-  }
-  
-  if (sanitizedRecord.outgoingNumber) {
-    sanitizedRecord.outgoingNumber = sanitizeInput(sanitizedRecord.outgoingNumber);
-  }
-  
-  if (sanitizedRecord.subject) {
-    sanitizedRecord.subject = sanitizeInput(sanitizedRecord.subject);
-  }
-  
-  if (sanitizedRecord.from) {
-    sanitizedRecord.from = sanitizeInput(sanitizedRecord.from);
-  }
-  
-  if (sanitizedRecord.to) {
-    sanitizedRecord.to = sanitizeInput(sanitizedRecord.to);
-  }
-  
-  if (sanitizedRecord.signedBy) {
-    sanitizedRecord.signedBy = sanitizeInput(sanitizedRecord.signedBy);
-  }
-  
-  return sanitizedRecord;
-};
 
 /**
  * Sanitizes a category record before saving
@@ -239,21 +196,21 @@ export const sanitizeCategoryRecord = (record: any): any => {
     return record;
   }
 
-  const sanitizedRecord = { ...record };
-  
+  const sanitizedRecord: any = {};
+
   // Sanitize text fields
-  if (sanitizedRecord.name) {
-    sanitizedRecord.name = sanitizeInput(sanitizedRecord.name);
+  if (record.name !== undefined) {
+    sanitizedRecord.name = sanitizeInput(record.name);
   }
-  
-  if (sanitizedRecord.description) {
-    sanitizedRecord.description = sanitizeInput(sanitizedRecord.description);
+
+  if (record.description !== undefined) {
+    sanitizedRecord.description = sanitizeInput(record.description);
   }
-  
-  if (sanitizedRecord.type) {
-    sanitizedRecord.type = sanitizeInput(sanitizedRecord.type);
+
+  if (record.type !== undefined) {
+    sanitizedRecord.type = sanitizeInput(record.type);
   }
-  
+
   return sanitizedRecord;
 };
 
@@ -268,25 +225,25 @@ export const deepSanitize = (obj: any): any => {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => deepSanitize(item));
+    return obj.map(item => deepSanitize(item)).filter(item => item !== undefined);
   }
 
   const sanitizedObj: any = {};
-  
+
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const value = obj[key];
-      
+
       if (typeof value === 'string') {
         sanitizedObj[key] = sanitizeInput(value);
       } else if (typeof value === 'object' && value !== null) {
         sanitizedObj[key] = deepSanitize(value);
-      } else {
+      } else if (value !== undefined) {
         sanitizedObj[key] = value;
       }
     }
   }
-  
+
   return sanitizedObj;
 }
 
@@ -300,41 +257,41 @@ export const sanitizeVehicleRecord = (record: any): any => {
     return record;
   }
 
-  const sanitizedRecord = { ...record };
-  
+  const sanitizedRecord: any = {};
+
   // Sanitize text fields
-  if (sanitizedRecord.name) {
-    sanitizedRecord.name = sanitizeInput(sanitizedRecord.name);
+  if (record.name !== undefined) {
+    sanitizedRecord.name = sanitizeInput(record.name);
   }
-  
-  if (sanitizedRecord.manufacturer) {
-    sanitizedRecord.manufacturer = sanitizeInput(sanitizedRecord.manufacturer);
+
+  if (record.manufacturer !== undefined) {
+    sanitizedRecord.manufacturer = sanitizeInput(record.manufacturer);
   }
-  
-  if (sanitizedRecord.model) {
-    sanitizedRecord.model = sanitizeInput(sanitizedRecord.model);
+
+  if (record.model !== undefined) {
+    sanitizedRecord.model = sanitizeInput(record.model);
   }
-  
-  if (sanitizedRecord.engineVolume) {
-    sanitizedRecord.engineVolume = sanitizeInput(sanitizedRecord.engineVolume);
+
+  if (record.engineVolume !== undefined) {
+    sanitizedRecord.engineVolume = sanitizeInput(record.engineVolume);
   }
-  
-  if (sanitizedRecord.engineNumber) {
-    sanitizedRecord.engineNumber = sanitizeInput(sanitizedRecord.engineNumber);
+
+  if (record.engineNumber !== undefined) {
+    sanitizedRecord.engineNumber = sanitizeInput(record.engineNumber);
   }
-  
-  if (sanitizedRecord.vin) {
-    sanitizedRecord.vin = sanitizeInput(sanitizedRecord.vin);
+
+  if (record.vin !== undefined) {
+    sanitizedRecord.vin = sanitizeInput(record.vin);
   }
-  
-  if (sanitizedRecord.stsData) {
-    sanitizedRecord.stsData = sanitizeInput(sanitizedRecord.stsData);
+
+  if (record.stsData !== undefined) {
+    sanitizedRecord.stsData = sanitizeInput(record.stsData);
   }
-  
-  if (sanitizedRecord.ptsData) {
-    sanitizedRecord.ptsData = sanitizeInput(sanitizedRecord.ptsData);
+
+  if (record.ptsData !== undefined) {
+    sanitizedRecord.ptsData = sanitizeInput(record.ptsData);
   }
-  
+
   return sanitizedRecord;
 };
 
@@ -348,40 +305,44 @@ export const sanitizeMaintenanceRecord = (record: any): any => {
     return record;
   }
 
-  const sanitizedRecord = { ...record };
+  const sanitizedRecord: any = {};
 
   // Sanitize text fields
-  if (sanitizedRecord.vehicleId) {
-    sanitizedRecord.vehicleId = sanitizeInput(sanitizedRecord.vehicleId);
+  if (record.vehicleId !== undefined) {
+    sanitizedRecord.vehicleId = sanitizeInput(record.vehicleId);
   }
 
-  if (sanitizedRecord.vehicleName) {
-    sanitizedRecord.vehicleName = sanitizeInput(sanitizedRecord.vehicleName);
+  if (record.vehicleName !== undefined) {
+    sanitizedRecord.vehicleName = sanitizeInput(record.vehicleName);
   }
 
-  if (sanitizedRecord.date) {
-    sanitizedRecord.date = sanitizeInput(sanitizedRecord.date);
+  if (record.date !== undefined) {
+    sanitizedRecord.date = sanitizeInput(record.date);
   }
 
-  if (sanitizedRecord.workType) {
-    sanitizedRecord.workType = sanitizeInput(sanitizedRecord.workType);
+  if (record.workType !== undefined) {
+    sanitizedRecord.workType = sanitizeInput(record.workType);
   }
 
-  if (sanitizedRecord.comment) {
-    sanitizedRecord.comment = sanitizeInput(sanitizedRecord.comment);
+  if (record.comment !== undefined) {
+    sanitizedRecord.comment = sanitizeInput(record.comment);
   }
 
-  if (sanitizedRecord.frequency) {
-    sanitizedRecord.frequency = sanitizeInput(sanitizedRecord.frequency);
+  if (record.frequency !== undefined) {
+    sanitizedRecord.frequency = sanitizeInput(record.frequency);
   }
 
   // Ensure numeric fields are numbers
-  if (sanitizedRecord.cost !== undefined) {
-    sanitizedRecord.cost = Number(sanitizedRecord.cost);
+  if (record.cost !== undefined) {
+    sanitizedRecord.cost = Number(record.cost);
   }
 
-  if (sanitizedRecord.mileage !== undefined) {
-    sanitizedRecord.mileage = Number(sanitizedRecord.mileage);
+  if (record.quantity !== undefined) {
+    sanitizedRecord.quantity = Number(record.quantity);
+  }
+
+  if (record.mileage !== undefined) {
+    sanitizedRecord.mileage = Number(record.mileage);
   }
 
   return sanitizedRecord;
@@ -397,23 +358,23 @@ export const sanitizePeriodEvent = (event: any): any => {
     return event;
   }
 
-  const sanitizedEvent = { ...event };
+  const sanitizedEvent: any = {};
 
   // Sanitize text fields
-  if (sanitizedEvent.title) {
-    sanitizedEvent.title = sanitizeInput(sanitizedEvent.title);
+  if (event.title !== undefined) {
+    sanitizedEvent.title = sanitizeInput(event.title);
   }
 
-  if (sanitizedEvent.date) {
-    sanitizedEvent.date = sanitizeInput(sanitizedEvent.date);
+  if (event.date !== undefined) {
+    sanitizedEvent.date = sanitizeInput(event.date);
   }
 
-  if (sanitizedEvent.description) {
-    sanitizedEvent.description = sanitizeInput(sanitizedEvent.description);
+  if (event.description !== undefined) {
+    sanitizedEvent.description = sanitizeInput(event.description);
   }
 
-  if (sanitizedEvent.category) {
-    sanitizedEvent.category = sanitizeInput(sanitizedEvent.category);
+  if (event.category !== undefined) {
+    sanitizedEvent.category = sanitizeInput(event.category);
   }
 
   return sanitizedEvent;

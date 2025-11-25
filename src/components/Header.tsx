@@ -26,10 +26,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
       // Show error message to user
       alert('Ошибка при выходе из системы. Пожалуйста, попробуйте снова.');
     }
-  };
-
-  console.log(user?.uid);
-  
+  }; 
 
   return (
     <header className="bg-[#033835] shadow-md">

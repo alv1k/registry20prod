@@ -7,6 +7,7 @@ interface MaintenanceRecord {
   date: string;
   workType: string;
   cost: number;
+  quantity?: number;
   comment: string;
   frequency: string;
   mileage?: number;
@@ -25,27 +26,34 @@ interface MaintenanceFormModalProps {
   recordId?: number | string | null;
   record?: MaintenanceRecord | null;
   vehicles: Vehicle[];
+  workTypeOptions: string[];
   onAdd: (record: Omit<MaintenanceRecord, 'id'>) => void;
   onUpdate: (id: number | string, record: Partial<MaintenanceRecord>) => void;
 }
 
-const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  recordId, 
+const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
+  isOpen,
+  onClose,
+  recordId,
   record,
   vehicles,
-  onAdd, 
-  onUpdate 
+  workTypeOptions,
+  onAdd,
+  onUpdate
 }) => {
   const [vehicleId, setVehicleId] = useState<string>('');
   const [date, setDate] = useState<string>('');
   const [workType, setWorkType] = useState<string>('');
+  const [showWorkTypeDropdown, setShowWorkTypeDropdown] = useState<boolean>(false);
   const [cost, setCost] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number>(1);
   const [comment, setComment] = useState<string>('');
   const [frequency, setFrequency] = useState<string>('');
   const [mileage, setMileage] = useState<number | undefined>(undefined);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+
+  // Calculate total cost
+  const totalCost = cost * (quantity || 1);
 
   // Load record data if editing
   useEffect(() => {
@@ -55,6 +63,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
       setDate(record.date || '');
       setWorkType(record.workType || '');
       setCost(record.cost || 0);
+      setQuantity(record.quantity || 1);
       setComment(record.comment || '');
       setFrequency(record.frequency || '');
       setMileage(record.mileage || undefined);
@@ -64,6 +73,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
       setDate(new Date().toISOString().split('T')[0]); // Default to today's date
       setWorkType('');
       setCost(0);
+      setQuantity(1);
       setComment('');
       setFrequency('');
       setMileage(undefined);
@@ -89,6 +99,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
       date,
       workType,
       cost,
+      quantity,
       comment,
       frequency,
       mileage: mileage || undefined
@@ -105,6 +116,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
     setDate(new Date().toISOString().split('T')[0]);
     setWorkType('');
     setCost(0);
+    setQuantity(1);
     setComment('');
     setFrequency('');
     setMileage(undefined);
@@ -150,19 +162,57 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
             />
           </div>
           
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-1">Вид работ *</label>
-            <input
-              type="text"
-              name="workType"
-              value={workType}
-              onChange={(e) => setWorkType(e.target.value)}
-              onFocus={(e) => setFocusedInput(e.target.name)}
-              onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-              placeholder="Например: Техническое обслуживание, Замена масла"
-              required
-            />
+            <div className="relative">
+              <input
+                type="text"
+                name="workType"
+                value={workType}
+                onChange={(e) => setWorkType(e.target.value)}
+                onFocus={(e) => {
+                  setFocusedInput(e.target.name);
+                  setShowWorkTypeDropdown(true);
+                }}
+                onBlur={() => setTimeout(() => setShowWorkTypeDropdown(false), 200)}
+                className="w-full p-2 pr-10 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                placeholder="Например: Техническое обслуживание, Замена масла"
+                required
+              />
+              <div
+                className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                onClick={() => setShowWorkTypeDropdown(!showWorkTypeDropdown)}
+              >
+                <svg
+                  className={`h-5 w-5 text-gray-400 transform ${showWorkTypeDropdown ? 'rotate-180' : ''}`}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            {showWorkTypeDropdown  && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                {workTypeOptions
+                  .filter(option =>
+                    option.toLowerCase().includes(workType.toLowerCase())
+                  )
+                  .map((option, index) => (
+                    <div
+                      key={index}
+                      className="p-2 hover:bg-blue-100 cursor-pointer"
+                      onMouseDown={() => {
+                        setWorkType(option);
+                        setShowWorkTypeDropdown(false);
+                      }}
+                    >
+                      {option}
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
           
           <div>
@@ -181,7 +231,30 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
               required
             />
           </div>
-          
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Количество</label>
+            <input
+              type="number"
+              name="quantity"
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(0, Number(e.target.value)))}
+              onFocus={(e) => setFocusedInput(e.target.name)}
+              onBlur={() => setFocusedInput(null)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              placeholder="Количество"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Итоговая сумма</label>
+            <div className="w-full p-2 border border-gray-300 rounded-md bg-gray-50">
+              {totalCost.toFixed(2)} ₽
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Частота</label>
             <input

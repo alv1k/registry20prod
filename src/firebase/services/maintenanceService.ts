@@ -24,7 +24,8 @@ export interface MaintenanceRecord {
   vehicleName?: string; // название автомобиля (для удобства отображения)
   date: string; // дата обслуживания
   workType: string; // вид работ
-  cost: number; // стоимость
+  cost: number; // стоимость за единицу
+  quantity?: number; // количество
   comment: string; // комментарий
   frequency: string; // частота
   mileage?: number; // пробег (опционально)
@@ -48,6 +49,7 @@ export const getAllMaintenanceRecords = async (): Promise<MaintenanceRecord[]> =
         date: data.date || '',
         workType: data.workType || '',
         cost: typeof data.cost === 'number' ? data.cost : 0,
+        quantity: typeof data.quantity === 'number' ? data.quantity : undefined,
         comment: data.comment || '',
         frequency: data.frequency || '',
         mileage: typeof data.mileage === 'number' ? data.mileage : undefined
@@ -103,6 +105,9 @@ export const updateMaintenanceRecord = async (id: string, record: Partial<Mainte
     }
     if (record.frequency !== undefined) {
       sanitizedRecord.frequency = sanitizeMaintenanceRecord({ frequency: record.frequency }).frequency;
+    }
+    if (record.quantity !== undefined) {
+      sanitizedRecord.quantity = sanitizeMaintenanceRecord({ quantity: record.quantity }).quantity;
     }
     if (record.mileage !== undefined) {
       sanitizedRecord.mileage = sanitizeMaintenanceRecord({ mileage: record.mileage }).mileage;

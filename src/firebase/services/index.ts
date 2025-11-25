@@ -1,5 +1,4 @@
 // src/firebase/services/index.ts
-export * from './correspondentService';
 export * from './financeService';
 export * from './categoryService';
 export * from './vehicleService';

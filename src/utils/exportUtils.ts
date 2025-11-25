@@ -70,12 +70,20 @@ export const exportRecordsToExcel = (data: any[], fileName: string = 'records.xl
       { header: 'ID', key: 'id' },
       { header: 'Дата', key: 'date' },
       { header: 'Вид работ', key: 'workType' },
+      { header: 'Кол-во', key: 'quantity' },
       { header: 'Стоимость', key: 'cost' },
+      { header: 'Общая стоимость', key: 'totalCost' },
       { header: 'Частота', key: 'frequency' },
       { header: 'Пробег', key: 'mileage' },
       { header: 'Комментарий', key: 'comment' },
       { header: 'ID автомобиля', key: 'vehicleId' },
     ];
+
+    // Process the data to include calculated total cost
+    data = data.map(item => ({
+      ...item,
+      totalCost: (item.cost || 0) * (item.quantity || 1)
+    }));
   } else {
     // Default columns for finance records and other types
     columns = [
@@ -105,14 +113,22 @@ export const exportMaintenanceRecordsToExcel = (data: any[], fileName: string = 
     { header: 'ID', key: 'id' },
     { header: 'Дата', key: 'date' },
     { header: 'Вид работ', key: 'workType' },
+    { header: 'Кол-во', key: 'quantity' },
     { header: 'Стоимость', key: 'cost' },
+    { header: 'Общая стоимость', key: 'totalCost' },
     { header: 'Частота', key: 'frequency' },
     { header: 'Пробег', key: 'mileage' },
     { header: 'Комментарий', key: 'comment' },
     { header: 'ID автомобиля', key: 'vehicleId' },
   ];
 
-  exportToExcel(data, {
+  // Process the data to include calculated total cost
+  const processedData = data.map(item => ({
+    ...item,
+    totalCost: (item.cost || 0) * (item.quantity || 1)
+  }));
+
+  exportToExcel(processedData, {
     fileName,
     sheetName,
     columns
