@@ -166,7 +166,7 @@ const Recipes = () => {
               <option value="первое">Первое</option>
               <option value="второе">Второе</option>
               <option value="напитки">Напитки</option>
-              <option value="сладости">Сладости</option>
+              <option value="выпечка">Выпечка</option>
               <option value="молочка">Молочка</option>
               <option value="хлеб">Хлеб</option>
             </select>

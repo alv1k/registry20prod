@@ -218,16 +218,48 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Стоимость *</label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               name="cost"
               value={cost}
-              onChange={(e) => setCost(Number(e.target.value))}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Remove any non-numeric characters except decimal point
+                const cleanValue = value.replace(/[^0-9.]/g, '');
+
+                // Split into integer and decimal parts
+                const parts = cleanValue.split('.');
+                if (parts.length > 2) return; // Prevent multiple decimal points
+
+                let integerPart = parts[0];
+                let decimalPart = parts.length > 1 ? parts[1] : '';
+
+                // Remove leading zeros from integer part (but keep at least one digit)
+                if (integerPart) {
+                  integerPart = integerPart.replace(/^0+([1-9])/, '$1'); // Remove leading zeros but keep first non-zero digit
+                  if (integerPart === '') integerPart = '0'; // If all digits were zeros, keep one zero
+                }
+
+                // Limit decimal part to 2 digits
+                if (decimalPart.length > 2) {
+                  decimalPart = decimalPart.substring(0, 2);
+                }
+
+                // Reconstruct the value
+                let processedValue = integerPart;
+                if (decimalPart) {
+                  processedValue += '.' + decimalPart;
+                }
+
+                // Convert to number and store in state
+                const numValue = processedValue === '' ? 0 : Number(processedValue);
+                setCost(Math.max(0, isNaN(numValue) ? 0 : Math.round(numValue * 100) / 100));
+              }}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
               className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Стоимость в рублях"
               min="0"
-              step="0.01"
               required
             />
           </div>
