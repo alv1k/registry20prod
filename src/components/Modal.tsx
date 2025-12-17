@@ -1,5 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiX } from 'react-icons/fi';
+
+// Type the icon properly
+const CloseIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
 
 interface ModalProps {
   isOpen: boolean;
@@ -7,22 +12,24 @@ interface ModalProps {
   children: React.ReactNode;
   title?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  showCloseButton?: boolean;
 }
 
 const sizeClasses = {
-  sm: 'max-w-md',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
-  full: 'max-w-full'
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
+  full: 'max-w-4xl w-full'
 };
 
-const Modal: React.FC<ModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  children, 
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  children,
   title,
-  size = 'md'
+  size = 'md',
+  showCloseButton = true
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -51,30 +58,54 @@ const Modal: React.FC<ModalProps> = ({
 
   // Create portal to render modal in body (for proper stacking context)
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
-      />
-      
-      {/* Modal content */}
-      <div 
-        ref={modalRef}
-        className={`p-4 relative bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {title && (
-          <div className="border-b border-gray-200 px-6 py-4">
-            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-          </div>
-        )}
-        
-        <div className="overflow-y-auto flex-grow">
-          {children}
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          {/* Modal content */}
+          <motion.div
+            ref={modalRef}
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(title || showCloseButton) && (
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                {title && (
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {title}
+                  </h3>
+                )}
+                {showCloseButton && (
+                  <button
+                    onClick={onClose}
+                    className="p-1 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    aria-label="Close modal"
+                  >
+                    <CloseIcon className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="overflow-y-auto flex-grow p-6">
+              {children}
+            </div>
+          </motion.div>
         </div>
-      </div>
-    </div>,
+      )}
+    </AnimatePresence>,
     document.body
   );
 };

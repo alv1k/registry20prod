@@ -10,6 +10,14 @@ import Button from '../../components/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../../utils/formatUtils';
 import { exportRecordsToExcel, exportMaintenanceRecordsToExcel } from '../../utils/exportUtils';
+import { FiPlus, FiDownload, FiX, FiTrash2, FiEdit } from 'react-icons/fi';
+
+// Type the icons properly
+const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
+const DownloadIcon = FiDownload as React.FC<React.SVGProps<SVGSVGElement>>;
+const XIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
+const TrashIcon = FiTrash2 as React.FC<React.SVGProps<SVGSVGElement>>;
+const EditIcon = FiEdit as React.FC<React.SVGProps<SVGSVGElement>>;
 
 interface VehicleMaintenanceRecord {
   id: number | string;
@@ -213,26 +221,14 @@ const VehiclesMaintenance = () => {
 
   return (
     <div className="p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Каталог технического обслуживания автомобилей</h1>
-        <div className="flex flex-wrap gap-3">
-          {isAdmin && (
-            <Button
-              onClick={() => openMaintenanceFormModal()}
-              variant="primary" className="flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              Добавить запись
-            </Button>
-          )}
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Каталог технического обслуживания автомобилей</h1>
       </div>
-      
+
       {/* Error messages */}
       {(vehicleDataError || maintenanceDataError) && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+          <XIcon className="h-5 w-5 mr-2" />
           {vehicleDataError && <div>{vehicleDataError}</div>}
           {maintenanceDataError && <div>{maintenanceDataError}</div>}
         </div>
@@ -321,9 +317,9 @@ const VehiclesMaintenance = () => {
       
       {/* Delete Confirmation Modal */}
       {isAdmin && deleteConfirmationId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Подтверждение удаления</h3>
             <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <Button
@@ -413,9 +409,7 @@ const VehiclesMaintenance = () => {
                           className="text-red-600 hover:text-red-900"
                           title="Удалить запись"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
+                          <TrashIcon className="h-5 w-5" />
                         </button>
                       </div>
                     )}
@@ -510,9 +504,7 @@ const VehiclesMaintenance = () => {
                           className="text-red-600 hover:text-red-900"
                           title="Удалить запись"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
+                          <TrashIcon className="h-5 w-5" />
                         </button>
                       </td>
                     )}
@@ -577,9 +569,7 @@ const VehiclesMaintenance = () => {
                                 className="text-blue-600 hover:text-blue-900"
                                 title="Редактировать автомобиль"
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
+                                <EditIcon className="h-5 w-5" />
                               </button>
                               <button
                                 onClick={(e) => {
@@ -654,9 +644,7 @@ const VehiclesMaintenance = () => {
                             className="text-blue-600 hover:text-blue-900 mr-3"
                             title="Редактировать автомобиль"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
+                            <EditIcon className="h-5 w-5" />
                           </button>
                           <button
                             onClick={(e) => {

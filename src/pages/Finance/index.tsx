@@ -11,6 +11,15 @@ import Tabs from '../../components/Tabs';
 import { formatCurrencyWithSeparators, formatDate } from '../../utils/formatUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { exportRecordsToExcel } from '../../utils/exportUtils';
+import { FiPlus, FiDownload, FiX, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+
+// Type the icons properly
+const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
+const DownloadIcon = FiDownload as React.FC<React.SVGProps<SVGSVGElement>>;
+const XIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
+const TrashIcon = FiTrash2 as React.FC<React.SVGProps<SVGSVGElement>>;
+const ChevronDownIcon = FiChevronDown as React.FC<React.SVGProps<SVGSVGElement>>;
+const ChevronUpIcon = FiChevronUp as React.FC<React.SVGProps<SVGSVGElement>>;
 
 const Finance = () => {
   const financeData = useStore((state) => state.financeData);
@@ -34,6 +43,10 @@ const Finance = () => {
 
   // Ref for the table container
   const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // Ref for the categories content container
+  const categoriesContentRef = useRef<HTMLDivElement>(null);
+  const [categoriesHeight, setCategoriesHeight] = useState<number | string>('auto');
   
 
 
@@ -51,6 +64,7 @@ const Finance = () => {
   const [dateFilter, setDateFilter] = useState<string>('');
   const [nameFilter, setNameFilter] = useState<string>('');
   const [classificationFilter, setClassificationFilter] = useState<string>('');
+  const [showAllExpensesByCategory, setShowAllExpensesByCategory] = useState<boolean>(false);
   
   // Keep getCurrentMonth function for clearFilters
   const getCurrentMonth = () => {
@@ -59,10 +73,10 @@ const Finance = () => {
     const month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
     
     return `${year}-${month}`;
-  };
+  };  
   
   const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'month', value: getCurrentMonth()});
-
+  
   useEffect(() => {
     // Load data from Firebase when component mounts
     syncFinanceData().catch(error => {
@@ -113,8 +127,10 @@ const Finance = () => {
           }
         }
         
-        // Name filter (partial match)
-        if (nameFilter && !record.name.toLowerCase().includes(nameFilter.toLowerCase())) {
+        // Name and comment filter (partial match in both fields)
+        if (nameFilter &&
+            !record.name.toLowerCase().includes(nameFilter.toLowerCase()) &&
+            !record.comment.toLowerCase().includes(nameFilter.toLowerCase())) {
           return false;
         }
         
@@ -203,7 +219,7 @@ const Finance = () => {
   }, [filteredData]);
 
   // Get top 3 most expensive categories
-  const getTopCategories = useMemo(() => {
+  const getExpensesByCategories = useMemo(() => {
     // Group records by classification and sum totals
     const categoryTotals: Record<string, number> = {};
     
@@ -220,8 +236,25 @@ const Finance = () => {
       .sort((a, b) => b.total - a.total);
     
     // Return top 3
-    return sortedCategories.slice(0, 3);
-  }, [filteredData]);
+    return showAllExpensesByCategory ? sortedCategories : sortedCategories.slice(0, 3);
+  }, [filteredData, showAllExpensesByCategory]);
+
+  // Update height of categories container when categories change
+  useEffect(() => {
+    // Use setTimeout to allow DOM to update first
+    const timer = setTimeout(() => {
+      if (categoriesContentRef.current) {
+        const contentHeight = categoriesContentRef.current.scrollHeight;
+        const newHeight = showAllExpensesByCategory
+          ? contentHeight
+          : Math.min(contentHeight, 150);
+        // Handle case when there are no categories
+        setCategoriesHeight(getExpensesByCategories.length > 0 ? newHeight : 60); // Provide default height for no-data case
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [getExpensesByCategories, showAllExpensesByCategory]);
 
   const handleRecordsDownload = () => {
     // Export the filtered finance data to Excel
@@ -231,66 +264,81 @@ const Finance = () => {
       'Финансовые записи'
     );
   }
+
+  const showAllExpensesByCategoryHandler = () => {
+    setShowAllExpensesByCategory(prev => !prev);
+  }
   
   const financeTabs = [
     {
       id: 'tab1',
       title: 'Финансы',
       content: (
-        <div className="p-4 bg-white rounded-lg shadow">
-          <div className="flex gap-10">
-            <h3 className="text-lg font-semibold mb-2">Записи расходов/доходов</h3>  
-            {isAdmin && (
-              <Button 
-                onClick={() => openFinanceFormModal()}
-                variant="primary" className="flex items-center ms-auto"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Добавить
-              </Button>
-            )}        
-            <button className={isAdmin ? '' : 'ms-auto'} onClick={handleRecordsDownload}>Скачать в .xlsx</button>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h3 className="text-lg font-semibold text-gray-900">Записи расходов/доходов</h3>
+              <div className="flex gap-3 ms-auto">
+                {isAdmin && (
+                  <Button
+                    onClick={() => openFinanceFormModal()}
+                    variant="primary"
+                    className="flex items-center"
+                  >
+                    <PlusIcon className="mr-2" />
+                    Добавить
+                  </Button>
+                )}
+                <Button
+                  onClick={handleRecordsDownload}
+                  variant="secondary"
+                  className="flex items-center"
+                >
+                  <DownloadIcon />                  
+                </Button>
+              </div>
+            </div>
           </div>
-          <div ref={tableContainerRef} className="mt-2 bg-white rounded-lg shadow-md border border-gray-200 overflow-y-auto max-h-[500px]">
+
+          <div ref={tableContainerRef} className="overflow-y-auto max-h-[600px]">
             <div className="overflow-x-auto">
               {isDataLoading ? (
-                <div className="py-12">
+                <div className="py-12 flex justify-center">
                   <LoadingSpinner message="Загрузка финансовых данных..." />
                 </div>
               ) : (
                 <>
                   {/* Mobile View - Card Layout */}
-                  <div className="block md:hidden overflow-y-scroll">
+                  <div className="sm:hidden divide-y divide-gray-200">
                     {filteredData.length > 0 ? (
                       filteredData.map((record) => (
-                        <div key={record.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
+                        <div
+                          key={record.id}
+                          className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${isAdmin ? 'cursor-pointer' : ''}`}
+                          onClick={isAdmin ? () => openFinanceFormModal(record.id) : undefined}
+                        >
                           <div className="flex justify-between items-start">
-                            <div 
-                              className={`flex-1 ${isAdmin ? 'cursor-pointer' : ''}`}
-                              onClick={isAdmin ? () => openFinanceFormModal(record.id) : undefined}
-                            >
+                            <div className="flex-1">
                               <div className="flex items-center justify-between">
-                                <div className="text-sm font-medium text-gray-900">{record.name}</div>
+                                <div className="font-medium text-gray-900">{record.name}</div>
                                 <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
                               </div>
-                              <div className="mt-1 text-sm text-gray-500 truncate max-w-xs">{record.comment}</div>
-                              <div className="mt-2 text-xs text-gray-500 space-y-1">
+                              <div className="mt-1 text-sm text-gray-500 truncate">{record.comment}</div>
+                              <div className="mt-3 space-y-1 text-sm">
                                 <div className="flex justify-between">
-                                  <span>Цена:</span>
+                                  <span className="text-gray-600">Цена:</span>
                                   <span className="font-medium">{formatCurrencyWithSeparators(record.price)} ₽</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span>Кол-во:</span>
+                                  <span className="text-gray-600">Кол-во:</span>
                                   <span className="font-medium">{record.quantity}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span>Сумма:</span>
-                                  <span className="font-medium">{formatCurrencyWithSeparators(record.total)} ₽</span>
+                                  <span className="text-gray-600">Сумма:</span>
+                                  <span className="font-medium text-green-600">{formatCurrencyWithSeparators(record.total)} ₽</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span>Классификация:</span>
+                                  <span className="text-gray-600">Категория:</span>
                                   <span className="font-medium">{record.classification}</span>
                                 </div>
                               </div>
@@ -302,12 +350,10 @@ const Finance = () => {
                                     e.stopPropagation();
                                     confirmDelete(record.id);
                                   }}
-                                  className="text-red-600 hover:text-red-900"
+                                  className="text-red-600 hover:text-red-800 p-1"
                                   title="Удалить запись"
                                 >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                                  </svg>
+                                  <TrashIcon className="h-5 w-5" />
                                 </button>
                               </div>
                             )}
@@ -315,14 +361,14 @@ const Finance = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="p-4 text-center text-sm text-gray-500">
+                      <div className="p-8 text-center text-gray-500">
                         Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Desktop View - Table */}
-                  <table className="hidden md:table divide-y divide-gray-200 min-w-full overflow-y-scroll">
+                  <table className="hidden sm:table min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
@@ -330,7 +376,7 @@ const Finance = () => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Цена</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кол-во</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Классификация</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
                         {isAdmin && (
                           <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
@@ -340,67 +386,53 @@ const Finance = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredData.length > 0 ? (
                         filteredData.map((record, index) => (
-                          <tr 
-                            key={record.id} 
-                            className={`hover:bg-gray-50 ${isAdmin ? 'cursor-pointer' : ''}`}
+                          <tr
+                            key={record.id}
+                            className={`hover:bg-gray-50 transition-colors ${isAdmin ? 'cursor-pointer' : ''}`}
                             onClick={isAdmin ? () => openFinanceFormModal(record.id) : undefined}
                           >
-                            <td 
-                              className="p-4 whitespace-nowrap text-sm text-gray-500"
-                            >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {formatDate(record.date)}
                             </td>
-                            <td 
-                              className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                            >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                               {record.name}
                             </td>
-                            <td 
-                              className="p-4 whitespace-nowrap text-sm text-gray-500"
-                            >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {formatCurrencyWithSeparators(record.price)} ₽
                             </td>
-                            <td 
-                              className="p-4 whitespace-nowrap text-sm text-gray-500"
-                            >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {record.quantity}
                             </td>
-                            <td 
-                              className="p-4 whitespace-nowrap text-sm text-gray-500"
-                            >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
                               {formatCurrencyWithSeparators(record.total)} ₽
                             </td>
-                            <td 
-                              className="p-4 whitespace-nowrap text-sm text-gray-500"
-                            >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {record.classification}
                             </td>
-                            <td 
-                              className="p-4 text-sm text-gray-500"
-                            >
+                            <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                               {record.comment}
                             </td>
                             {isAdmin && (
-                              <td className="p-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    confirmDelete(record.id);
-                                  }}
-                                  className="text-red-600 hover:text-red-900"
-                                  title="Удалить запись"
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                                  </svg>
-                                </button>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div className="flex justify-end space-x-2">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      confirmDelete(record.id);
+                                    }}
+                                    className="text-red-600 hover:text-red-800 p-1"
+                                    title="Удалить запись"
+                                  >
+                                    <TrashIcon className="h-5 w-5" />
+                                  </button>
+                                </div>
                               </td>
                             )}
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={isAdmin ? 8 : 7} className="p-4 text-center text-sm text-gray-500">
+                          <td colSpan={isAdmin ? 8 : 7} className="px-6 py-8 text-center text-sm text-gray-500">
                             Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                           </td>
                         </tr>
@@ -440,40 +472,79 @@ const Finance = () => {
       id: 'tab3',
       title: 'Аналитика',
       content: (
-        <div className="p-4 bg-white rounded-lg shadow">
-          {/* Chart section */}
-          
-          <h3 className="text-lg font-semibold mb-2">Аналитика</h3>          
-      
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Аналитика</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Total Amount Block */}
-            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Общая сумма</h3>
-              <div className="flex items-center">
-                <div className="text-3xl font-bold text-blue-600">
-                  {formatCurrencyWithSeparators(calculateTotalAmount)} ₽
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600">Общая сумма</h4>
+                  <div className="mt-2 text-2xl font-bold text-blue-700">
+                    {formatCurrencyWithSeparators(calculateTotalAmount)} ₽
+                  </div>
                 </div>
-                <div className="ml-4 text-sm text-gray-500">
-                  по выбранным фильтрам
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <DownloadIcon className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
+              <div className="mt-4 text-sm text-gray-600">
+                по выбранным фильтрам
+              </div>
             </div>
-            
+
             {/* Top 3 Categories Block */}
-            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Топ 3 категории</h3>
-              <div className="space-y-3">
-                {getTopCategories.length > 0 ? (
-                  getTopCategories.map((category, index) => (
+            <div className="bg-gradient-to-br min-h-[210px] from-indigo-50 to-indigo-100 rounded-xl p-6 border border-indigo-100">
+              <div className="flex justify-between">
+                <h4 className="text-sm font-medium text-gray-600">
+                  <span className="relative h-5 overflow-hidden inline-block min-w-[250px]">
+                    <span className={`
+                      absolute inset-0 transition-opacity duration-300 ease-in-out
+                      ${showAllExpensesByCategory ? 'opacity-0' : 'opacity-100'}
+                    `}>
+                      Топ 3 категории
+                    </span>
+                    <span className={`
+                      absolute inset-0 transition-opacity duration-300 ease-in-out
+                      ${showAllExpensesByCategory ? 'opacity-100' : 'opacity-0'}
+                    `}>
+                      Расходы по категориям
+                    </span>
+                  </span>
+                </h4>
+                <span
+                  className="transition-transform duration-300 ease-in-out cursor-pointer"
+                  style={{
+                    transform: showAllExpensesByCategory ? 'rotate(0deg)' : 'rotate(180deg)'
+                  }}
+                  onClick={() => showAllExpensesByCategoryHandler()}
+                >
+                    <ChevronDownIcon />
+                </span>
+              </div>
+              <div
+                ref={categoriesContentRef}
+                className={`
+                  mt-4 space-y-4 overflow-hidden
+                `}
+                style={{
+                  height: categoriesHeight + 'px',
+                  transition: 'height 0.5s ease-in-out'
+                }}
+              >
+                {getExpensesByCategories.length > 0 ? (
+                  getExpensesByCategories.map((category, index) => (
                     <div key={category.name} className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm mr-3 ${
-                          index === 0 ? 'bg-yellow-500' : 
-                          index === 1 ? 'bg-gray-400' : 'bg-amber-700'
+                          index === 0 ? 'bg-yellow-500' :
+                          index === 1 ? 'bg-gray-400' :
+                          index === 2 ? 'bg-amber-700' : 'bg-slate-600'
                         }`}>
                           {index + 1}
                         </div>
-                        <div className="font-medium text-gray-800">{category.name}</div>
+                        <div className="text-gray-900 font-medium">{category.name}</div>
                       </div>
                       <div className="font-semibold text-gray-700">
                         {formatCurrencyWithSeparators(category.total)} ₽
@@ -488,31 +559,35 @@ const Finance = () => {
               </div>
             </div>
           </div>
-          <Charts records={filteredData} />
+          <div className="bg-gray-50 rounded-xl p-4">
+            <Charts records={filteredData} />
+          </div>
         </div>
       )
     },{
       id: 'tab4',
       title: 'Категории',
       content: (
-        <div className="p-4 bg-white rounded-lg shadow">
-          <div className="flex gap-10">
-            <h3 className="text-lg font-semibold mb-2">Управление категориями</h3>
-            
-            {isAdmin && (
-              <button 
-                onClick={() => openCategoryFormModal()}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Добавить
-              </button>
-            )}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h3 className="text-lg font-semibold text-gray-900">Управление категориями</h3>
+              {isAdmin && (
+                <Button
+                  onClick={() => openCategoryFormModal()}
+                  variant="primary"
+                  className="flex items-center"
+                >
+                  <PlusIcon className="mr-2" />
+                  Добавить
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="max-h-96 overflow-y-auto pr-2">
-            <CategoryManager onAddCategoryClick={() => openCategoryFormModal()} />
+          <div className="p-6">
+            <div className="max-h-96 overflow-y-auto">
+              <CategoryManager onAddCategoryClick={() => openCategoryFormModal()} />
+            </div>
           </div>
         </div>
       )
@@ -525,7 +600,8 @@ const Finance = () => {
       
       {/* Error message */}
       {dataError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+          <XIcon className="h-5 w-5 mr-2" />
           {dataError}
         </div>
       )}
@@ -534,10 +610,10 @@ const Finance = () => {
       <AnimatedAccordion title="Фильтры" defaultOpen={true}>
         <div className="md:flex gap-4">          
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Название</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Название и комментарий</label>
             <input
               type="text"
-              placeholder="Фильтр по названию"
+              placeholder="Фильтр по названию и комментарию"
               value={nameFilter}
               onChange={(e) => setNameFilter(e.target.value)}
               className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
@@ -621,9 +697,9 @@ const Finance = () => {
       
       {/* Delete Confirmation Modal */}
       {isAdmin && deleteConfirmationId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Подтверждение удаления</h3>
             <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <Button

@@ -1,8 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
 import {
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -45,14 +43,25 @@ interface DateData {
   total: number;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'];
+interface ClassificationData {
+  name: string;
+  total: number;
+  count: number;
+}
+
+interface LegendPayload {
+  value: string;
+  // other properties from Recharts legend payload
+}
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#c44569', '#f8c291', '#6a89cc', '#b8e994', '#f6b93b', '#82ccdd'];
 
 const Charts: React.FC<ChartsProps> = ({ records }) => {
   const isMobile = useIsMobile();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   // Подготовка данных для диаграммы по классификациям
-  const classificationData = Object.values(
-    records.reduce((acc: Record<string, any>, record) => {
+  const classificationData: (ClassificationData & { [key: string]: any })[] = Object.values(
+    records.reduce((acc: Record<string, ClassificationData>, record) => {
       if (!acc[record.classification]) {
         acc[record.classification] = {
           name: record.classification,
@@ -68,7 +77,7 @@ const Charts: React.FC<ChartsProps> = ({ records }) => {
 
   // Подготовка данных для временной диаграммы
   const dateData = Object.values(
-    records.reduce((acc: Record<string, any>, record) => {
+    records.reduce((acc: Record<string, DateData>, record) => {
       if (!acc[record.date]) {
         acc[record.date] = {
           date: record.date,
@@ -78,7 +87,7 @@ const Charts: React.FC<ChartsProps> = ({ records }) => {
       acc[record.date].total += record.total;
       return acc;
     }, {})
-  ).sort((a: any, b: any) => a.date.localeCompare(b.date))
+  ).sort((a, b) => a.date.localeCompare(b.date))
   .map(item => ({
     ...item,
     date: formatDate(item.date) // Форматируем дату для отображения
@@ -102,9 +111,8 @@ const Charts: React.FC<ChartsProps> = ({ records }) => {
                   fill="#8884d8"
                   dataKey="total"
                   nameKey="name"
-                  label={(entry: any) => isMobile ? '' : `${entry.name}: ${(entry.percent * 100).toFixed(0)}%`}
-                  onMouseEnter={(data, index) => setActiveIndex(index)}
-                  onMouseLeave={() => setActiveIndex(null)}
+                  label={({ name, percent }) => isMobile ? '' : `${name}: ${percent ? (Number(percent) * 100).toFixed(0) : '0'}%`}
+                  
                 >
                   {classificationData.map((entry, index) => (
                     <Cell 
@@ -116,17 +124,7 @@ const Charts: React.FC<ChartsProps> = ({ records }) => {
                   ))}
                 </Pie>
                 <Tooltip formatter={(value: number) => [`${formatCurrencyWithSeparators(value)} ₽`]} />
-                <Legend 
-                  onMouseEnter={(payload) => {
-                    const index = classificationData.findIndex(item => item.name === payload.value);
-                    if (index !== -1) {
-                      setActiveIndex(index);
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    setActiveIndex(null);
-                  }}
-                />
+                <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>

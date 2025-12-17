@@ -1,10 +1,12 @@
 import React from 'react';
-import { 
-  MdMenu as MdMenuBase, 
-  MdOutlineMenu as MdOutlineMenuBase
-} from 'react-icons/md'; // Material Design icons
+import { FiMenu, FiX } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { signOutUser } from '../firebase/authService';
+import Button from './Button';
+
+// Type the icons properly
+const MenuIcon = FiMenu as React.FC<React.SVGProps<SVGSVGElement>>;
+const CloseIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
 
 interface HeaderProps {
   sidebarOpen: boolean;
@@ -12,11 +14,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
-  const MdMenu = MdMenuBase as any;
-  const MdOutlineMenu = MdOutlineMenuBase as any;
-  
   const { user, loading } = useAuth();
-  
+
   const handleSignOut = async () => {
     try {
       await signOutUser();
@@ -26,66 +25,64 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
       // Show error message to user
       alert('Ошибка при выходе из системы. Пожалуйста, попробуйте снова.');
     }
-  }; 
+  };
 
   return (
-    <header className="bg-[#033835] shadow-md">
-      <div className="mx-auto px-6">
-        <div className="flex h-16">
-          
-          <div className="flex items-center md:hidden">
-            {/* Mobile menu button */}
+    <header className="bg-white shadow-sm border-b border-gray-200">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+
+          <div className="flex items-center">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none"
+              className="md:hidden -ml-2 p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              aria-label="Toggle sidebar"
             >
-              <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-              </svg>
+              {sidebarOpen ? (
+                <CloseIcon className="h-6 w-6" />
+              ) : (
+                <MenuIcon className="h-6 w-6" />
+              )}
             </button>
-          </div>
-          <div className="hidden md:flex items-center">
-            <MdMenu 
-              onClick={() => setSidebarOpen(!sidebarOpen)} 
-              size={24} 
-              className="text-gray-700 hover:text-indigo-600 cursor-pointer w-6 h-6" 
-            />
-            <div className="ms-12 flex">
-              <a href="/" className="flex gap-5 justify-center items-center">
-                <img src="/favicon.png" alt="logo" className="h-10 w-10" />
-                <p className="text-xl text-white font-bold">
+
+            <div className="flex items-center ml-0">
+              <a href="/" className="flex items-center">
+                <img src="/favicon.png" alt="logo" className="h-8 w-8 rounded-lg" />
+                <span className="ml-2 text-xl font-bold text-gray-900 hidden sm:block">
                   Реестр 2.0
-                </p>
+                </span>
               </a>
             </div>
           </div>
-          
+
           {/* Auth section - right aligned */}
-          <div className="ml-auto flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {loading ? (
-              <div className="text-white">Загрузка...</div>
+              <div className="text-gray-600">Загрузка...</div>
             ) : user ? (
               // User is authenticated - show user info and sign out
-              <div className="flex items-center space-x-4">
-                <div className="hidden md:block text-sm text-white">
-                  <div className="font-medium">{user.email}</div>
-                  <div className="text-xs opacity-80">UID: {user.uid.substring(0, 8)}...</div>
+              <div className="flex items-center space-x-3">
+                <div className="hidden md:block text-sm text-gray-600">
+                  <div className="font-medium text-gray-900 truncate max-w-xs">{user.email}</div>
+                  <div className="text-xs text-gray-500">UID: {user.uid.substring(0, 8)}...</div>
                 </div>
-                <button
+                <Button
                   onClick={handleSignOut}
-                  className="px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors"
+                  variant="danger"
+                  size="sm"
                 >
                   Выйти
-                </button>
+                </Button>
               </div>
             ) : (
               // User is not authenticated - show sign in
-              <a 
-                href="/login" 
-                className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
+              <Button
+                href="/login"
+                variant="primary"
+                size="sm"
               >
                 Войти
-              </a>
+              </Button>
             )}
           </div>
         </div>

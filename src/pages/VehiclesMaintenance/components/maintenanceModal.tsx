@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Modal from '../../../components/Modal';
 
 interface MaintenanceRecord {
@@ -193,26 +194,34 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
                 </svg>
               </div>
             </div>
-            {showWorkTypeDropdown  && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                {workTypeOptions
-                  .filter(option =>
-                    option.toLowerCase().includes(workType.toLowerCase())
-                  )
-                  .map((option, index) => (
-                    <div
-                      key={index}
-                      className="p-2 hover:bg-blue-100 cursor-pointer"
-                      onMouseDown={() => {
-                        setWorkType(option);
-                        setShowWorkTypeDropdown(false);
-                      }}
-                    >
-                      {option}
-                    </div>
-                  ))}
-              </div>
-            )}
+            <AnimatePresence>
+              {showWorkTypeDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+                >
+                  {workTypeOptions
+                    .filter(option =>
+                      option.toLowerCase().includes(workType.toLowerCase())
+                    )
+                    .map((option, index) => (
+                      <div
+                        key={index}
+                        className="p-2 hover:bg-blue-100 cursor-pointer"
+                        onMouseDown={() => {
+                          setWorkType(option);
+                          setShowWorkTypeDropdown(false);
+                        }}
+                      >
+                        {option}
+                      </div>
+                    ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           
           <div>

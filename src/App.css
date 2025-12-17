@@ -1,3 +1,27 @@
+/* Modern UI - App.css */
+/* Remove the older styling that's now handled in index.css */
+
+/* App container */
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(var(--bg-secondary));
+  color: rgb(var(--text-primary));
+}
+
+/* Modern transition for main content */
+main {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid rgb(var(--primary-500));
+  outline-offset: 2px;
+}
+
+/* Remove old styling */
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -18,33 +42,13 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
-  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
 }
 
 .App-link {
   color: #61dafb;
-}
-
-input, * {
-  outline: none;
-}
-
-/* Custom select with custom arrow */
-select {
-  outline: none;
-  /* Remove default arrow */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  /* Add padding to make space for custom arrow */
-  padding-right: 2rem;
-  /* Add custom arrow using background */
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.2rem 1.2rem;
 }
 
 @keyframes App-logo-spin {
