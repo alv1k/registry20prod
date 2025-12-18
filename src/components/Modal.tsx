@@ -16,11 +16,11 @@ interface ModalProps {
 }
 
 const sizeClasses = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-  full: 'max-w-4xl w-full'
+  sm: 'w-fit min-w-[20rem] max-w-[90vw]',
+  md: 'w-fit min-w-[24rem] max-w-[90vw]',
+  lg: 'w-fit min-w-[28rem] max-w-[90vw]',
+  xl: 'w-fit min-w-[32rem] max-w-[90vw]',
+  full: 'w-full max-w-[90vw]'
 };
 
 const Modal: React.FC<ModalProps> = ({
@@ -77,7 +77,7 @@ const Modal: React.FC<ModalProps> = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}
+            className={`relative bg-white rounded-xl shadow-2xl ${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col`}
             onClick={(e) => e.stopPropagation()}
           >
             {(title || showCloseButton) && (

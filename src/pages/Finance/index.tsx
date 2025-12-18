@@ -5,6 +5,7 @@ import CategoryModal from './components/categoryModal';
 import AnimatedAccordion from '../../components/AnimatedAccordion';
 import Charts from './components/charts';
 import CategoryManager from './components/categoryManager';
+import GroceryListManager from './components/groceryListManager';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import Button from '../../components/Button';
 import Tabs from '../../components/Tabs';
@@ -12,6 +13,7 @@ import { formatCurrencyWithSeparators, formatDate } from '../../utils/formatUtil
 import { useAuth } from '../../contexts/AuthContext';
 import { exportRecordsToExcel } from '../../utils/exportUtils';
 import { FiPlus, FiDownload, FiX, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { log } from 'console';
 
 // Type the icons properly
 const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -47,6 +49,7 @@ const Finance = () => {
   // Ref for the categories content container
   const categoriesContentRef = useRef<HTMLDivElement>(null);
   const [categoriesHeight, setCategoriesHeight] = useState<number | string>('auto');
+
   
 
 
@@ -176,6 +179,15 @@ const Finance = () => {
     setIsCategoryFormModalOpen(false);
     setSelectedCategoryId(null);
   };
+
+  // We'll store the grocery list manager's open function once it registers
+  const groceryListOpenFunctionRef = useRef<(() => void) | null>(null);
+
+  const openGroceryListFormModal = (id?: number | string | null) => {
+    if (groceryListOpenFunctionRef.current) {
+      groceryListOpenFunctionRef.current();
+    }
+  }
 
   // Wrapper function to add a record and trigger scroll to bottom
   const addFinanceRecordAndScroll = async (record: any) => {
@@ -588,6 +600,36 @@ const Finance = () => {
             <div className="max-h-96 overflow-y-auto">
               <CategoryManager onAddCategoryClick={() => openCategoryFormModal()} />
             </div>
+          </div>
+        </div>
+      )
+    },{
+      id: 'tab5',
+      title: 'Список покупок',
+      content: (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h3 className="text-lg font-semibold text-gray-900">Список покупок</h3>
+              {isAdmin && (
+                <Button
+                  onClick={() => openGroceryListFormModal()}
+                  variant="primary"
+                  className="flex items-center"
+                >
+                  <PlusIcon className="mr-2" />
+                  Добавить покупки
+                </Button>
+              )}
+            </div>
+          </div>
+          <div className="max-h-96 overflow-y-auto">
+            <GroceryListManager
+              onRegisterOpenForm={(func) => {
+                groceryListOpenFunctionRef.current = func;
+              }}
+              onAddGroceryClick={() => openGroceryListFormModal()}
+            />
           </div>
         </div>
       )

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { signIn, signUp } from '../firebase/authService';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -13,8 +14,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +29,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       } else {
         await signIn(email, password);
       }
-      onSuccess();
+      // Navigate to home page after successful login/signup
+      navigate('/');
+      onSuccess(); // Still call onSuccess in case parent component has additional logic
     } catch (err: any) {
       setError(err.message || 'Произошла ошибка при входе');
     } finally {

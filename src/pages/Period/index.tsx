@@ -122,7 +122,7 @@ const Period = () => {
         <div>
           {handlePeriodAnalytics().map((test) => (
             <div>
-              {test.category}
+              {/* {test.category} */}
             </div>
           ))}
         </div>

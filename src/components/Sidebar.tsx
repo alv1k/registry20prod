@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { FiX, FiHome, FiDollarSign, FiTruck, FiHome as FiHouse, FiBook, FiChevronRight, FiCoffee } from 'react-icons/fi';
 import { useStore } from '../store/useStore';
 import { useAdminAccess } from '../hooks/useAdminAccess';
+import Tooltip from './Tooltip';
 
 // Type the icons properly
 const CloseIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -84,55 +85,59 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
 
             <nav className="flex-1 p-2 mt-4 overflow-y-auto">
               <ul className="space-y-1">
-                <li>
-                  <Link
-                    to="/"
-                    onClick={() => handleClick('/')}
-                    className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
-                      location.pathname === '/'
-                        ? 'bg-blue-50 text-blue-600 shadow-sm'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }
-                    ${
-                      sidebarOpen ? '' : 'justify-center'
-                    }`}
-                  >
-                    <HomeIcon className="h-5 w-5" />
-                    <span
-                      className={`${
-                        sidebarOpen ? 'ml-3 font-medium text-sm' : 'hidden' // Hide text when collapsed
+                <li  className="w-fit">
+                  <Tooltip content="Главная" position={sidebarOpen ? 'right' : 'bottom'}>
+                    <Link
+                      to="/"
+                      onClick={() => handleClick('/')}
+                      className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
+                        location.pathname === '/'
+                          ? 'bg-blue-50 text-blue-600 shadow-sm'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      }
+                      ${
+                        sidebarOpen ? '' : 'justify-center'
                       }`}
                     >
-                      Главная
-                    </span>
-                  </Link>
+                      <HomeIcon className="h-5 w-5" />
+                      <span
+                        className={`${
+                          sidebarOpen ? 'ml-3 font-medium text-sm' : 'hidden' // Hide text when collapsed
+                        }`}
+                      >
+                        Главная
+                      </span>
+                    </Link>
+                  </Tooltip>
                 </li>
 
                 {navItems.map((item, index) => {
                   const IconComponent = item.icon;
                   return (
                     <li key={`${item.name}-${index}`}>
-                      <Link
-                        to={item.path}
-                        onClick={() => handleClick(item.path)}
-                        className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
-                          location.pathname === item.path
-                            ? 'bg-blue-50 text-blue-600 shadow-sm'
-                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                        }
-                        ${
-                          sidebarOpen ? '' : 'justify-center'
-                        }`}
-                      >
-                        <IconComponent className="h-5 w-5" />
-                        <span
-                          className={`${
-                            sidebarOpen ? 'ml-3 font-medium text-sm' : 'hidden' // Hide text when collapsed
+                      <Tooltip content={item.name} position={sidebarOpen ? 'right' : 'bottom'}>
+                        <Link
+                          to={item.path}
+                          onClick={() => handleClick(item.path)}
+                          className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
+                            location.pathname === item.path
+                              ? 'bg-blue-50 text-blue-600 shadow-sm'
+                              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                          }
+                          ${
+                            sidebarOpen ? '' : 'justify-center'
                           }`}
                         >
-                          {item.name}
-                        </span>
-                      </Link>
+                          <IconComponent className="h-5 w-5" />
+                          <span
+                            className={`${
+                              sidebarOpen ? 'ml-3 font-medium text-sm' : 'hidden' // Hide text when collapsed
+                            }`}
+                          >
+                            {item.name}
+                          </span>
+                        </Link>
+                      </Tooltip>
                     </li>
                   );
                 })}
@@ -150,59 +155,63 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
 
       {/* Desktop sidebar without animation - always visible */}
       <div className={`${
-        sidebarOpen ? 'w-64' : 'w-20' // Full width when open, narrow when collapsed
+        sidebarOpen ? 'w-64' : 'w-fit' // Full width when open, narrow when collapsed
       } bg-white shadow-lg h-screen flex flex-col z-30 md:static fixed inset-y-0 left-0 hidden md:flex md:translate-x-0`}>
         <nav className="flex-1 p-2 mt-4 overflow-y-auto">
           <ul className="space-y-1">
             <li>
-              <Link
-                to="/"
-                onClick={() => handleClick('/')}
-                className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
-                  location.pathname === '/'
-                    ? 'bg-blue-50 text-blue-600 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                }
-                ${
-                  sidebarOpen ? '' : 'justify-center'
-                }`}
-              >
-                <HomeIcon className="h-5 w-5" />
-                <span
-                  className={`${
-                    sidebarOpen ? 'ml-3 font-medium text-sm' : 'hidden' // Hide text when collapsed
+              <Tooltip content="Главная" position={sidebarOpen ? 'right' : 'bottom'}>
+                <Link
+                  to="/"
+                  onClick={() => handleClick('/')}
+                  className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
+                    location.pathname === '/'
+                      ? 'bg-blue-50 text-blue-600 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  }
+                  ${
+                    sidebarOpen ? '' : 'justify-center'
                   }`}
                 >
-                  Главная
-                </span>
-              </Link>
+                  <HomeIcon className="h-5 w-5" />
+                  <span
+                    className={`${
+                      sidebarOpen ? 'ml-3 font-medium text-sm' : 'hidden' // Hide text when collapsed
+                    }`}
+                  >
+                    Главная
+                  </span>
+                </Link>
+              </Tooltip>
             </li>
 
             {navItems.map((item, index) => {
               const IconComponent = item.icon;
               return (
                 <li key={`${item.name}-${index}`}>
-                  <Link
-                    to={item.path}
-                    onClick={() => handleClick(item.path)}
-                    className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
-                      location.pathname === item.path
-                        ? 'bg-blue-50 text-blue-600 shadow-sm'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }
-                    ${
-                      sidebarOpen ? '' : 'justify-center'
-                    }`}
-                  >
-                    <IconComponent className="h-5 w-5" />
-                    <span
-                      className={`${
-                        sidebarOpen ? 'ml-3 font-medium text-sm' : 'hidden' // Hide text when collapsed
+                  <Tooltip content={item.name} position={sidebarOpen ? 'right' : 'bottom'}>
+                    <Link
+                      to={item.path}
+                      onClick={() => handleClick(item.path)}
+                      className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
+                        location.pathname === item.path
+                          ? 'bg-blue-50 text-blue-600 shadow-sm'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      }
+                      ${
+                        sidebarOpen ? '' : 'justify-center'
                       }`}
                     >
-                      {item.name}
-                    </span>
-                  </Link>
+                      <IconComponent className="h-5 w-5" />
+                      <span
+                        className={`${
+                          sidebarOpen ? 'ml-3 font-medium text-sm' : 'hidden' // Hide text when collapsed
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                    </Link>
+                  </Tooltip>
                 </li>
               );
             })}
