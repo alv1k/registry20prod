@@ -38,7 +38,7 @@ interface SingleGroceryFormValues {
 }
 
 interface MultipleGroceryFormValues {
-  items: { name: string; category: string; quantity: number; unit: string }[];
+  items: { name: string; category: string; quantity: number; price: number; unit: string }[];
   comment?: string;
 }
 
@@ -134,7 +134,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
           name: item.name,
           category: item.category,
           quantity: item.quantity || 1, // Use provided quantity or default to 1
-          price: 0, // Default price for multiple items
+          price: item.price || 0, // Use provided price or default to 0
           unit: item.unit || 'шт', // Use provided unit or default to 'шт'
           purchased: false,
           createdAt: new Date().toISOString()
@@ -167,7 +167,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
         name: item.name,
         category: item.category,
         quantity: item.quantity || 1,
-        price: existingItem?.price || 0,
+        price: item.price || 0,
         unit: item.unit || 'шт',
         purchased: existingItem?.purchased || false,
         createdAt: existingItem?.createdAt || new Date().toISOString()
@@ -318,21 +318,39 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
 
                 {/* Display all items in this entry */}
                 <div className="ml-8 space-y-1">
-                  {entry.items.map((item, index) => (
-                    <div key={item.id || index} className="flex items-center justify-between py-1">
-                      <div className="flex items-center">
-                        <div className={`font-medium ${item.purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                          {item.name}
+                  {entry.items.map((item, index) => {
+                    const totalPrice = item.quantity * item.price;
+                    return (
+                      <div key={item.id || index} className="grid grid-cols-12 gap-2 py-1">
+                        <div className="col-span-4 flex items-center">
+                          <div className={`font-medium ${item.purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                            {item.name}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-500 ml-2">
-                          {item.quantity} {item.unit} • {item.category}
+                        <div className="col-span-2 text-sm text-gray-500">
+                          {item.quantity} {item.unit}
+                        </div>
+                        <div className="col-span-2 text-sm text-gray-500">
+                          {item.category}
+                        </div>
+                        <div className="col-span-2 text-sm font-medium text-gray-700">
+                          {item.price.toLocaleString()} ₽/ед
+                        </div>
+                        <div className="col-span-2 text-sm font-medium text-green-600">
+                          {totalPrice.toLocaleString()} ₽
                         </div>
                       </div>
-                      <div className="text-sm font-medium text-gray-700">
-                        {item.price.toLocaleString()} ₽
-                      </div>
+                    );
+                  })}
+                  {/* Total sum for this entry */}
+                  <div className="grid grid-cols-12 gap-2 py-2 border-t border-gray-200 mt-1">
+                    <div className="col-span-8 text-sm font-medium text-gray-700">
+                      Общая сумма:
                     </div>
-                  ))}
+                    <div className="col-span-4 text-sm font-bold text-green-700">
+                      {entry.items.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString()} ₽
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -401,7 +419,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
   });
 
   const [multipleValues, setMultipleValues] = useState<MultipleGroceryFormValues>({
-    items: groceryEntry?.items?.map(item => ({ name: item.name, category: item.category, quantity: item.quantity, unit: item.unit })) || [{ name: '', category: '', quantity: 1, unit: 'шт' }],
+    items: groceryEntry?.items?.map(item => ({ name: item.name, category: item.category, quantity: item.quantity, price: item.price, unit: item.unit })) || [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт' }],
     comment: groceryEntry?.comment || ''
   });
 
@@ -423,8 +441,9 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
           name: item.name,
           category: item.category,
           quantity: item.quantity,
+          price: item.price,
           unit: item.unit
-        })) || [{ name: '', category: '', quantity: 1, unit: 'шт' }],
+        })) || [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт' }],
         comment: groceryEntry.comment || ''
       });
     } else {
@@ -437,7 +456,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
         unit: 'шт'
       });
       setMultipleValues({
-        items: [{ name: '', category: '', quantity: 1, unit: 'шт' }],
+        items: [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт' }],
         comment: ''
       });
     }
@@ -485,6 +504,10 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
           itemErrors.quantity = 'Количество должно быть больше 0';
           isValid = false;
         }
+        if (item.price < 0) {
+          itemErrors.price = 'Цена не может быть отрицательной';
+          isValid = false;
+        }
         if (Object.keys(itemErrors).length > 0) {
           newErrors[index] = itemErrors;
         }
@@ -498,7 +521,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
   const handleAddItemRow = () => {
     setMultipleValues({
       ...multipleValues,
-      items: [...multipleValues.items, { name: '', category: '', quantity: 1, unit: 'шт' }]
+      items: [...multipleValues.items, { name: '', category: '', quantity: 1, price: 0, unit: 'шт' }]
     });
   };
 
@@ -510,7 +533,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
     }
   };
 
-  const handleMultipleChange = (index: number, field: 'name' | 'category' | 'quantity' | 'unit', value: string | number) => {
+  const handleMultipleChange = (index: number, field: 'name' | 'category' | 'quantity' | 'unit' | 'price', value: string | number) => {
     const newItems = [...multipleValues.items];
     newItems[index] = { ...newItems[index], [field]: value };
     setMultipleValues({ ...multipleValues, items: newItems });
@@ -552,104 +575,129 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
         <div>
           {/* Header row with column titles */}
           <div className="grid grid-cols-12 gap-2 mb-2 px-2 py-2 bg-gray-50 rounded-md">
-            <div className="col-span-5 text-sm font-medium text-gray-700">Название *</div>
-            <div className="col-span-3 text-sm font-medium text-gray-700">Категория *</div>
-            <div className="col-span-2 text-sm font-medium text-gray-700">Кол-во *</div>
+            <div className="col-span-3 text-sm font-medium text-gray-700">Название *</div>
+            <div className="col-span-2 text-sm font-medium text-gray-700">Категория *</div>
+            <div className="col-span-1 text-sm font-medium text-gray-700">Кол-во *</div>
             <div className="col-span-1 text-sm font-medium text-gray-700">Ед.</div>
+            <div className="col-span-2 text-sm font-medium text-gray-700">Цена за ед./кг</div>
+            <div className="col-span-2 text-sm font-medium text-gray-700">Стоимость</div>
             <div className="col-span-1"></div>
           </div>
 
           <div className="space-y-3 mb-4">
-            {multipleValues.items.map((item, index) => (
-              <div key={index} className="grid grid-cols-12 gap-2 items-end">
-                <div className="col-span-5">
-                  <input
-                    type="text"
-                    value={item.name}
-                    onChange={(e) => handleMultipleChange(index, 'name', e.target.value)}
-                    className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                      (errors as Record<number, Record<string, string>>)[index]?.name ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Название продукта"
-                  />
-                  {(errors as Record<number, Record<string, string>>)[index]?.name && (
-                    <div className="text-red-500 text-sm mt-1">
-                      {(errors as Record<number, Record<string, string>>)[index]?.name}
-                    </div>
-                  )}
-                </div>
+            {multipleValues.items.map((item, index) => {
+              // Calculate total price based on quantity and price per unit
+              const totalPrice = (item.quantity || 0) * (item.price || 0);
 
-                <div className="col-span-3">
-                  <select
-                    value={item.category}
-                    onChange={(e) => handleMultipleChange(index, 'category', e.target.value)}
-                    className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                      (errors as Record<number, Record<string, string>>)[index]?.category ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  >
-                    <option value="">Выберите категорию</option>
-                    {categories
-                      .filter(cat => cat.type === 'expense') // Only show expense categories
-                      .map(category => (
-                        <option key={category.id} value={category.name}>
-                          {category.name}
-                        </option>
-                      ))}
-                  </select>
-                  {(errors as Record<number, Record<string, string>>)[index]?.category && (
-                    <div className="text-red-500 text-sm mt-1">
-                      {(errors as Record<number, Record<string, string>>)[index]?.category}
-                    </div>
-                  )}
-                </div>
+              return (
+                <div key={index} className="grid grid-cols-12 gap-2 items-end">
+                  <div className="col-span-3">
+                    <input
+                      type="text"
+                      value={item.name}
+                      onChange={(e) => handleMultipleChange(index, 'name', e.target.value)}
+                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
+                        (errors as Record<number, Record<string, string>>)[index]?.name ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="Название продукта"
+                    />
+                    {(errors as Record<number, Record<string, string>>)[index]?.name && (
+                      <div className="text-red-500 text-sm mt-1">
+                        {(errors as Record<number, Record<string, string>>)[index]?.name}
+                      </div>
+                    )}
+                  </div>
 
-                <div className="col-span-2">
-                  <input
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => handleMultipleChange(index, 'quantity', Number(e.target.value))}
-                    min="1"
-                    className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                      (errors as Record<number, Record<string, string>>)[index]?.quantity ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Количество"
-                  />
-                  {(errors as Record<number, Record<string, string>>)[index]?.quantity && (
-                    <div className="text-red-500 text-sm mt-1">
-                      {(errors as Record<number, Record<string, string>>)[index]?.quantity}
-                    </div>
-                  )}
-                </div>
-
-                <div className="col-span-1">
-                  <select
-                    value={item.unit}
-                    onChange={(e) => handleMultipleChange(index, 'unit', e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="шт">шт</option>
-                    <option value="кг">кг</option>
-                    <option value="г">г</option>
-                    <option value="л">л</option>
-                    <option value="мл">мл</option>
-                    <option value="уп">уп</option>
-                    <option value="пак">пак</option>
-                  </select>
-                </div>
-
-                <div className="col-span-1 flex justify-center">
-                  {multipleValues.items.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveItemRow(index)}
-                      className="text-red-600 hover:text-red-800 p-1"
+                  <div className="col-span-2">
+                    <select
+                      value={item.category}
+                      onChange={(e) => handleMultipleChange(index, 'category', e.target.value)}
+                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
+                        (errors as Record<number, Record<string, string>>)[index]?.category ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     >
-                      ×
-                    </button>
-                  )}
+                      <option value="">Выберите категорию</option>
+                      {categories
+                        .filter(cat => cat.type === 'expense') // Only show expense categories
+                        .map(category => (
+                          <option key={category.id} value={category.name}>
+                            {category.name}
+                          </option>
+                        ))}
+                    </select>
+                    {(errors as Record<number, Record<string, string>>)[index]?.category && (
+                      <div className="text-red-500 text-sm mt-1">
+                        {(errors as Record<number, Record<string, string>>)[index]?.category}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="col-span-1">
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) => handleMultipleChange(index, 'quantity', Number(e.target.value))}
+                      min="1"
+                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
+                        (errors as Record<number, Record<string, string>>)[index]?.quantity ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="Количество"
+                    />
+                    {(errors as Record<number, Record<string, string>>)[index]?.quantity && (
+                      <div className="text-red-500 text-sm mt-1">
+                        {(errors as Record<number, Record<string, string>>)[index]?.quantity}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="col-span-1">
+                    <select
+                      value={item.unit}
+                      onChange={(e) => handleMultipleChange(index, 'unit', e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="шт">шт</option>
+                      <option value="кг">кг</option>
+                      <option value="г">г</option>
+                      <option value="л">л</option>
+                      <option value="мл">мл</option>
+                      <option value="уп">уп</option>
+                      <option value="пак">пак</option>
+                    </select>
+                  </div>
+
+                  <div className="col-span-2">
+                    <input
+                      type="number"
+                      value={item.price}
+                      onChange={(e) => handleMultipleChange(index, 'price', Number(e.target.value))}
+                      min="0"
+                      step="0.01"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Цена за ед."
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <div className="w-full p-2 bg-gray-50 border border-gray-300 rounded-md">
+                      {totalPrice.toLocaleString()} ₽
+                    </div>
+                  </div>
+
+                  <div className="col-span-1 flex justify-center">
+                    {multipleValues.items.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveItemRow(index)}
+                        className="text-red-600 hover:text-red-800 p-1"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <button

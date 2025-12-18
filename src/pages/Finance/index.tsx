@@ -510,7 +510,7 @@ const Finance = () => {
             <div className="bg-gradient-to-br min-h-[210px] from-indigo-50 to-indigo-100 rounded-xl p-6 border border-indigo-100">
               <div className="flex justify-between">
                 <h4 className="text-sm font-medium text-gray-600">
-                  <span className="relative h-5 overflow-hidden inline-block min-w-[250px]">
+                  <span className="relative h-5 text-nowrap">
                     <span className={`
                       absolute inset-0 transition-opacity duration-300 ease-in-out
                       ${showAllExpensesByCategory ? 'opacity-0' : 'opacity-100'}
@@ -556,7 +556,7 @@ const Finance = () => {
                         }`}>
                           {index + 1}
                         </div>
-                        <div className="text-gray-900 font-medium">{category.name}</div>
+                        <div className="text-gray-900 font-medium truncate max-w-[100px] md:max-w-fit">{category.name}</div>
                       </div>
                       <div className="font-semibold text-gray-700">
                         {formatCurrencyWithSeparators(category.total)} ₽
@@ -597,7 +597,7 @@ const Finance = () => {
             </div>
           </div>
           <div className="p-6">
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-96 overflow-y-auto">    
               <CategoryManager onAddCategoryClick={() => openCategoryFormModal()} />
             </div>
           </div>
