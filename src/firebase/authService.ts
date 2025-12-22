@@ -11,8 +11,6 @@ import {
 import app from './config';
 
 const auth = getAuth(app);
-console.log(auth, 'test');
-
 
 // Sign up with email and password
 export const signUp = async (email: string, password: string): Promise<User> => {

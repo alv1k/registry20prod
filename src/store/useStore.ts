@@ -46,6 +46,11 @@ import {
   addGroceryEntry as firebaseAddGroceryEntry,
   updateGroceryEntry as firebaseUpdateGroceryEntry,
   deleteGroceryEntry as firebaseDeleteGroceryEntry,
+  // Holiday menu services
+  getAllHolidayMenus,
+  addHolidayMenu as firebaseAddHolidayMenu,
+  updateHolidayMenu as firebaseUpdateHolidayMenu,
+  deleteHolidayMenu as firebaseDeleteHolidayMenu,
 } from '../firebase/services';
 
 // Общие интерфейсы
@@ -134,6 +139,13 @@ export interface AppGroceryEntry extends BaseEntity {
   comment?: string;
 }
 
+export interface AppHolidayMenu extends BaseEntity {
+  holidayName: string;
+  holidayDate: string;
+  recipeIds: (number | string)[];
+  dateAdded?: string;
+}
+
 // Интерфейс общего состояния
 interface AppState {
   // Navigation state
@@ -153,6 +165,7 @@ interface AppState {
   recipeData: AppRecipeRecord[];
   groceryItems: AppGroceryItem[];
   groceryEntries: AppGroceryEntry[];
+  holidayMenus: AppHolidayMenu[];
 
   // Loading states
   isVehicleDataLoading: boolean;
@@ -162,6 +175,7 @@ interface AppState {
   isPeriodDataLoading: boolean;
   isRecipeDataLoading: boolean;
   isGroceryDataLoading: boolean;
+  isHolidayMenuDataLoading: boolean;
   vehicleDataError: string | null;
   maintenanceDataError: string | null;
   financeDataError: string | null;
@@ -169,6 +183,7 @@ interface AppState {
   periodDataError: string | null;
   recipeDataError: string | null;
   groceryDataError: string | null;
+  holidayMenuDataError: string | null;
 
   // Firebase sync actions
   syncVehicleData: () => Promise<void>;
@@ -179,6 +194,7 @@ interface AppState {
   syncRecipeData: () => Promise<void>;
   syncGroceryData: () => Promise<void>;
   syncGroceryEntries: () => Promise<void>;
+  syncHolidayMenus: () => Promise<void>;
 
   // Vehicle data and functions
   setVehicleData: (data: AppVehicleRecord[]) => void;
@@ -203,6 +219,12 @@ interface AppState {
   addGroceryEntry: (record: Omit<AppGroceryEntry, 'id'>) => Promise<void>;
   updateGroceryEntry: (id: number | string, record: Partial<AppGroceryEntry>) => Promise<void>;
   deleteGroceryEntry: (id: number | string) => Promise<void>;
+
+  // Holiday menu functions
+  setHolidayMenus: (data: AppHolidayMenu[]) => void;
+  addHolidayMenu: (record: Omit<AppHolidayMenu, 'id' | 'dateAdded'>) => Promise<void>;
+  updateHolidayMenu: (id: number | string, record: Partial<AppHolidayMenu>) => Promise<void>;
+  deleteHolidayMenu: (id: number | string) => Promise<void>;
 
   // Maintenance data and functions
   setMaintenanceData: (data: AppMaintenanceRecord[]) => void;
@@ -347,6 +369,7 @@ export const useStore = create<AppState>((set, get) => {
     setRecipeData: (data: AppRecipeRecord[]) => set({ recipeData: data }),
     setGroceryItems: (data: AppGroceryItem[]) => set({ groceryItems: data }),
     setGroceryEntries: (data: AppGroceryEntry[]) => set({ groceryEntries: data }),
+    setHolidayMenus: (data: AppHolidayMenu[]) => set({ holidayMenus: data }),
     setCategories: (data: AppCategory[]) => set({ categories: data }),
   };
   
@@ -361,6 +384,7 @@ export const useStore = create<AppState>((set, get) => {
     recipeData: [],
     groceryItems: [],
     groceryEntries: [],
+    holidayMenus: [],
 
     // Loading states
     isVehicleDataLoading: false,
@@ -370,6 +394,7 @@ export const useStore = create<AppState>((set, get) => {
     isPeriodDataLoading: false,
     isRecipeDataLoading: false,
     isGroceryDataLoading: false,
+    isHolidayMenuDataLoading: false,
     vehicleDataError: null,
     maintenanceDataError: null,
     financeDataError: null,
@@ -377,6 +402,7 @@ export const useStore = create<AppState>((set, get) => {
     periodDataError: null,
     recipeDataError: null,
     groceryDataError: null,
+    holidayMenuDataError: null,
 
     // Categories state
     categories: [],
@@ -691,6 +717,42 @@ export const useStore = create<AppState>((set, get) => {
     () => get().groceryEntries
   );
 
+  const holidayMenuHandlers = createEntityHandlers(
+    {
+      getAll: getAllHolidayMenus,
+      addFirebase: firebaseAddHolidayMenu,
+      updateFirebase: firebaseUpdateHolidayMenu,
+      deleteFirebase: firebaseDeleteHolidayMenu,
+      convertToApp: (firebaseRecord) => ({
+        id: firebaseRecord.id || Date.now().toString(),
+        holidayName: firebaseRecord.holidayName,
+        holidayDate: firebaseRecord.holidayDate,
+        recipeIds: firebaseRecord.recipeIds || [],
+        dateAdded: firebaseRecord.dateAdded
+      }),
+      convertToFirebase: (appRecord) => {
+        // Exclude dateAdded when adding a new record since it's set by the service
+        return {
+          holidayName: appRecord.holidayName,
+          holidayDate: appRecord.holidayDate,
+          recipeIds: appRecord.recipeIds
+        };
+      },
+      convertToUpdate: (partial) => {
+        const updateData: any = {};
+        if (partial.holidayName !== undefined) updateData.holidayName = partial.holidayName;
+        if (partial.holidayDate !== undefined) updateData.holidayDate = partial.holidayDate;
+        if (partial.recipeIds !== undefined) updateData.recipeIds = partial.recipeIds;
+        if (partial.dateAdded !== undefined) updateData.dateAdded = partial.dateAdded;
+        return updateData;
+      }
+    },
+    (loading) => set({ isHolidayMenuDataLoading: loading }),
+    (error) => set({ holidayMenuDataError: error }),
+    (data) => set({ holidayMenus: data }),
+    () => get().holidayMenus
+  );
+
   const categoryHandlers = createEntityHandlers(
     {
       getAll: getAllCategories,
@@ -747,6 +809,7 @@ export const useStore = create<AppState>((set, get) => {
     addGroceryItem: groceryHandlers.add,
     addGroceryEntry: groceryEntriesHandlers.add,
     addCategory: categoryHandlers.add,
+    addHolidayMenu: holidayMenuHandlers.add,
 
     // Update functions
     updateVehicleRecord: vehicleHandlers.update,
@@ -758,6 +821,7 @@ export const useStore = create<AppState>((set, get) => {
     updateGroceryItem: groceryHandlers.update,
     updateGroceryEntry: groceryEntriesHandlers.update,
     updateCategory: categoryHandlers.update,
+    updateHolidayMenu: holidayMenuHandlers.update,
 
     // Delete functions
     deleteVehicleRecord: vehicleHandlers.delete,
@@ -769,5 +833,9 @@ export const useStore = create<AppState>((set, get) => {
     deleteGroceryItem: groceryHandlers.delete,
     deleteGroceryEntry: groceryEntriesHandlers.delete,
     deleteCategory: categoryHandlers.delete,
+    deleteHolidayMenu: holidayMenuHandlers.delete,
+
+    // Sync functions
+    syncHolidayMenus: holidayMenuHandlers.sync,
   };
 });

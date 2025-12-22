@@ -8,3 +8,4 @@ export * from './periodService';
 export * from './recipeService';
 export * from './groceryService';
 export * from './groceryEntriesService';
+export * from './holidayMenuService';
