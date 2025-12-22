@@ -31,32 +31,11 @@ const Home: React.FC = () => {
       color: 'bg-green-100 text-green-600'
     },
     {
-      title: 'Бытовой каталог',
-      description: 'Планирование домашних дел и задач. Календарь и система отслеживания выполнения задач.',
-      icon: <HomeIcon className="h-6 w-6" />,
-      path: '/domestic',
-      color: 'bg-purple-100 text-purple-600'
-    },
-    ...(isAdmin ? [{
-      title: 'Каталог',
-      description: 'Организация и планирование различных категорий и записей.',
-      icon: <CalendarIcon className="h-6 w-6" />,
-      path: '/period',
-      color: 'bg-amber-100 text-amber-600'
-    }] : []),
-    {
       title: 'Рецепты',
       description: 'Хранение и организация кулинарных рецептов.',
       icon: <BookIcon className="h-6 w-6" />,
       path: '/recipes',
       color: 'bg-pink-100 text-pink-600'
-    },
-    {
-      title: 'Еще',
-      description: 'Дополнительные функции и возможности.',
-      icon: <CoffeeIcon className="h-6 w-6" />,
-      path: '/recipes',
-      color: 'bg-indigo-100 text-indigo-600'
     }
   ];
 

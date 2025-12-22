@@ -11,6 +11,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../../utils/formatUtils';
 import { exportRecordsToExcel, exportMaintenanceRecordsToExcel } from '../../utils/exportUtils';
 import { FiPlus, FiDownload, FiX, FiTrash2, FiEdit } from 'react-icons/fi';
+import useIsMobile from '../../hooks/useIsMobile';
+
 
 // Type the icons properly
 const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -78,6 +80,8 @@ const VehiclesMaintenance = () => {
   const [frequencyFilter, setFrequencyFilter] = useState<string>('');
   const [commentFilter, setCommentFilter] = useState<string>('');
   const [vehicleFilter, setVehicleFilter] = useState<string>('');
+
+  const isMobile = useIsMobile();
 
   // Get unique work type values from maintenance data for dropdown
   const workTypeOptions = useMemo(() => {
@@ -341,14 +345,29 @@ const VehiclesMaintenance = () => {
       
       <AnimatedAccordion title="Записи" defaultOpen={true}>
         <div className="flex justify-between mb-4">
-          <h3 className="text-lg font-semibold mb-2">Записи технического обслуживания</h3>
-          <button onClick={() => exportMaintenanceRecordsToExcel(
-            filteredData,
-            `Техническое_обслуживание_${new Date().toISOString().slice(0, 10)}.xlsx`,
-            'Записи ТО'
-          )} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            Скачать в .xlsx
-          </button>
+          <h3 className="text-lg font-semibold mb-2"> 
+            {
+              !isMobile ?
+              'Записи технического обслуживания'
+              :
+              ''
+            }
+
+          </h3>
+          {
+            !isMobile ? 
+            <button onClick={() => exportMaintenanceRecordsToExcel(
+              filteredData,
+              `Техническое_обслуживание_${new Date().toISOString().slice(0, 10)}.xlsx`,
+              'Записи ТО'
+            )} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Скачать в .xlsx
+            </button>
+            : 
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <DownloadIcon className="h-6 w-6 text-blue-600" />
+            </div>
+          }
         </div>
         <div className="overflow-x-auto">
           {isMaintenanceDataLoading ? (
@@ -367,7 +386,7 @@ const VehiclesMaintenance = () => {
               filteredData.map((record) => (
                 <div key={record.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
                   <div className="flex justify-between items-start">
-                    <div 
+                    <div
                       className={`flex-1 ${isAdmin ? 'cursor-pointer' : ''}`}
                       onClick={isAdmin ? () => openMaintenanceFormModal(record.id) : undefined}
                     >
@@ -375,45 +394,50 @@ const VehiclesMaintenance = () => {
                         <div className="text-sm font-medium text-gray-900">{record.workType}</div>
                         <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
                       </div>
-                      <div className="mt-1 text-sm text-gray-500 truncate max-w-xs">{record.comment}</div>
-                      <div className="mt-2 text-xs text-gray-500 space-y-1">
-                        <div className="flex justify-between">
-                          <span>Стоимость:</span>
-                          <span className="font-medium">
+                      <div className="mt-1 text-sm text-gray-500 truncate text-wrap">{record.comment}</div>
+                      <div className="mt-3 space-y-1">
+                        <div className="flex">
+                          <span className="text-xs text-gray-500 w-20 flex-shrink-0">Стоимость:</span>
+                          <span className="text-xs font-medium text-gray-900 ml-2 flex-1 text-right">
                             {record.quantity !== undefined && record.quantity !== 1
                               ? `${formatCurrencyWithSeparators(record.cost)} ₽ x ${record.quantity} = ${formatCurrencyWithSeparators(record.cost * record.quantity)} ₽`
                               : `${formatCurrencyWithSeparators(record.cost)} ₽`}
                           </span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Частота:</span>
-                          <span className="font-medium">{record.frequency}</span>
+                        <div className="flex">
+                          <span className="text-xs text-gray-500 w-20 flex-shrink-0">Частота:</span>
+                          <span className="text-xs font-medium text-gray-900 ml-2 flex-1 text-right">{record.frequency}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Пробег:</span>
-                          <span className="font-medium">{record.mileage !== undefined ? `${record.mileage} км` : 'Не указан'}</span>
+                        <div className="flex">
+                          <span className="text-xs text-gray-500 w-20 flex-shrink-0">Пробег:</span>
+                          <span className="text-xs font-medium text-gray-900 ml-2 flex-1 text-right">{record.mileage !== undefined ? `${record.mileage} км` : 'Не указан'}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span>Автомобиль:</span>
-                          <span className="font-medium">{getVehicleName(record.vehicleId)}</span>
+                        <div className="flex">
+                          <span className="text-xs text-gray-500 w-20 flex-shrink-0">Автомобиль:</span>
+                          <span className="text-xs font-medium text-gray-900 ml-2 flex-1 text-right">{getVehicleName(record.vehicleId)}</span>
                         </div>
                       </div>
-                    </div>
-                    {isAdmin && (
-                      <div className="ml-4 flex-shrink-0">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            confirmDelete(record.id);
-                          }}
-                          className="text-red-600 hover:text-red-900"
-                          title="Удалить запись"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    )}
+                    </div>                    
                   </div>
+                  {isAdmin && (
+                    <div className="ml-2 flex-shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmDelete(record.id);
+                        }}
+                        className="text-red-600 hover:text-red-900 text-sm sm:text-base"
+                        title="Удалить запись"
+                      >
+                        {
+                          !isMobile ?
+                          <TrashIcon className="h-5 w-5" />
+                          :
+                          'Удалить'
+                        }
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
@@ -589,9 +613,15 @@ const VehiclesMaintenance = () => {
                         <div className="mt-1 text-sm text-gray-500">
                           {vehicle.manufacturer} {vehicle.model}
                         </div>
-                        <div className="mt-1 text-xs text-gray-500">
-                          VIN: {vehicle.vin || 'Не указан'} | 
-                          Двигатель: {vehicle.engineNumber || 'Не указан'}
+                        <div className="mt-2 space-y-1">
+                          <div className="flex">
+                            <span className="text-xs text-gray-500 w-20 flex-shrink-0">VIN:</span>
+                            <span className="text-xs text-gray-500 ml-2 flex-1 text-right">{vehicle.vin || 'Не указан'}</span>
+                          </div>
+                          <div className="flex">
+                            <span className="text-xs text-gray-500 w-20 flex-shrink-0">Двигатель:</span>
+                            <span className="text-xs text-gray-500 ml-2 flex-1 text-right">{vehicle.engineNumber || 'Не указан'}</span>
+                          </div>
                         </div>
                       </div>
                     </div>

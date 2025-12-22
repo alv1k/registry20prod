@@ -14,6 +14,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { exportRecordsToExcel } from '../../utils/exportUtils';
 import { FiPlus, FiDownload, FiX, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { log } from 'console';
+import { isModifier } from 'typescript';
+import useIsMobile from '../../hooks/useIsMobile';
 
 // Type the icons properly
 const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -50,8 +52,7 @@ const Finance = () => {
   const categoriesContentRef = useRef<HTMLDivElement>(null);
   const [categoriesHeight, setCategoriesHeight] = useState<number | string>('auto');
 
-  
-
+  const isMobile = useIsMobile();
 
   // Auto-scroll to the bottom of the table when shouldScrollToBottom is true
   useEffect(() => {
@@ -288,8 +289,8 @@ const Finance = () => {
       content: (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <h3 className="text-lg font-semibold text-gray-900">Записи расходов/доходов</h3>
+            <div className="flex sm:items-center sm:justify-between gap-4">
+              <h3 className="text-lg font-semibold text-gray-900">Записи</h3>
               <div className="flex gap-3 ms-auto">
                 {isAdmin && (
                   <Button
@@ -335,7 +336,7 @@ const Finance = () => {
                                 <div className="font-medium text-gray-900">{record.name}</div>
                                 <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
                               </div>
-                              <div className="mt-1 text-sm text-gray-500 truncate">{record.comment}</div>
+                              <div className="mt-1 text-sm text-gray-500 truncate text-wrap">{record.comment}</div>
                               <div className="mt-3 space-y-1 text-sm">
                                 <div className="flex justify-between">
                                   <span className="text-gray-600">Цена:</span>
@@ -355,21 +356,26 @@ const Finance = () => {
                                 </div>
                               </div>
                             </div>
-                            {isAdmin && (
-                              <div className="ml-4 flex-shrink-0">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    confirmDelete(record.id);
-                                  }}
-                                  className="text-red-600 hover:text-red-800 p-1"
-                                  title="Удалить запись"
-                                >
-                                  <TrashIcon className="h-5 w-5" />
-                                </button>
-                              </div>
-                            )}
                           </div>
+                          {isAdmin && (
+                            <div className="flex-shrink-0">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  confirmDelete(record.id);
+                                }}
+                                className="text-red-600 hover:text-red-800 p-1 text-sm"
+                                title="Удалить запись"
+                              >
+                                {
+                                  !isMobile ?
+                                  <TrashIcon className="h-5 w-5" />
+                                  :
+                                  'Удалить'
+                                }
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))
                     ) : (
@@ -609,7 +615,7 @@ const Finance = () => {
       content: (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex justify-between gap-4">
               <h3 className="text-lg font-semibold text-gray-900">Список покупок</h3>
               {isAdmin && (
                 <Button
@@ -617,8 +623,11 @@ const Finance = () => {
                   variant="primary"
                   className="flex items-center"
                 >
-                  <PlusIcon className="mr-2" />
-                  Добавить покупки
+                  <PlusIcon className={ isMobile ? '' : 'mr-2' } />
+                  {
+                    !isMobile &&
+                    'Добавить покупки'
+                  }
                 </Button>
               )}
             </div>
@@ -633,7 +642,7 @@ const Finance = () => {
           </div>
         </div>
       )
-    },
+    }, 
   ];
 
   return (

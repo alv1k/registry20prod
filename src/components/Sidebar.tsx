@@ -26,7 +26,6 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
   const navItems = [
     { name: 'ТО авто', icon: TruckIcon, path: '/vehicles_maintenance' },
     { name: 'Финансы', icon: DollarSignIcon, path: '/finance' },
-    { name: 'Быт', icon: HouseIcon, path: '/domestic' },
     ...(isAdmin ? [{ name: 'Каталог', icon: BookIcon, path: '/period' }] : []),
     { name: 'Рецепты', icon: CoffeeIcon, path: '/recipes' },
   ];

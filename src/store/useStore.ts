@@ -130,6 +130,7 @@ export interface AppGroceryItem extends BaseEntity {
   unit: string;
   purchased: boolean;
   createdAt: string;
+  actualExpense?: number | null; // фактически затраченные средства
 }
 
 export interface AppGroceryEntry extends BaseEntity {

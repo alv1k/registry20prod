@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import VehiclesMaintenance from '../pages/VehiclesMaintenance/index';
@@ -39,16 +39,7 @@ const AppRoutes: React.FC = () => {
               <Finance />
             </motion.div>
           } />
-          <Route path="/domestic" element={
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Domestic />
-            </motion.div>
-          } />
+          <Route path="/domestic" element={<Navigate to="/" replace />} />
           <Route path="/period" element={
             <motion.div
               initial={{ opacity: 0, x: 20 }}

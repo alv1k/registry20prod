@@ -561,9 +561,6 @@ const Recipes = () => {
       {/* Recipe List for Catalog Tab */}
       {activeTab === 'catalog' && (
         <AnimatedAccordion title="Рецепты" defaultOpen={true}>
-          <div className="flex justify-between mb-4">
-            <h3 className="text-lg font-semibold mb-2">Список рецептов</h3>
-          </div>
           <div className="overflow-x-auto">
             {isRecipeDataLoading ? (
               <div className="py-12">

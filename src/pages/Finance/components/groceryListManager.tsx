@@ -4,30 +4,12 @@ import { useAuth } from '../../../contexts/AuthContext';
 import Modal from '../../../components/Modal';
 import Button from '../../../components/Button';
 import { FiPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
+import { AppGroceryEntry, AppGroceryItem } from '../../../store/useStore';
+import useIsMobile from '../../../hooks/useIsMobile';
 
 const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
 const Trash2Icon = FiTrash2 as React.FC<React.SVGProps<SVGSVGElement>>;
 const Edit2Icon = FiEdit2 as React.FC<React.SVGProps<SVGSVGElement>>;
-
-
-interface GroceryItem {
-  id: string | number;
-  name: string;
-  category: string;
-  quantity: number;
-  price: number;
-  unit: string;
-  purchased: boolean;
-  createdAt: string;
-}
-
-interface GroceryEntry {
-  id: string | number;
-  items: GroceryItem[];
-  dateAdded: string;
-  purchased: boolean;
-  comment?: string;
-}
 
 interface SingleGroceryFormValues {
   name: string;
@@ -35,10 +17,11 @@ interface SingleGroceryFormValues {
   quantity: number;
   price: number;
   unit: string;
+  actualExpense?: number | null;
 }
 
 interface MultipleGroceryFormValues {
-  items: { name: string; category: string; quantity: number; price: number; unit: string }[];
+  items: { name: string; category: string; quantity: number; price: number; unit: string; actualExpense?: number | null }[];
   comment?: string;
 }
 
@@ -50,9 +33,9 @@ interface GroceriesManagerProps {
 const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick, onRegisterOpenForm }) => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [groceryEntries, setGroceryEntries] = useState<GroceryEntry[]>([]);
+  const [groceryEntries, setGroceryEntries] = useState<AppGroceryEntry[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentGroceryEntry, setCurrentGroceryEntry] = useState<GroceryEntry | null>(null);
+  const [currentGroceryEntry, setCurrentGroceryEntry] = useState<AppGroceryEntry | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
 
   // Get grocery data from store (create this store functionality if it doesn't exist)
@@ -63,6 +46,8 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
   const syncGroceryEntries = useStore(state => state.syncGroceryEntries);
   const categories = useStore(state => state.categories) || [];
   const syncCategories = useStore(state => state.syncCategories);
+  
+  const isMobile = useIsMobile();
 
   // Load categories and grocery entries on component mount
   useEffect(() => {
@@ -100,7 +85,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
   }, [storedGroceryEntries]);
 
   const handleAddGrocery = (values: SingleGroceryFormValues) => {
-    const newItem: GroceryItem = {
+    const newItem: AppGroceryItem = {
       id: Date.now().toString(),
       name: values.name,
       category: values.category,
@@ -108,11 +93,12 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
       price: values.price || 0,
       unit: values.unit || 'шт',
       purchased: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      actualExpense: values.actualExpense !== undefined && values.actualExpense !== null ? values.actualExpense : null
     };
 
     // Create a grocery entry with a single item
-    const newEntry: GroceryEntry = {
+    const newEntry: AppGroceryEntry = {
       id: Date.now(),
       items: [newItem],
       dateAdded: new Date().toISOString(),
@@ -126,10 +112,10 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
   };
 
   const handleAddMultipleGroceries = (values: MultipleGroceryFormValues) => {
-    const items: GroceryItem[] = [];
+    const items: AppGroceryItem[] = [];
     values.items.forEach((item, index) => {
       if (item.name.trim()) {
-        const newItem: GroceryItem = {
+        const newItem: AppGroceryItem = {
           id: `${Date.now()}-${index}`, // Ensure unique ID
           name: item.name,
           category: item.category,
@@ -137,14 +123,15 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
           price: item.price || 0, // Use provided price or default to 0
           unit: item.unit || 'шт', // Use provided unit or default to 'шт'
           purchased: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          actualExpense: item.actualExpense !== undefined && item.actualExpense !== null ? item.actualExpense : null
         };
         items.push(newItem);
       }
     });
 
     // Create a single grocery entry with all the items
-    const newEntry: GroceryEntry = {
+    const newEntry: AppGroceryEntry = {
       id: Date.now(),
       items: items,
       dateAdded: new Date().toISOString(),
@@ -160,7 +147,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
   const handleUpdateGroceryEntry = (values: MultipleGroceryFormValues) => {
     if (!currentGroceryEntry) return;
 
-    const updatedItems: GroceryItem[] = values.items.map((item, index) => {
+    const updatedItems: AppGroceryItem[] = values.items.map((item, index) => {
       const existingItem = currentGroceryEntry.items[index];
       return {
         id: existingItem?.id || `${Date.now()}-${index}`,
@@ -170,11 +157,12 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
         price: item.price || 0,
         unit: item.unit || 'шт',
         purchased: existingItem?.purchased || false,
-        createdAt: existingItem?.createdAt || new Date().toISOString()
+        createdAt: existingItem?.createdAt || new Date().toISOString(),
+        actualExpense: item.actualExpense !== undefined && item.actualExpense !== null ? item.actualExpense : null
       };
     });
 
-    const updatedEntry: GroceryEntry = {
+    const updatedEntry: AppGroceryEntry = {
       ...currentGroceryEntry,
       items: updatedItems,
       comment: values.comment || `Updated entry with ${updatedItems.length} item(s)`
@@ -201,7 +189,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
     }
   };
 
-  const handleEdit = (entry: GroceryEntry) => {
+  const handleEdit = (entry: AppGroceryEntry) => {
     setCurrentGroceryEntry(entry);
     setIsModalOpen(true);
   };
@@ -224,7 +212,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
   const togglePurchaseStatus = (id: number | string) => {
     const entry = groceryEntries.find(entry => entry.id === id);
     if (entry) {
-      const updatedEntry: GroceryEntry = {
+      const updatedEntry: AppGroceryEntry = {
         ...entry,
         purchased: !entry.purchased,
         items: entry.items.map(item => ({
@@ -233,6 +221,20 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
         }))
       };
       updateGroceryEntry(id, updatedEntry);
+    }
+  };
+
+  const toggleItemPurchaseStatus = (entryId: number | string, itemId: string | number) => {
+    const entry = groceryEntries.find(entry => entry.id === entryId);
+    if (entry) {
+      const updatedEntry: AppGroceryEntry = {
+        ...entry,
+        items: entry.items.map(item =>
+          item.id === itemId ? { ...item, purchased: !item.purchased } : item
+        ),
+        purchased: entry.items.every(item => item.purchased) // Update entry's purchased status if all items are purchased
+      };
+      updateGroceryEntry(entryId, updatedEntry);
     }
   };
 
@@ -286,9 +288,13 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
                     />
                     <div className="ml-4">
                       <div className={`font-medium ${entry.purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                        Запись покупок от {new Date(entry.dateAdded).toLocaleDateString('ru-RU')}
+                        {
+                          !isMobile &&
+                          'Запись покупок от '
+                        }
+                        {new Date(entry.dateAdded).toLocaleDateString('ru-RU')}
                       </div>
-                      {entry.comment && (
+                      {entry.comment && !isMobile && (
                         <div className="text-sm text-gray-500">
                           {entry.comment}
                         </div>
@@ -317,40 +323,98 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
                 </div>
 
                 {/* Display all items in this entry */}
-                <div className="ml-8 space-y-1">
+                {/* Header row with column titles */}
+                <div className="grid grid-cols-12 gap-2 py-2 px-2 bg-gray-50 rounded-t-md mb-1">
+                  <div className="col-span-3 text-sm font-medium text-gray-700">Название</div>
+                  {
+                    !isMobile && 
+                    <div className="col-span-2 text-sm font-medium text-gray-700">Кол-во</div>
+                  }
+                  {
+                    !isMobile && 
+                    <div className="col-span-2 text-sm font-medium text-gray-700">Категория</div>
+                  }
+                  {
+                    !isMobile && 
+                    <div className="col-span-1 text-sm font-medium text-gray-700">Цена/ед</div>
+                  }
+                  {
+                    !isMobile && 
+                    <div className="col-span-2 text-sm font-medium text-gray-700">Стоимость</div>
+                  }
+                  {
+                    !isMobile && 
+                    <div className="col-span-2 text-sm font-medium text-gray-700">Факт. расход</div>
+                  }
+                </div>
+
+                <div className={` ${isMobile ? 'ml-2' : 'ml-8'} space-y-1`}>
                   {entry.items.map((item, index) => {
                     const totalPrice = item.quantity * item.price;
+                    const actualExpense = item.actualExpense !== undefined ? item.actualExpense : null;
                     return (
                       <div key={item.id || index} className="grid grid-cols-12 gap-2 py-1">
-                        <div className="col-span-4 flex items-center">
-                          <div className={`font-medium ${item.purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                            {item.name}
+                        <div className={`${isMobile ? 'col-span-12' : 'col-span-3'} gap-2 flex items-center`}>
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={item.purchased}
+                              onChange={() => toggleItemPurchaseStatus(entry.id, item.id)}
+                              className="h-5 w-5 text-green-600 rounded focus:ring-green-500 mr-2"
+                            />
+                            <span className={`font-medium ${item.purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                              {item.name}
+                            </span>
+                          </label>
+                        </div>
+                        {
+                          !isMobile && 
+                          <div className="col-span-2 text-sm text-gray-500">
+                            {item.quantity} {item.unit}
                           </div>
-                        </div>
-                        <div className="col-span-2 text-sm text-gray-500">
-                          {item.quantity} {item.unit}
-                        </div>
-                        <div className="col-span-2 text-sm text-gray-500">
-                          {item.category}
-                        </div>
-                        <div className="col-span-2 text-sm font-medium text-gray-700">
-                          {item.price.toLocaleString()} ₽/ед
-                        </div>
-                        <div className="col-span-2 text-sm font-medium text-green-600">
-                          {totalPrice.toLocaleString()} ₽
-                        </div>
+                        }
+                        {
+                          !isMobile && 
+                          <div className="col-span-2 text-sm text-gray-500">
+                            {item.category}
+                          </div>
+                        }
+                        {
+                          !isMobile && 
+                          <div className="col-span-1 text-sm font-medium text-gray-700">
+                            {item.price.toLocaleString()} ₽/ед
+                          </div>
+                        }
+                        {
+                          !isMobile && 
+                          <div className="col-span-2 text-sm font-medium text-green-600">
+                            {totalPrice.toLocaleString()} ₽
+                          </div>
+                        }
+                        {
+                          !isMobile && 
+                          <div className="col-span-2 text-sm font-medium text-blue-600">
+                            {item.actualExpense !== null && item.actualExpense !== undefined ? `${item.actualExpense.toLocaleString()} ₽` : '-'}
+                          </div>
+                        }
                       </div>
                     );
                   })}
                   {/* Total sum for this entry */}
-                  <div className="grid grid-cols-12 gap-2 py-2 border-t border-gray-200 mt-1">
-                    <div className="col-span-8 text-sm font-medium text-gray-700">
-                      Общая сумма:
+                  {
+                    !isMobile &&
+                    <div className="grid grid-cols-12 gap-2 py-2 border-t border-gray-200 mt-1">
+                      <div className="col-span-8 text-sm font-medium text-gray-700">
+                        Общая сумма:
+                      </div>
+                      <div className="col-span-2 text-sm font-bold text-green-700">
+                        {entry.items.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString()} ₽
+                      </div>
+                      <div className="col-span-2 text-sm font-bold text-blue-700">
+                        {entry.items.reduce((sum, item) => sum + ((item.actualExpense !== null && item.actualExpense !== undefined) ? item.actualExpense : 0), 0).toLocaleString()} ₽
+                      </div>
                     </div>
-                    <div className="col-span-4 text-sm font-bold text-green-700">
-                      {entry.items.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString()} ₽
-                    </div>
-                  </div>
+                  }
                 </div>
               </div>
             ))}
@@ -404,7 +468,7 @@ interface GroceryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (values: SingleGroceryFormValues | MultipleGroceryFormValues) => void;
-  groceryEntry?: GroceryEntry | null;
+  groceryEntry?: AppGroceryEntry | null;
   isMultipleMode?: boolean;
   categories?: { id: string | number; name: string; type: 'expense' | 'income' }[];
 }
@@ -415,11 +479,12 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
     category: groceryEntry?.items?.[0]?.category || '',
     quantity: groceryEntry?.items?.[0]?.quantity || 1,
     price: groceryEntry?.items?.[0]?.price || 0,
-    unit: groceryEntry?.items?.[0]?.unit || 'шт'
+    unit: groceryEntry?.items?.[0]?.unit || 'шт',
+    actualExpense: groceryEntry?.items?.[0]?.actualExpense
   });
 
   const [multipleValues, setMultipleValues] = useState<MultipleGroceryFormValues>({
-    items: groceryEntry?.items?.map(item => ({ name: item.name, category: item.category, quantity: item.quantity, price: item.price, unit: item.unit })) || [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт' }],
+    items: groceryEntry?.items?.map(item => ({ name: item.name, category: item.category, quantity: item.quantity, price: item.price, unit: item.unit, actualExpense: item.actualExpense })) || [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт', actualExpense: undefined }],
     comment: groceryEntry?.comment || ''
   });
 
@@ -442,8 +507,9 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
           category: item.category,
           quantity: item.quantity,
           price: item.price,
-          unit: item.unit
-        })) || [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт' }],
+          unit: item.unit,
+          actualExpense: item.actualExpense
+        })) || [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт', actualExpense: undefined }],
         comment: groceryEntry.comment || ''
       });
     } else {
@@ -453,10 +519,11 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
         category: '',
         quantity: 1,
         price: 0,
-        unit: 'шт'
+        unit: 'шт',
+        actualExpense: undefined
       });
       setMultipleValues({
-        items: [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт' }],
+        items: [{ name: '', category: '', quantity: 1, price: 0, unit: 'шт', actualExpense: undefined }],
         comment: ''
       });
     }
@@ -521,7 +588,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
   const handleAddItemRow = () => {
     setMultipleValues({
       ...multipleValues,
-      items: [...multipleValues.items, { name: '', category: '', quantity: 1, price: 0, unit: 'шт' }]
+      items: [...multipleValues.items, { name: '', category: '', quantity: 1, price: 0, unit: 'шт', actualExpense: undefined }]
     });
   };
 
@@ -533,7 +600,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
     }
   };
 
-  const handleMultipleChange = (index: number, field: 'name' | 'category' | 'quantity' | 'unit' | 'price', value: string | number) => {
+  const handleMultipleChange = (index: number, field: 'name' | 'category' | 'quantity' | 'unit' | 'price' | 'actualExpense', value: string | number | null) => {
     const newItems = [...multipleValues.items];
     newItems[index] = { ...newItems[index], [field]: value };
     setMultipleValues({ ...multipleValues, items: newItems });
@@ -579,8 +646,9 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
             <div className="col-span-2 text-sm font-medium text-gray-700">Категория *</div>
             <div className="col-span-1 text-sm font-medium text-gray-700">Кол-во *</div>
             <div className="col-span-1 text-sm font-medium text-gray-700">Ед.</div>
-            <div className="col-span-2 text-sm font-medium text-gray-700">Цена за ед./кг</div>
+            <div className="col-span-1 text-sm font-medium text-gray-700">Цена за ед./кг</div>
             <div className="col-span-2 text-sm font-medium text-gray-700">Стоимость</div>
+            <div className="col-span-1 text-sm font-medium text-gray-700">Факт. расход</div>
             <div className="col-span-1"></div>
           </div>
 
@@ -666,7 +734,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
                     </select>
                   </div>
 
-                  <div className="col-span-2">
+                  <div className="col-span-1">
                     <input
                       type="number"
                       value={item.price}
@@ -682,6 +750,18 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
                     <div className="w-full p-2 bg-gray-50 border border-gray-300 rounded-md">
                       {totalPrice.toLocaleString()} ₽
                     </div>
+                  </div>
+
+                  <div className="col-span-1">
+                    <input
+                      type="number"
+                      value={item.actualExpense !== undefined && item.actualExpense !== null ? item.actualExpense : ''}
+                      onChange={(e) => handleMultipleChange(index, 'actualExpense', e.target.value ? Number(e.target.value) : null)}
+                      min="0"
+                      step="0.01"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Факт. расход"
+                    />
                   </div>
 
                   <div className="col-span-1 flex justify-center">
