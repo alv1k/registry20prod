@@ -51,31 +51,31 @@ const Tabs: React.FC<TabsProps> = ({
   // Determine styling based on variant
   const getTabButtonClasses = (tabId: string, disabled: boolean = false) => {
     let baseClasses = 'font-medium text-sm transition-colors duration-200 ';
-    
+
     if (variant === 'boxed') {
-      baseClasses += disabled 
-        ? 'bg-gray-100 text-gray-400 cursor-not-allowed ' 
-        : 'hover:bg-gray-100 cursor-pointer ';
-      
+      baseClasses += disabled
+        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed '
+        : 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ';
+
       baseClasses += activeTab === tabId
-        ? 'bg-blue-100 text-blue-700 border border-gray-300 '
-        : 'bg-white text-gray-700 border border-transparent ';
+        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-gray-300 dark:border-gray-600 '
+        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-transparent ';
     } else if (variant === 'underline') {
-      baseClasses += disabled 
-        ? 'text-gray-400 cursor-not-allowed ' 
-        : 'hover:text-gray-700 cursor-pointer ';
-      
+      baseClasses += disabled
+        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed '
+        : 'hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer ';
+
       baseClasses += activeTab === tabId
-        ? 'text-blue-600 border-b-2 border-blue-600 '
-        : 'text-gray-500 ';
+        ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 '
+        : 'text-gray-500 dark:text-gray-400 ';
     } else { // default
-      baseClasses += disabled 
-        ? 'text-gray-400 cursor-not-allowed ' 
-        : 'hover:text-gray-700 cursor-pointer ';
-      
+      baseClasses += disabled
+        ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed '
+        : 'hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer ';
+
       baseClasses += activeTab === tabId
-        ? 'text-blue-600 border-b-2 border-blue-600 '
-        : 'text-gray-500 ';
+        ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 '
+        : 'text-gray-500 dark:text-gray-400 ';
     }
 
     // Add padding and other layout classes based on orientation
@@ -90,12 +90,12 @@ const Tabs: React.FC<TabsProps> = ({
 
   return (
     <div className={`tabs-container ${isVertical ? 'flex' : ''} ${className}`}>
-      <div 
+      <div
         className={`
-          ${isVertical 
-            ? 'flex-col w-48 border-r border-gray-200' 
-            : 'flex flex-wrap border-b border-gray-200'
-          } 
+          ${isVertical
+            ? 'flex-col w-48 border-r border-gray-200 dark:border-gray-700'
+            : 'flex flex-wrap border-b border-gray-200 dark:border-gray-700'
+          }
           ${tabListClassName}
         `}
       >

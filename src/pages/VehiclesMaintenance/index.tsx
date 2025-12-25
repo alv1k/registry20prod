@@ -226,82 +226,82 @@ const VehiclesMaintenance = () => {
   return (
     <div className="p-4 sm:p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Каталог технического обслуживания автомобилей</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Каталог технического обслуживания автомобилей</h1>
       </div>
 
       {/* Error messages */}
       {(vehicleDataError || maintenanceDataError) && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6 flex items-center">
           <XIcon className="h-5 w-5 mr-2" />
           {vehicleDataError && <div>{vehicleDataError}</div>}
           {maintenanceDataError && <div>{maintenanceDataError}</div>}
         </div>
       )}
-      
+
       {/* Filter Controls - Accordion */}
       <AnimatedAccordion title="Фильтры" defaultOpen={true}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Вид работ</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Вид работ</label>
             <select
               value={workTypeFilter}
               onChange={(e) => setWorkTypeFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">Все виды работ</option>
+              <option value="" className="dark:bg-gray-700 dark:text-white">Все виды работ</option>
               {workTypeOptions.map(workType => (
-                <option key={workType} value={workType}>
+                <option key={workType} value={workType} className="dark:bg-gray-700 dark:text-white">
                   {workType}
                 </option>
               ))}
             </select>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Частота</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Частота</label>
             <select
               value={frequencyFilter}
               onChange={(e) => setFrequencyFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">Все частоты</option>
+              <option value="" className="dark:bg-gray-700 dark:text-white">Все частоты</option>
               {frequencyOptions.map(frequency => (
-                <option key={frequency} value={frequency}>
+                <option key={frequency} value={frequency} className="dark:bg-gray-700 dark:text-white">
                   {frequency}
                 </option>
               ))}
             </select>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Комментарий</label>
             <input
               type="text"
               placeholder="Фильтр по комментарию"
               value={commentFilter}
               onChange={(e) => setCommentFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Автомобиль</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Автомобиль</label>
             <select
               value={vehicleFilter}
               onChange={(e) => setVehicleFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">Все автомобили</option>
+              <option value="" className="dark:bg-gray-700 dark:text-white">Все автомобили</option>
               {vehicleData.map(vehicle => (
-                <option key={vehicle.id} value={vehicle.id}>
+                <option key={vehicle.id} value={vehicle.id} className="dark:bg-gray-700 dark:text-white">
                   {vehicle.name} ({vehicle.manufacturer} {vehicle.model})
                 </option>
               ))}
             </select>
           </div>
-          
+
         </div>
-        
+
         <div className="flex justify-end mt-3">
           <Button
             onClick={clearFilters}
@@ -322,9 +322,9 @@ const VehiclesMaintenance = () => {
       {/* Delete Confirmation Modal */}
       {isAdmin && deleteConfirmationId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Подтверждение удаления</h3>
-            <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Подтверждение удаления</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <Button
                 onClick={cancelDelete}
@@ -342,10 +342,10 @@ const VehiclesMaintenance = () => {
           </div>
         </div>
       )}
-      
+
       <AnimatedAccordion title="Записи" defaultOpen={true}>
         <div className="flex justify-between mb-4">
-          <h3 className="text-lg font-semibold mb-2"> 
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             {
               !isMobile ?
               'Записи технического обслуживания'
@@ -355,7 +355,7 @@ const VehiclesMaintenance = () => {
 
           </h3>
           {
-            !isMobile ? 
+            !isMobile ?
             <button onClick={() => exportMaintenanceRecordsToExcel(
               filteredData,
               `Техническое_обслуживание_${new Date().toISOString().slice(0, 10)}.xlsx`,
@@ -363,9 +363,9 @@ const VehiclesMaintenance = () => {
             )} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
               Скачать в .xlsx
             </button>
-            : 
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <DownloadIcon className="h-6 w-6 text-blue-600" />
+            :
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <DownloadIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           }
         </div>
@@ -375,7 +375,7 @@ const VehiclesMaintenance = () => {
               <LoadingSpinner message="Загрузка данных технического обслуживания..." />
             </div>
           ) : maintenanceDataError ? (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
               {maintenanceDataError}
             </div>
           ) : (
@@ -384,40 +384,40 @@ const VehiclesMaintenance = () => {
               <div className="block md:hidden">
             {filteredData.length > 0 ? (
               filteredData.map((record) => (
-                <div key={record.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
+                <div key={record.id} className="border-b border-gray-200 dark:border-gray-700 p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <div className="flex justify-between items-start">
                     <div
                       className={`flex-1 ${isAdmin ? 'cursor-pointer' : ''}`}
                       onClick={isAdmin ? () => openMaintenanceFormModal(record.id) : undefined}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium text-gray-900">{record.workType}</div>
-                        <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{record.workType}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{formatDate(record.date)}</div>
                       </div>
-                      <div className="mt-1 text-sm text-gray-500 truncate text-wrap">{record.comment}</div>
+                      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate text-wrap">{record.comment}</div>
                       <div className="mt-3 space-y-1">
                         <div className="flex">
-                          <span className="text-xs text-gray-500 w-20 flex-shrink-0">Стоимость:</span>
-                          <span className="text-xs font-medium text-gray-900 ml-2 flex-1 text-right">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">Стоимость:</span>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white ml-2 flex-1 text-right">
                             {record.quantity !== undefined && record.quantity !== 1
                               ? `${formatCurrencyWithSeparators(record.cost)} ₽ x ${record.quantity} = ${formatCurrencyWithSeparators(record.cost * record.quantity)} ₽`
                               : `${formatCurrencyWithSeparators(record.cost)} ₽`}
                           </span>
                         </div>
                         <div className="flex">
-                          <span className="text-xs text-gray-500 w-20 flex-shrink-0">Частота:</span>
-                          <span className="text-xs font-medium text-gray-900 ml-2 flex-1 text-right">{record.frequency}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">Частота:</span>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white ml-2 flex-1 text-right">{record.frequency}</span>
                         </div>
                         <div className="flex">
-                          <span className="text-xs text-gray-500 w-20 flex-shrink-0">Пробег:</span>
-                          <span className="text-xs font-medium text-gray-900 ml-2 flex-1 text-right">{record.mileage !== undefined ? `${record.mileage} км` : 'Не указан'}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">Пробег:</span>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white ml-2 flex-1 text-right">{record.mileage !== undefined ? `${record.mileage} км` : 'Не указан'}</span>
                         </div>
                         <div className="flex">
-                          <span className="text-xs text-gray-500 w-20 flex-shrink-0">Автомобиль:</span>
-                          <span className="text-xs font-medium text-gray-900 ml-2 flex-1 text-right">{getVehicleName(record.vehicleId)}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">Автомобиль:</span>
+                          <span className="text-xs font-medium text-gray-900 dark:text-white ml-2 flex-1 text-right">{getVehicleName(record.vehicleId)}</span>
                         </div>
                       </div>
-                    </div>                    
+                    </div>
                   </div>
                   {isAdmin && (
                     <div className="ml-2 flex-shrink-0">
@@ -426,7 +426,7 @@ const VehiclesMaintenance = () => {
                           e.stopPropagation();
                           confirmDelete(record.id);
                         }}
-                        className="text-red-600 hover:text-red-900 text-sm sm:text-base"
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm sm:text-base"
                         title="Удалить запись"
                       >
                         {
@@ -441,80 +441,80 @@ const VehiclesMaintenance = () => {
                 </div>
               ))
             ) : (
-              <div className="p-4 text-center text-sm text-gray-500">
+              <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                 Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
               </div>
             )}
           </div>
-          
+
           {/* Desktop View - Table */}
-          <table className="hidden md:table divide-y divide-gray-200 min-w-full">
-            <thead className="bg-gray-50">
+          <table className="hidden md:table divide-y divide-gray-200 dark:divide-gray-700 min-w-full">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Вид работ</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кол-во</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ед. стоимость</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Итог. стоимость</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Частота</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Пробег</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Автомобиль</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Дата</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Вид работ</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Кол-во</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ед. стоимость</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Итог. стоимость</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Частота</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Пробег</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Комментарий</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Автомобиль</th>
                 {isAdmin && (
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Действия</th>
                 )}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredData.length > 0 ? (
                 filteredData.map((record) => (
-                  <tr 
-                    key={record.id} 
-                    className={`hover:bg-gray-50 ${isAdmin ? 'cursor-pointer' : ''}`}
+                  <tr
+                    key={record.id}
+                    className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${isAdmin ? 'cursor-pointer' : ''}`}
                     onClick={isAdmin ? () => openMaintenanceFormModal(record.id) : undefined}
                   >
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                    <td
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                     >
                       {formatDate(record.date)}
                     </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                    <td
+                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"
                     >
                       {record.workType}
                     </td>
                     <td
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                     >
                       {record.quantity !== undefined ? record.quantity : 1}
                     </td>
                     <td
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                     >
                       {formatCurrencyWithSeparators(record.cost)} ₽
                     </td>
                     <td
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                     >
                       {formatCurrencyWithSeparators(record.cost * (record.quantity || 1))} ₽
                     </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                    <td
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                     >
                       {record.frequency}
                     </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                    <td
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                     >
                       {record.mileage !== undefined ? `${record.mileage} км` : 'Не указан'}
                     </td>
-                    <td 
-                      className="p-4 text-sm text-gray-500"
+                    <td
+                      className="p-4 text-sm text-gray-500 dark:text-gray-400"
                     >
                       {record.comment}
                     </td>
                     <td
-                      className="p-4 text-sm text-gray-500"
+                      className="p-4 text-sm text-gray-500 dark:text-gray-400"
                     >
                       {getVehicleName(record.vehicleId)}
                     </td>
@@ -525,7 +525,7 @@ const VehiclesMaintenance = () => {
                             e.stopPropagation();
                             confirmDelete(record.id);
                           }}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                           title="Удалить запись"
                         >
                           <TrashIcon className="h-5 w-5" />
@@ -536,7 +536,7 @@ const VehiclesMaintenance = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={isAdmin ? 10 : 9} className="p-4 text-center text-sm text-gray-500">
+                  <td colSpan={isAdmin ? 10 : 9} className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                     Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                   </td>
                 </tr>
@@ -547,13 +547,13 @@ const VehiclesMaintenance = () => {
       )}
     </div>
   </AnimatedAccordion>
-      
+
       {/* Vehicle Management Section */}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Управление автомобилями</h2>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">Управление автомобилями</h2>
           {isAdmin && (
-            <Button 
+            <Button
               onClick={() => openVehicleFormModal()}
               variant="primary" className="flex items-center"
             >
@@ -564,15 +564,15 @@ const VehiclesMaintenance = () => {
             </Button>
           )}
         </div>
-        
-        <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
           <div className="overflow-x-auto">
             {isVehicleDataLoading ? (
               <div className="py-12">
                 <LoadingSpinner message="Загрузка данных об автомобилях..." />
               </div>
             ) : vehicleDataError ? (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
                 {vehicleDataError}
               </div>
             ) : (
@@ -581,16 +581,16 @@ const VehiclesMaintenance = () => {
                 <div className="block md:hidden">
               {vehicleData.length > 0 ? (
                 vehicleData.map(vehicle => (
-                  <div key={vehicle.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
+                  <div key={vehicle.id} className="border-b border-gray-200 dark:border-gray-700 p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <div className="text-sm font-medium text-gray-900">{vehicle.name}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{vehicle.name}</div>
                           {isAdmin && (
                             <div className="flex space-x-2">
                               <button
                                 onClick={() => openVehicleFormModal(vehicle.id)}
-                                className="text-blue-600 hover:text-blue-900"
+                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                 title="Редактировать автомобиль"
                               >
                                 <EditIcon className="h-5 w-5" />
@@ -600,7 +600,7 @@ const VehiclesMaintenance = () => {
                                   e.stopPropagation();
                                   setDeleteConfirmationVehicleId(vehicle.id);
                                 }}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                                 title="Удалить автомобиль"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -610,17 +610,17 @@ const VehiclesMaintenance = () => {
                             </div>
                           )}
                         </div>
-                        <div className="mt-1 text-sm text-gray-500">
+                        <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                           {vehicle.manufacturer} {vehicle.model}
                         </div>
                         <div className="mt-2 space-y-1">
                           <div className="flex">
-                            <span className="text-xs text-gray-500 w-20 flex-shrink-0">VIN:</span>
-                            <span className="text-xs text-gray-500 ml-2 flex-1 text-right">{vehicle.vin || 'Не указан'}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">VIN:</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 flex-1 text-right">{vehicle.vin || 'Не указан'}</span>
                           </div>
                           <div className="flex">
-                            <span className="text-xs text-gray-500 w-20 flex-shrink-0">Двигатель:</span>
-                            <span className="text-xs text-gray-500 ml-2 flex-1 text-right">{vehicle.engineNumber || 'Не указан'}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">Двигатель:</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2 flex-1 text-right">{vehicle.engineNumber || 'Не указан'}</span>
                           </div>
                         </div>
                       </div>
@@ -628,50 +628,50 @@ const VehiclesMaintenance = () => {
                   </div>
                 ))
               ) : (
-                <div className="p-4 text-center text-sm text-gray-500">
+                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                   Нет данных о транспортных средствах.
                 </div>
               )}
             </div>
-            
+
             {/* Desktop View - Table */}
-            <table className="hidden md:table divide-y divide-gray-200 min-w-full">
-              <thead className="bg-gray-50">
+            <table className="hidden md:table divide-y divide-gray-200 dark:divide-gray-700 min-w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Производитель</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Марка</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">VIN/Кузов</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Данные СТС</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Название</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Производитель</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Марка</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">VIN/Кузов</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Данные СТС</th>
                   {isAdmin && (
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Действия</th>
                   )}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {vehicleData.length > 0 ? (
                   vehicleData.map(vehicle => (
-                    <tr key={vehicle.id} className="hover:bg-gray-50">
-                      <td className="p-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr key={vehicle.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                         {vehicle.name}
                       </td>
-                      <td className="p-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {vehicle.manufacturer}
                       </td>
-                      <td className="p-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {vehicle.model}
                       </td>
-                      <td className="p-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {vehicle.vin}
                       </td>
-                      <td className="p-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {vehicle.stsData}
                       </td>
                       {isAdmin && (
                         <td className="p-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
                             onClick={() => openVehicleFormModal(vehicle.id)}
-                            className="text-blue-600 hover:text-blue-900 mr-3"
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
                             title="Редактировать автомобиль"
                           >
                             <EditIcon className="h-5 w-5" />
@@ -681,7 +681,7 @@ const VehiclesMaintenance = () => {
                               e.stopPropagation();
                               setDeleteConfirmationVehicleId(vehicle.id);
                             }}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                             title="Удалить автомобиль"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -694,7 +694,7 @@ const VehiclesMaintenance = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={isAdmin ? 6 : 5} className="p-4 text-center text-sm text-gray-500">
+                    <td colSpan={isAdmin ? 6 : 5} className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                       Нет данных о транспортных средствах.
                     </td>
                   </tr>
@@ -705,7 +705,7 @@ const VehiclesMaintenance = () => {
         )}
       </div>
     </div>
-  </div>      
+  </div>
       
       {/* Maintenance Form Modal */}
       {isAdmin && (
@@ -735,10 +735,10 @@ const VehiclesMaintenance = () => {
       
       {/* Delete Confirmation Modal for Vehicles */}
       {isAdmin && deleteConfirmationVehicleId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
-            <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить этот автомобиль? Это действие нельзя отменить.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Подтверждение удаления</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">Вы уверены, что хотите удалить этот автомобиль? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <Button
                 onClick={() => setDeleteConfirmationVehicleId(null)}

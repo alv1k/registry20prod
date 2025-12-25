@@ -4,11 +4,13 @@ import { useStore } from '../../store/useStore';
 import type { AppHolidayMenu as HolidayMenu } from '../../store/useStore';
 import AnimatedAccordion from '../../components/AnimatedAccordion';
 import RecipeModal from './components/recipeModal';
+import HolidayMenuFormModal from './components/holidayMenuFormModal';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import Button from '../../components/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatDate } from '../../utils/formatUtils';
 import useIsMobile from '../../hooks/useIsMobile';
+import { useModal } from '../../contexts/ModalContext';
 
 interface RecipeRecord {
   id: number | string;
@@ -47,12 +49,13 @@ const Recipes = () => {
   const isHolidayMenuDataLoading = useStore((state) => state.isHolidayMenuDataLoading);
   const holidayMenuDataError = useStore((state) => state.holidayMenuDataError);
 
+  // Use ModalContext
+  const { openModal, closeModal } = useModal();
+
   // State for holiday menu functionality
-  const [isHolidayMenuFormModalOpen, setIsHolidayMenuFormModalOpen] = useState(false);
   const [selectedHolidayMenuId, setSelectedHolidayMenuId] = useState<number | string | null>(null);
 
   // State for modals
-  const [isRecipeFormModalOpen, setIsRecipeFormModalOpen] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
 
@@ -106,12 +109,19 @@ const Recipes = () => {
     } else {
       setSelectedRecordId(null);
     }
-    setIsRecipeFormModalOpen(true);
-  };
 
-  const closeRecipeFormModal = () => {
-    setIsRecipeFormModalOpen(false);
-    setSelectedRecordId(null);
+    // Open modal using ModalContext
+    openModal({
+      id: `recipe-modal-${id || 'new'}`,
+      component: RecipeModal,
+      props: {
+        recordId: id || null,
+        record: id ? recipeData.find(r => r.id === id) as any : undefined,
+        onAdd: addRecipeRecord,
+        onUpdate: updateRecipeRecord,
+        onClose: () => closeModal(`recipe-modal-${id || 'new'}`)
+      }
+    });
   };
 
   // Confirmation functions for deletion
@@ -146,12 +156,20 @@ const Recipes = () => {
     } else {
       setSelectedHolidayMenuId(null);
     }
-    setIsHolidayMenuFormModalOpen(true);
-  };
 
-  const closeHolidayMenuFormModal = () => {
-    setIsHolidayMenuFormModalOpen(false);
-    setSelectedHolidayMenuId(null);
+    // Open modal using ModalContext
+    openModal({
+      id: `holiday-menu-modal-${id || 'new'}`,
+      component: HolidayMenuFormModal,
+      props: {
+        holidayMenuId: id || null,
+        holidayMenu: id ? holidayMenus.find(hm => hm.id === id) : undefined,
+        onAdd: addHolidayMenu,
+        onUpdate: updateHolidayMenu,
+        recipes: recipeData,
+        onClose: () => closeModal(`holiday-menu-modal-${id || 'new'}`)
+      }
+    });
   };
 
   // Confirmation functions for deleting holiday menus
@@ -321,15 +339,15 @@ const Recipes = () => {
   return (
     <div className="p-4 sm:p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Рецепты</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Рецепты</h1>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200 mb-6">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
           <button
             className={`px-4 py-2 font-medium text-sm ${
               activeTab === 'catalog'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
             onClick={() => setActiveTab('catalog')}
           >
@@ -338,8 +356,8 @@ const Recipes = () => {
           <button
             className={`px-4 py-2 font-medium text-sm ${
               activeTab === 'holiday'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
             onClick={() => setActiveTab('holiday')}
           >
@@ -348,7 +366,7 @@ const Recipes = () => {
         </div>
 
         <div className="flex justify-between items-start sm:items-center">
-          <h2 className="text-base sm:text-xl font-semibold text-gray-700">
+          <h2 className="text-base sm:text-xl font-semibold text-gray-700 dark:text-gray-300">
             {activeTab === 'catalog' ? 'Каталог рецептов' : 'Меню на праздник'}
           </h2>
           <div className="flex flex-wrap gap-3">
@@ -374,19 +392,19 @@ const Recipes = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
-                { 
+                {
                   !isMobile &&
                   'Добавить меню'
                 }
               </Button>
-            }            
+            }
           </div>
         </div>
       </div>
 
       {/* Error messages */}
       {recipeDataError && activeTab === 'catalog' && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
           {recipeDataError}
         </div>
       )}
@@ -398,41 +416,41 @@ const Recipes = () => {
           <AnimatedAccordion title="Фильтры" defaultOpen={false}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Название</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Название</label>
                 <input
                   type="text"
                   placeholder="Фильтр по названию"
                   value={titleFilter}
                   onChange={(e) => setTitleFilter(e.target.value)}
-                  className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                  className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Категория</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категория</label>
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                  className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-                  <option value="">Все категории</option>
-                  <option value="первое">Первое</option>
-                  <option value="второе">Второе</option>
-                  <option value="напитки">Напитки</option>
-                  <option value="выпечка">Выпечка</option>
-                  <option value="молочка">Молочка</option>
-                  <option value="хлеб">Хлеб</option>
+                  <option value="" className="dark:bg-gray-700 dark:text-white">Все категории</option>
+                  <option value="первое" className="dark:bg-gray-700 dark:text-white">Первое</option>
+                  <option value="второе" className="dark:bg-gray-700 dark:text-white">Второе</option>
+                  <option value="напитки" className="dark:bg-gray-700 dark:text-white">Напитки</option>
+                  <option value="выпечка" className="dark:bg-gray-700 dark:text-white">Выпечка</option>
+                  <option value="молочка" className="dark:bg-gray-700 dark:text-white">Молочка</option>
+                  <option value="хлеб" className="dark:bg-gray-700 dark:text-white">Хлеб</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Поиск по ингредиентам</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Поиск по ингредиентам</label>
                 <input
                   type="text"
                   placeholder="Ингредиент"
                   value={ingredientFilter}
                   onChange={(e) => setIngredientFilter(e.target.value)}
-                  className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                  className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
             </div>
@@ -451,9 +469,9 @@ const Recipes = () => {
 
       {/* Content for Holiday Menu Tab */}
       {activeTab === 'holiday' && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           {holidayMenuDataError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
               {holidayMenuDataError}
             </div>
           )}
@@ -471,33 +489,33 @@ const Recipes = () => {
                 );
 
                 return (
-                  <div key={menu.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                  <div key={menu.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <div className="">
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-md font-medium text-gray-900">{menu.holidayName}</h4>
-                          <div className="text-sm text-gray-500">{menu.holidayDate ? formatDate(menu.holidayDate) : '***'}</div>
+                          <h4 className="text-md font-medium text-gray-900 dark:text-white">{menu.holidayName}</h4>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{menu.holidayDate ? formatDate(menu.holidayDate) : '***'}</div>
                         </div>
 
                         <div className="mt-2">
-                          <p className="text-sm text-gray-600">Рецепты в меню:</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Рецепты в меню:</p>
                           <div className="mt-1 flex flex-wrap gap-1">
                             {selectedRecipes.length > 0 ? (
                               selectedRecipes.map(recipe => (
                                 <span
                                   key={recipe.id}
-                                  className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                                  className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded"
                                 >
                                   {recipe.title}
                                 </span>
                               ))
                             ) : (
-                              <span className="text-xs text-gray-500">Нет выбранных рецептов</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">Нет выбранных рецептов</span>
                             )}
                           </div>
                         </div>
 
-                        <div className="mt-2 text-xs text-gray-500">
+                        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                           Добавлено: {menu.dateAdded ? formatDate(menu.dateAdded) : '***'}
                         </div>
                       </div>
@@ -506,14 +524,14 @@ const Recipes = () => {
                         <div className="flex space-x-2 mt-4">
                           <button
                             onClick={() => openHolidayMenuFormModal(menu.id)}
-                            className="text-blue-600 hover:text-blue-900 text-xs"
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-xs"
                             title="Редактировать меню"
                           >
                             Редактировать
                           </button>
                           <button
                             onClick={() => confirmHolidayMenuDelete(menu.id)}
-                            className="text-red-600 hover:text-red-900 text-xs"
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-xs"
                             title="Удалить меню"
                           >
                             Удалить
@@ -526,8 +544,8 @@ const Recipes = () => {
               })
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-500">Нет созданных меню для праздников</p>
-                <p className="text-sm text-gray-400 mt-1">Нажмите "Добавить" для создания первого меню</p>
+                <p className="text-gray-500 dark:text-gray-400">Нет созданных меню для праздников</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Нажмите "Добавить" для создания первого меню</p>
               </div>
             )}
           </div>
@@ -536,10 +554,10 @@ const Recipes = () => {
 
       {/* Delete Confirmation Modal */}
       {isAdmin && deleteConfirmationId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
-            <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить этот рецепт? Это действие нельзя отменить.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Подтверждение удаления</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">Вы уверены, что хотите удалить этот рецепт? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <Button
                 onClick={cancelDelete}
@@ -567,7 +585,7 @@ const Recipes = () => {
                 <LoadingSpinner message="Загрузка рецептов..." />
               </div>
             ) : recipeDataError ? (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
                 {recipeDataError}
               </div>
             ) : (
@@ -576,27 +594,27 @@ const Recipes = () => {
                 <div className="block md:hidden">
                   {filteredData.length > 0 ? (
                     filteredData.map((record) => (
-                      <div key={record.id} className="border-b border-gray-200 p-4 hover:bg-gray-50">
+                      <div key={record.id} className="border-b border-gray-200 dark:border-gray-700 p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <div className={`flex-1 ${isAdmin ? 'cursor-pointer' : ''}`}>
                           <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium text-gray-900">{record.title}</div>
-                            <div className="text-xs text-gray-500">{record.category}</div>
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">{record.title}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">{record.category}</div>
                           </div>
-                          <div className="mt-1 text-xs text-gray-500">
+                          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                             <div>Время: {record.cookingTime ? `${record.cookingTime} мин` : 'Не указано'}</div>
                             <div>Порции/штук: {record.servings || 'Не указано'}</div>
                           </div>
-                          <div className="mt-2 text-xs text-gray-500 max-h-20 overflow-hidden">
+                          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 max-h-20 overflow-hidden">
                             <div className="truncate" title={record.ingredients}>
                               <span className="font-medium">Ингредиенты:</span> {record.ingredients.split('\n').slice(0, 3).join(', ')}
                             </div>
                           </div>
-                          <div className="mt-2 text-xs text-gray-500 max-h-10 overflow-hidden">
+                          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 max-h-10 overflow-hidden">
                             <div className="truncate" title={record.instructions}>
                               <span className="font-medium">Способ приготовления:</span> {record.instructions}
                             </div>
                           </div>
-                          <div className="mt-2 text-xs text-gray-500">
+                          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                             Добавлен: {record.date}
                           </div>
                         </div>
@@ -604,7 +622,7 @@ const Recipes = () => {
                           <div className="flex space-x-2 mt-2">
                             <button
                               onClick={() => openRecipeFormModal(record.id)}
-                              className="text-blue-600 hover:text-blue-900 text-xs"
+                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-xs"
                               title="Редактировать рецепт"
                             >
                               Редактировать
@@ -614,7 +632,7 @@ const Recipes = () => {
                                 e.stopPropagation();
                                 confirmDelete(record.id);
                               }}
-                              className="text-red-600 hover:text-red-900 text-xs"
+                              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-xs"
                               title="Удалить рецепт"
                             >
                               Удалить
@@ -624,56 +642,56 @@ const Recipes = () => {
                       </div>
                     ))
                   ) : (
-                    <div className="p-4 text-center text-sm text-gray-500">
+                    <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                       Нет рецептов, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                     </div>
                   )}
                 </div>
 
                 {/* Desktop View - Table */}
-                <table className="hidden md:table divide-y divide-gray-200 min-w-full">
-                  <thead className="bg-gray-50">
+                <table className="hidden md:table divide-y divide-gray-200 dark:divide-gray-700 min-w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Время приготовления</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Порции/штук</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата добавления</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Название</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Категория</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Время приготовления</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Порции/штук</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Дата добавления</th>
                       {isAdmin && (
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Действия</th>
                       )}
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredData.length > 0 ? (
                       filteredData.map((record) => (
                         <tr
                           key={record.id}
-                          className={`hover:bg-gray-50 ${isAdmin ? 'cursor-pointer' : ''}`}
+                          className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${isAdmin ? 'cursor-pointer' : ''}`}
                           onClick={isAdmin ? () => openRecipeFormModal(record.id) : undefined}
                         >
                           <td
-                            className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                            className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"
                           >
                             {record.title}
                           </td>
                           <td
-                            className="p-4 whitespace-nowrap text-sm text-gray-500"
+                            className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                           >
                             {record.category}
                           </td>
                           <td
-                            className="p-4 whitespace-nowrap text-sm text-gray-500"
+                            className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                           >
                             {record.cookingTime ? `${record.cookingTime} мин` : 'Не указано'}
                           </td>
                           <td
-                            className="p-4 whitespace-nowrap text-sm text-gray-500"
+                            className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                           >
                             {record.servings || 'Не указано'}
                           </td>
                           <td
-                            className="p-4 whitespace-nowrap text-sm text-gray-500"
+                            className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                           >
                             {record.date}
                           </td>
@@ -685,7 +703,7 @@ const Recipes = () => {
                                     e.stopPropagation();
                                     openRecipeFormModal(record.id);
                                   }}
-                                  className="text-blue-600 hover:text-blue-900"
+                                  className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                   title="Редактировать"
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -697,7 +715,7 @@ const Recipes = () => {
                                     e.stopPropagation();
                                     confirmDelete(record.id);
                                   }}
-                                  className="text-red-600 hover:text-red-900 ml-2"
+                                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 ml-2"
                                   title="Удалить"
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -711,7 +729,7 @@ const Recipes = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={isAdmin ? 6 : 5} className="p-4 text-center text-sm text-gray-500">
+                        <td colSpan={isAdmin ? 6 : 5} className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                           Нет рецептов, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                         </td>
                       </tr>
@@ -726,14 +744,14 @@ const Recipes = () => {
 
       {/* Delete Confirmation Modal for Holiday Menus */}
       {isAdmin && deleteHolidayMenuConfirmationId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
-            <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить это меню на праздник? Это действие нельзя отменить.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Подтверждение удаления</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">Вы уверены, что хотите удалить это меню на праздник? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={cancelHolidayMenuDelete}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 Отмена
               </button>
@@ -748,184 +766,6 @@ const Recipes = () => {
         </div>
       )}
 
-      {/* Recipe Form Modal - Only for Catalog Tab */}
-      {isAdmin && activeTab === 'catalog' && (
-        <RecipeModal
-          isOpen={isRecipeFormModalOpen}
-          onClose={closeRecipeFormModal}
-          recordId={selectedRecordId}
-          record={selectedRecordId ? recipeData.find(r => r.id === selectedRecordId) as any : undefined}
-          onAdd={addRecipeRecord}
-          onUpdate={updateRecipeRecord}
-        />
-      )}
-
-      {/* Holiday Menu Form Modal */}
-      {isAdmin && activeTab === 'holiday' && (
-        <HolidayMenuFormModal
-          isOpen={isHolidayMenuFormModalOpen}
-          onClose={closeHolidayMenuFormModal}
-          holidayMenuId={selectedHolidayMenuId}
-          holidayMenu={selectedHolidayMenuId ? holidayMenus.find(hm => hm.id === selectedHolidayMenuId) : undefined}
-          onAdd={addHolidayMenu}
-          onUpdate={updateHolidayMenu}
-          recipes={recipeData}
-        />
-      )}
-    </div>
-  );
-};
-
-// Holiday Menu Form Modal Component
-const HolidayMenuFormModal: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  holidayMenuId?: number | string | null;
-  holidayMenu?: HolidayMenu;
-  onAdd: (holidayMenu: Omit<HolidayMenu, 'id' | 'dateAdded'>) => void;
-  onUpdate: (id: number | string, updatedData: Partial<HolidayMenu>) => void;
-  recipes: RecipeRecord[];
-}> = ({ isOpen, onClose, holidayMenuId, holidayMenu, onAdd, onUpdate, recipes }) => {
-  const { isAdmin } = useAuth();
-  const [holidayName, setHolidayName] = useState(holidayMenu?.holidayName || '');
-  const [holidayDate, setHolidayDate] = useState(holidayMenu?.holidayDate || new Date().toISOString().split('T')[0]);
-  const [selectedRecipeIds, setSelectedRecipeIds] = useState<(number | string)[]>(holidayMenu?.recipeIds || []);
-
-  useEffect(() => {
-    if (holidayMenu) {
-      setHolidayName(holidayMenu.holidayName);
-      setHolidayDate(holidayMenu.holidayDate);
-      setSelectedRecipeIds(holidayMenu.recipeIds || []);
-    } else {
-      setHolidayName('');
-      setHolidayDate(new Date().toISOString().split('T')[0]); // Default to today's date
-      setSelectedRecipeIds([]);
-    }
-  }, [holidayMenu, isOpen]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!holidayName || !holidayDate || selectedRecipeIds.length === 0) {
-      alert('Пожалуйста, заполните все поля и выберите хотя бы один рецепт');
-      return;
-    }
-
-    const holidayMenuData = {
-      holidayName,
-      holidayDate,
-      recipeIds: selectedRecipeIds
-    };
-
-    if (holidayMenuId) {
-      onUpdate(holidayMenuId, holidayMenuData);
-    } else {
-      onAdd(holidayMenuData);
-    }
-
-    onClose();
-  };
-
-  const handleRecipeToggle = (recipeId: number | string) => {
-    if (selectedRecipeIds.includes(recipeId)) {
-      setSelectedRecipeIds(selectedRecipeIds.filter(id => id !== recipeId));
-    } else {
-      setSelectedRecipeIds([...selectedRecipeIds, recipeId]);
-    }
-  };
-
-  if (!isAdmin) return null;
-
-  return (
-    <div className={`${isOpen ? 'block' : 'hidden'} fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50`}>
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          {holidayMenuId ? 'Редактировать меню на праздник' : 'Добавить меню на праздник'}
-        </h3>
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Название праздника</label>
-              <input
-                type="text"
-                value={holidayName}
-                onChange={(e) => setHolidayName(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-                placeholder="Введите название праздника"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Дата праздника</label>
-              <input
-                type="date"
-                value={holidayDate}
-                onChange={(e) => setHolidayDate(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Выберите рецепты для меню</label>
-              <div className="border border-gray-300 rounded-md p-4 max-h-60 overflow-y-auto">
-                {recipes.length > 0 ? (
-                  [...recipes].sort((a, b) => {
-                    const categoryOrder = ['первое', 'второе', 'напитки', 'выпечка', 'молочка', 'хлеб'];
-                    const indexA = categoryOrder.indexOf(a.category.toLowerCase());
-                    const indexB = categoryOrder.indexOf(b.category.toLowerCase());
-
-                    // If category is not in our predefined order, put it at the end
-                    const orderA = indexA === -1 ? Infinity : indexA;
-                    const orderB = indexB === -1 ? Infinity : indexB;
-
-                    // If both categories are in our order, sort by that order
-                    if (orderA !== Infinity || orderB !== Infinity) {
-                      return orderA - orderB;
-                    }
-
-                    // If neither is in our predefined order, sort alphabetically
-                    return a.category.localeCompare(b.category);
-                  }).map((recipe) => (
-                    <div key={recipe.id} className="flex items-center mb-2">
-                      <input
-                        type="checkbox"
-                        id={`recipe-${recipe.id}`}
-                        checked={selectedRecipeIds.includes(recipe.id)}
-                        onChange={() => handleRecipeToggle(recipe.id)}
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                      />
-                      <label htmlFor={`recipe-${recipe.id}`} className="ml-2 text-sm text-gray-700">
-                        {recipe.title} ({recipe.category})
-                      </label>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 text-center">Нет доступных рецептов</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-3 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Отмена
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              {holidayMenuId ? 'Сохранить' : 'Добавить'}
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 };

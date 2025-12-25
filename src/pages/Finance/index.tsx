@@ -12,9 +12,7 @@ import Tabs from '../../components/Tabs';
 import { formatCurrencyWithSeparators, formatDate } from '../../utils/formatUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { exportRecordsToExcel } from '../../utils/exportUtils';
-import { FiPlus, FiDownload, FiX, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import { log } from 'console';
-import { isModifier } from 'typescript';
+import { FiPlus, FiDownload, FiX, FiTrash2, FiChevronDown } from 'react-icons/fi';
 import useIsMobile from '../../hooks/useIsMobile';
 
 // Type the icons properly
@@ -23,7 +21,6 @@ const DownloadIcon = FiDownload as React.FC<React.SVGProps<SVGSVGElement>>;
 const XIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
 const TrashIcon = FiTrash2 as React.FC<React.SVGProps<SVGSVGElement>>;
 const ChevronDownIcon = FiChevronDown as React.FC<React.SVGProps<SVGSVGElement>>;
-const ChevronUpIcon = FiChevronUp as React.FC<React.SVGProps<SVGSVGElement>>;
 
 const Finance = () => {
   const financeData = useStore((state) => state.financeData);
@@ -287,10 +284,10 @@ const Finance = () => {
       id: 'tab1',
       title: 'Финансы',
       content: (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex sm:items-center sm:justify-between gap-4">
-              <h3 className="text-lg font-semibold text-gray-900">Записи</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Записи</h3>
               <div className="flex gap-3 ms-auto">
                 {isAdmin && (
                   <Button
@@ -307,7 +304,7 @@ const Finance = () => {
                   variant="secondary"
                   className="flex items-center"
                 >
-                  <DownloadIcon />                  
+                  <DownloadIcon />
                 </Button>
               </div>
             </div>
@@ -322,37 +319,37 @@ const Finance = () => {
               ) : (
                 <>
                   {/* Mobile View - Card Layout */}
-                  <div className="sm:hidden divide-y divide-gray-200">
+                  <div className="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
                     {filteredData.length > 0 ? (
                       filteredData.map((record) => (
                         <div
                           key={record.id}
-                          className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${isAdmin ? 'cursor-pointer' : ''}`}
+                          className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer ${isAdmin ? 'cursor-pointer' : ''}`}
                           onClick={isAdmin ? () => openFinanceFormModal(record.id) : undefined}
                         >
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center justify-between">
-                                <div className="font-medium text-gray-900">{record.name}</div>
-                                <div className="text-sm text-gray-500">{formatDate(record.date)}</div>
+                                <div className="font-medium text-gray-900 dark:text-white">{record.name}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{formatDate(record.date)}</div>
                               </div>
-                              <div className="mt-1 text-sm text-gray-500 truncate text-wrap">{record.comment}</div>
+                              <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 truncate text-wrap">{record.comment}</div>
                               <div className="mt-3 space-y-1 text-sm">
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600">Цена:</span>
-                                  <span className="font-medium">{formatCurrencyWithSeparators(record.price)} ₽</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Цена:</span>
+                                  <span className="font-medium dark:text-gray-200">{formatCurrencyWithSeparators(record.price)} ₽</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600">Кол-во:</span>
-                                  <span className="font-medium">{record.quantity}</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Кол-во:</span>
+                                  <span className="font-medium dark:text-gray-200">{record.quantity}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600">Сумма:</span>
-                                  <span className="font-medium text-green-600">{formatCurrencyWithSeparators(record.total)} ₽</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Сумма:</span>
+                                  <span className="font-medium text-green-600 dark:text-green-400">{formatCurrencyWithSeparators(record.total)} ₽</span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-gray-600">Категория:</span>
-                                  <span className="font-medium">{record.classification}</span>
+                                  <span className="text-gray-600 dark:text-gray-300">Категория:</span>
+                                  <span className="font-medium dark:text-gray-200">{record.classification}</span>
                                 </div>
                               </div>
                             </div>
@@ -364,7 +361,7 @@ const Finance = () => {
                                   e.stopPropagation();
                                   confirmDelete(record.id);
                                 }}
-                                className="text-red-600 hover:text-red-800 p-1 text-sm"
+                                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1 text-sm"
                                 title="Удалить запись"
                               >
                                 {
@@ -379,55 +376,55 @@ const Finance = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="p-8 text-center text-gray-500">
+                      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                         Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                       </div>
                     )}
                   </div>
 
                   {/* Desktop View - Table */}
-                  <table className="hidden sm:table min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="hidden sm:table min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Цена</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кол-во</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Комментарий</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Дата</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Название</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Цена</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Кол-во</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Сумма</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Категория</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Комментарий</th>
                         {isAdmin && (
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Действия</th>
                         )}
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                       {filteredData.length > 0 ? (
                         filteredData.map((record, index) => (
                           <tr
                             key={record.id}
-                            className={`hover:bg-gray-50 transition-colors ${isAdmin ? 'cursor-pointer' : ''}`}
+                            className={`hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${isAdmin ? 'cursor-pointer' : ''}`}
                             onClick={isAdmin ? () => openFinanceFormModal(record.id) : undefined}
                           >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                               {formatDate(record.date)}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                               {record.name}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                               {formatCurrencyWithSeparators(record.price)} ₽
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                               {record.quantity}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 dark:text-green-400 font-medium">
                               {formatCurrencyWithSeparators(record.total)} ₽
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                               {record.classification}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                            <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
                               {record.comment}
                             </td>
                             {isAdmin && (
@@ -438,7 +435,7 @@ const Finance = () => {
                                       e.stopPropagation();
                                       confirmDelete(record.id);
                                     }}
-                                    className="text-red-600 hover:text-red-800 p-1"
+                                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
                                     title="Удалить запись"
                                   >
                                     <TrashIcon className="h-5 w-5" />
@@ -450,7 +447,7 @@ const Finance = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={isAdmin ? 8 : 7} className="px-6 py-8 text-center text-sm text-gray-500">
+                          <td colSpan={isAdmin ? 8 : 7} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
                             Нет данных, соответствующих фильтрам. Попробуйте изменить параметры фильтрации.
                           </td>
                         </tr>
@@ -467,21 +464,21 @@ const Finance = () => {
       id: 'tab2',
       title: 'Бюджет',
       content: (
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Планирование бюджета</h3>
-          <p>Здесь будет отображаться информация о запланированном бюджете.</p>
+        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Планирование бюджета</h3>
+          <p className="text-gray-700 dark:text-gray-300">Здесь будет отображаться информация о запланированном бюджете.</p>
           <ul className="mt-2 space-y-1">
             <li className="flex items-center">
               <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-              Доходы и расходы
+              <span className="text-gray-700 dark:text-gray-300">Доходы и расходы</span>
             </li>
             <li className="flex items-center">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-              Категории расходов
+              <span className="text-gray-700 dark:text-gray-300">Категории расходов</span>
             </li>
             <li className="flex items-center">
               <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
-              Отчеты
+              <span className="text-gray-700 dark:text-gray-300">Отчеты</span>
             </li>
           </ul>
         </div>
@@ -490,32 +487,32 @@ const Finance = () => {
       id: 'tab3',
       title: 'Аналитика',
       content: (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Аналитика</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Аналитика</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Total Amount Block */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-100">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-6 border border-blue-100 dark:border-gray-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-600">Общая сумма</h4>
-                  <div className="mt-2 text-2xl font-bold text-blue-700">
+                  <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">Общая сумма</h4>
+                  <div className="mt-2 text-2xl font-bold text-blue-700 dark:text-blue-400">
                     {formatCurrencyWithSeparators(calculateTotalAmount)} ₽
                   </div>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-lg">
-                  <DownloadIcon className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-blue-100 dark:bg-gray-700 rounded-lg">
+                  <DownloadIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              <div className="mt-4 text-sm text-gray-600">
+              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                 по выбранным фильтрам
               </div>
             </div>
 
             {/* Top 3 Categories Block */}
-            <div className="bg-gradient-to-br min-h-[210px] from-indigo-50 to-indigo-100 rounded-xl p-6 border border-indigo-100">
+            <div className="bg-gradient-to-br min-h-[210px] from-indigo-50 to-indigo-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-6 border border-indigo-100 dark:border-gray-700">
               <div className="flex justify-between">
-                <h4 className="text-sm font-medium text-gray-600">
+                <h4 className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   <span className="relative h-5 text-nowrap">
                     <span className={`
                       absolute inset-0 transition-opacity duration-300 ease-in-out
@@ -532,7 +529,7 @@ const Finance = () => {
                   </span>
                 </h4>
                 <span
-                  className="transition-transform duration-300 ease-in-out cursor-pointer"
+                  className="transition-transform duration-300 ease-in-out cursor-pointer text-gray-600 dark:text-gray-300"
                   style={{
                     transform: showAllExpensesByCategory ? 'rotate(0deg)' : 'rotate(180deg)'
                   }}
@@ -562,22 +559,22 @@ const Finance = () => {
                         }`}>
                           {index + 1}
                         </div>
-                        <div className="text-gray-900 font-medium truncate max-w-[100px] md:max-w-fit">{category.name}</div>
+                        <div className="text-gray-900 font-medium truncate max-w-[100px] md:max-w-fit dark:text-white">{category.name}</div>
                       </div>
-                      <div className="font-semibold text-gray-700">
+                      <div className="font-semibold text-gray-700 dark:text-gray-300">
                         {formatCurrencyWithSeparators(category.total)} ₽
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-gray-500 text-center py-4">
+                  <div className="text-gray-500 text-center py-4 dark:text-gray-400">
                     Нет данных для отображения
                   </div>
                 )}
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
             <Charts records={filteredData} />
           </div>
         </div>
@@ -586,10 +583,10 @@ const Finance = () => {
       id: 'tab4',
       title: 'Категории',
       content: (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <h3 className="text-lg font-semibold text-gray-900">Управление категориями</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Управление категориями</h3>
               {isAdmin && (
                 <Button
                   onClick={() => openCategoryFormModal()}
@@ -603,7 +600,7 @@ const Finance = () => {
             </div>
           </div>
           <div className="p-6">
-            <div className="max-h-96 overflow-y-auto">    
+            <div className="max-h-96 overflow-y-auto">
               <CategoryManager onAddCategoryClick={() => openCategoryFormModal()} />
             </div>
           </div>
@@ -613,10 +610,10 @@ const Finance = () => {
       id: 'tab5',
       title: 'Список покупок',
       content: (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex justify-between gap-4">
-              <h3 className="text-lg font-semibold text-gray-900">Список покупок</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Список покупок</h3>
               {isAdmin && (
                 <Button
                   onClick={() => openGroceryListFormModal()}
@@ -632,105 +629,107 @@ const Finance = () => {
               )}
             </div>
           </div>
-          <div className="max-h-96 overflow-y-auto">
-            <GroceryListManager
-              onRegisterOpenForm={(func) => {
-                groceryListOpenFunctionRef.current = func;
-              }}
-              onAddGroceryClick={() => openGroceryListFormModal()}
-            />
+          <div className="p-6">
+            <div className="max-h-96 overflow-y-auto">
+              <GroceryListManager
+                onRegisterOpenForm={(func) => {
+                  groceryListOpenFunctionRef.current = func;
+                }}
+                onAddGroceryClick={() => openGroceryListFormModal()}
+              />
+            </div>
           </div>
         </div>
       )
-    }, 
+    },
   ];
 
   return (
     <div className="p-4 sm:p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Каталог финансов</h1>
-      
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Каталог финансов</h1>
+
       {/* Error message */}
       {dataError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6 flex items-center">
           <XIcon className="h-5 w-5 mr-2" />
           {dataError}
         </div>
       )}
-      
+
       {/* Filter Controls - Accordion */}
       <AnimatedAccordion title="Фильтры" defaultOpen={true}>
-        <div className="md:flex gap-4">          
+        <div className="md:flex gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Название и комментарий</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Название и комментарий</label>
             <input
               type="text"
               placeholder="Фильтр по названию и комментарию"
               value={nameFilter}
               onChange={(e) => setNameFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Классификация</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Классификация</label>
             <select
               value={classificationFilter}
               onChange={(e) => setClassificationFilter(e.target.value)}
-              className="w-56 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-56 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">Не выбрано</option>
+              <option value="" className="dark:bg-gray-700 dark:text-white">Не выбрано</option>
               {categories
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .filter((a) => a.type === 'expense')
                 .map((category) => (
-                <option key={category.id} value={category.name}>
+                <option key={category.id} value={category.name} className="dark:bg-gray-700 dark:text-white">
                   {category.name}
                 </option>
               ))}
             </select>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Период</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Период</label>
             <div className="flex space-x-2">
               <select
                 value={periodFilter.type}
                 onChange={(e) => setPeriodFilter({type: e.target.value as any, value: periodFilter.value})}
-                className="w-32 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                className="w-32 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               >
-                <option value="all">Весь</option>
-                <option value="month">Месяц</option>
-                <option value="quarter">Квартал</option>
-                <option value="year">Год</option>
+                <option value="all" className="dark:bg-gray-700 dark:text-white">Весь</option>
+                <option value="month" className="dark:bg-gray-700 dark:text-white">Месяц</option>
+                <option value="quarter" className="dark:bg-gray-700 dark:text-white">Квартал</option>
+                <option value="year" className="dark:bg-gray-700 dark:text-white">Год</option>
               </select>
               {periodFilter.type !== 'all' && (
                 <select
                   value={periodFilter.value}
                   onChange={(e) => setPeriodFilter({...periodFilter, value: e.target.value})}
-                  className="w-32 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                  className="w-32 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
                   {periodFilter.type === 'year' && Array.from({length: 10}, (_, i) => {
                     const year = new Date().getFullYear() - i;
-                    return <option key={year} value={year.toString()}>{year}</option>;
+                    return <option key={year} value={year.toString()} className="dark:bg-gray-700 dark:text-white">{year}</option>;
                   })}
                   {periodFilter.type === 'month' && Array.from({length: 12}, (_, i) => {
                     const month = i + 1;
                     const year = new Date().getFullYear();
                     const monthStr = month < 10 ? `0${month}` : month;
                     const displayMonth = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][i];
-                    return <option key={month} value={`${year}-${monthStr}`}>{displayMonth}</option>;
+                    return <option key={month} value={`${year}-${monthStr}`} className="dark:bg-gray-700 dark:text-white">{displayMonth}</option>;
                   })}
                   {periodFilter.type === 'quarter' && Array.from({length: 4}, (_, i) => {
                     const quarter = i + 1;
                     const year = new Date().getFullYear();
-                    return <option key={quarter} value={`${year}-Q${quarter}`}>Q{quarter}</option>;
+                    return <option key={quarter} value={`${year}-Q${quarter}`} className="dark:bg-gray-700 dark:text-white">Q{quarter}</option>;
                   })}
                 </select>
               )}
             </div>
           </div>
         </div>
-        
+
         <div className="flex justify-end mt-3">
           <Button
             onClick={clearFilters}
@@ -745,13 +744,13 @@ const Finance = () => {
       <div>
         <Tabs tabs={financeTabs} />
       </div>
-      
+
       {/* Delete Confirmation Modal */}
       {isAdmin && deleteConfirmationId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Подтверждение удаления</h3>
-            <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Подтверждение удаления</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">Вы уверены, что хотите удалить эту запись? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <Button
                 onClick={cancelDelete}

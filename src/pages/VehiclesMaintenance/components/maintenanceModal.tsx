@@ -133,16 +133,16 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Автомобиль *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Автомобиль *</label>
             <select
               value={vehicleId}
               onChange={(e) => setVehicleId(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               required
             >
-              <option value="">Выберите автомобиль</option>
+              <option value="" className="dark:bg-gray-700 dark:text-white">Выберите автомобиль</option>
               {vehicles.map(vehicle => (
-                <option key={vehicle.id} value={vehicle.id}>
+                <option key={vehicle.id} value={vehicle.id} className="dark:bg-gray-700 dark:text-white">
                   {vehicle.name} ({vehicle.manufacturer} {vehicle.model})
                 </option>
               ))}
@@ -150,7 +150,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Дата *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
             <input
               type="date"
               name="date"
@@ -158,13 +158,13 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
               onChange={(e) => setDate(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               required
             />
           </div>
           
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Вид работ *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Вид работ *</label>
             <div className="relative">
               <input
                 type="text"
@@ -176,7 +176,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
                   setShowWorkTypeDropdown(true);
                 }}
                 onBlur={() => setTimeout(() => setShowWorkTypeDropdown(false), 200)}
-                className="w-full p-2 pr-10 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                className="w-full p-2 pr-10 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
                 placeholder="Например: Техническое обслуживание, Замена масла"
                 required
               />
@@ -201,7 +201,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+                  className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto"
                 >
                   {workTypeOptions
                     .filter(option =>
@@ -210,7 +210,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
                     .map((option, index) => (
                       <div
                         key={index}
-                        className="p-2 hover:bg-blue-100 cursor-pointer"
+                        className="p-2 hover:bg-blue-100 dark:hover:bg-gray-600 cursor-pointer dark:text-white"
                         onMouseDown={() => {
                           setWorkType(option);
                           setShowWorkTypeDropdown(false);
@@ -225,7 +225,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Стоимость *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Стоимость *</label>
             <input
               type="text"
               inputMode="decimal"
@@ -266,7 +266,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
               }}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Стоимость в рублях"
               min="0"
               required
@@ -274,7 +274,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Количество</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Количество</label>
             <input
               type="number"
               name="quantity"
@@ -282,7 +282,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
               onChange={(e) => setQuantity(Math.max(0, Number(e.target.value)))}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Количество"
               min="0"
               step="0.01"
@@ -290,14 +290,14 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Итоговая сумма</label>
-            <div className="w-full p-2 border border-gray-300 rounded-md bg-gray-50">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Итоговая сумма</label>
+            <div className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md bg-gray-50 dark:bg-gray-700 dark:text-white">
               {totalCost.toFixed(2)} ₽
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Частота</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Частота</label>
             <input
               type="text"
               name="frequency"
@@ -305,13 +305,13 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
               onChange={(e) => setFrequency(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Например: каждые 10000 км"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Пробег</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пробег</label>
             <input
               type="number"
               name="mileage"
@@ -319,21 +319,21 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
               onChange={(e) => setMileage(e.target.value ? Number(e.target.value) : undefined)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Пробег в км"
               min="0"
             />
           </div>
           
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Комментарий</label>
             <textarea
               name="comment"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Дополнительная информация"
               rows={3}
             />

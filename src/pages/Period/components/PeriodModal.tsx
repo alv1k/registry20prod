@@ -119,47 +119,47 @@ const PeriodModal: React.FC<PeriodModalProps> = ({ isOpen, onClose, onSave, onDe
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 gap-4 mt-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Дата *
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Категория
             </label>
             <div className="flex items-center space-x-2">
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               >
                 {actualCategoryList.map((cat, index) => (
-                  <option key={index} value={cat}>{cat}</option>
+                  <option key={index} value={cat} className="dark:bg-gray-700 dark:text-white">{cat}</option>
                 ))}
               </select>
               <div
-                className={`w-6 h-6 rounded-full ${getCategoryColor(category, categoryList)} border border-gray-300`}
+                className={`w-6 h-6 rounded-full ${getCategoryColor(category, categoryList)} border border-gray-300 dark:border-gray-500`}
                 title={`Цвет категории: ${category}`}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Описание
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               placeholder="Описание события"
               rows={3}
             />

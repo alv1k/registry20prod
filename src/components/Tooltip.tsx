@@ -39,7 +39,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       {children}
       {visible && (
         <div
-          className={`absolute z-50 bg-gray-900 text-white text-xs rounded py-1 px-2 whitespace-nowrap max-w-xs break-words ${getPositionClasses()} ${className}`}
+          className={`absolute z-50 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-100 text-xs rounded py-1 px-2 whitespace-nowrap max-w-xs break-words ${getPositionClasses()} ${className}`}
           style={{
             // Ensure tooltip doesn't extend beyond viewport
             maxWidth: '200px',
@@ -48,7 +48,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         >
           {content}
           <div
-            className={`absolute w-2 h-2 bg-gray-900 transform rotate-45 ${
+            className={`absolute w-2 h-2 bg-gray-900 dark:bg-gray-700 transform rotate-45 ${
               position === 'top' ? 'bottom-[-4px] left-1/2 -translate-x-1/2' :
               position === 'bottom' ? 'top-[-4px] left-1/2 -translate-x-1/2' :
               position === 'left' ? 'right-[-4px] top-1/2 -translate-y-1/2' :

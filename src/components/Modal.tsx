@@ -77,20 +77,20 @@ const Modal: React.FC<ModalProps> = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={`relative bg-white rounded-xl shadow-2xl ${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col`}
+            className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl ${sizeClasses[size]} max-h-[90vh] overflow-hidden flex flex-col`}
             onClick={(e) => e.stopPropagation()}
           >
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                 {title && (
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {title}
                   </h3>
                 )}
                 {showCloseButton && (
                   <button
                     onClick={onClose}
-                    className="p-1 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    className="p-1 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                     aria-label="Close modal"
                   >
                     <CloseIcon className="h-5 w-5" />
@@ -99,7 +99,7 @@ const Modal: React.FC<ModalProps> = ({
               </div>
             )}
 
-            <div className="overflow-y-auto flex-grow p-6">
+            <div className="overflow-y-auto flex-grow p-6 dark:text-gray-200">
               {children}
             </div>
           </motion.div>

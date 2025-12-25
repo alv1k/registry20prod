@@ -101,7 +101,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Название *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Название *</label>
             <input
               type="text"
               name="name"
@@ -109,37 +109,37 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Название категории"
               required
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Тип *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип *</label>
             <select
               name="type"
               value={type}
               onChange={(e) => setType(e.target.value as 'expense' | 'income')}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               required
             >
-              <option value="expense">Расход</option>
-              <option value="income">Доход</option>
+              <option value="expense" className="dark:bg-gray-700 dark:text-white">Расход</option>
+              <option value="income" className="dark:bg-gray-700 dark:text-white">Доход</option>
             </select>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Описание</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Описание</label>
             <textarea
               name="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Описание категории"
               rows={3}
             />

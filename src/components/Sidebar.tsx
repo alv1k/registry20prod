@@ -68,14 +68,14 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
             animate={{ x: 0 }}
             exit={{ x: -260 }}
             transition={{ type: 'tween', duration: 0.3, ease: 'easeInOut' }}
-            className="w-64 bg-white shadow-lg h-screen flex flex-col z-30 fixed inset-y-0 left-0 md:hidden"
+            className="w-64 bg-white dark:bg-gray-800 shadow-lg h-screen flex flex-col z-30 fixed inset-y-0 left-0 md:hidden"
           >
             {/* Mobile header with close button */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
-              <div className="text-base font-bold text-gray-800 ml-2">Меню</div>
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <div className="text-base font-bold text-gray-800 dark:text-white ml-2">Меню</div>
               <button
                 onClick={() => setSidebarOpen && setSidebarOpen(false)}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
                 aria-label="Close sidebar"
               >
                 <CloseIcon className="h-5 w-5" />
@@ -91,8 +91,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
                       onClick={() => handleClick('/')}
                       className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
                         location.pathname === '/'
-                          ? 'bg-blue-50 text-blue-600 shadow-sm'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
                       }
                       ${
                         sidebarOpen ? '' : 'justify-center'
@@ -120,8 +120,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
                           onClick={() => handleClick(item.path)}
                           className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
                             location.pathname === item.path
-                              ? 'bg-blue-50 text-blue-600 shadow-sm'
-                              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
                           }
                           ${
                             sidebarOpen ? '' : 'justify-center'
@@ -143,8 +143,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
               </ul>
             </nav>
 
-            <div className="p-4 border-t border-gray-200 flex-shrink-0">
-              <div className="text-xs sm:text-[0.6rem] text-gray-500 font-medium uppercase tracking-wider">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <div className="text-xs sm:text-[0.6rem] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
                 Версия: Реестр 2.0
               </div>
             </div>
@@ -155,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
       {/* Desktop sidebar without animation - always visible */}
       <div className={`${
         sidebarOpen ? 'w-64' : 'w-fit' // Full width when open, narrow when collapsed
-      } bg-white shadow-lg h-screen flex flex-col z-30 md:static fixed inset-y-0 left-0 hidden md:flex md:translate-x-0`}>
+      } bg-white dark:bg-gray-800 shadow-lg h-screen flex flex-col z-30 md:static fixed inset-y-0 left-0 hidden md:flex md:translate-x-0`}>
         <nav className="flex-1 p-2 mt-4 overflow-y-auto">
           <ul className="space-y-1">
             <li>
@@ -165,8 +165,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
                   onClick={() => handleClick('/')}
                   className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
                     location.pathname === '/'
-                      ? 'bg-blue-50 text-blue-600 shadow-sm'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
                   }
                   ${
                     sidebarOpen ? '' : 'justify-center'
@@ -194,8 +194,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
                       onClick={() => handleClick(item.path)}
                       className={`flex items-center p-3 rounded-lg transition-all duration-200 ${
                         location.pathname === item.path
-                          ? 'bg-blue-50 text-blue-600 shadow-sm'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
                       }
                       ${
                         sidebarOpen ? '' : 'justify-center'
@@ -217,8 +217,8 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen = false, setSidebarOpen }
           </ul>
         </nav>
 
-        <div className={`p-4 border-t border-gray-200 ${sidebarOpen ? '' : 'hidden'} flex-shrink-0`}>
-          <div className="text-xs sm:text-[0.6rem] text-gray-500 font-medium uppercase tracking-wider">
+        <div className={`p-4 border-t border-gray-200 dark:border-gray-700 ${sidebarOpen ? '' : 'hidden'} flex-shrink-0`}>
+          <div className="text-xs sm:text-[0.6rem] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
             Версия: Реестр 2.0
           </div>
         </div>

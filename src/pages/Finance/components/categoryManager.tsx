@@ -85,11 +85,11 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
   };
 
   return (
-    <div className="bg-white overflow-hidden">
-      
+    <div className="bg-white dark:bg-gray-800 overflow-hidden">
+
       {/* Error message */}
       {categoriesError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-4">
+        <div className="bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded m-4">
           {categoriesError}
         </div>
       )}
@@ -100,37 +100,37 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
           <div className="hidden md:flex md:gap-5">
             {/* Expenses Section */}
             <div className="mb-8 w-full">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <span className="bg-red-100 text-red-800 px-2 py-1 rounded mr-2">Расходы</span>
-                <span className="text-gray-600 text-sm">({categories.filter(c => c.type === 'expense').length} {categories.filter(c => c.type === 'expense').length === 1 ? 'категория' : categories.filter(c => c.type === 'expense').length < 5 ? 'категории' : 'категорий'})</span>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                <span className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-2 py-1 rounded mr-2">Расходы</span>
+                <span className="text-gray-600 dark:text-gray-300 text-sm">({categories.filter(c => c.type === 'expense').length} {categories.filter(c => c.type === 'expense').length === 1 ? 'категория' : categories.filter(c => c.type === 'expense').length < 5 ? 'категории' : 'категорий'})</span>
               </h3>
               <table className="min-w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Название</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Описание</th>
                     {isAdmin && (
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Действия</th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {categories.filter(category => category.type === 'expense').length > 0 ? (
                     categories
                       .filter(category => category.type === 'expense')
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
-                      <tr 
-                        key={category.id} 
-                        className="hover:bg-gray-50"
+                      <tr
+                        key={category.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
-                        <td 
-                          className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                        <td
+                          className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"
                         >
                           {category.name}
                         </td>
-                        <td 
-                          className="p-4 text-sm text-gray-500"
+                        <td
+                          className="p-4 text-sm text-gray-500 dark:text-gray-400"
                         >
                           {category.description || '-'}
                         </td>
@@ -139,7 +139,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                             <div className="flex justify-end space-x-2">
                               <button
                                 onClick={() => openFormModal(category.id)}
-                                className="text-blue-600 hover:text-blue-900"
+                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                 title="Редактировать категорию"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -148,7 +148,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                               </button>
                               <button
                                 onClick={() => confirmDelete(category.id)}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                                 title="Удалить категорию"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -162,7 +162,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={isAdmin ? 3 : 2} className="p-4 text-center text-sm text-gray-500">
+                      <td colSpan={isAdmin ? 3 : 2} className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                         Нет категорий расходов.
                       </td>
                     </tr>
@@ -173,37 +173,37 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
 
             {/* Income Section */}
             <div className="mb-8 w-full">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <span className="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">Доходы</span>
-                <span className="text-gray-600 text-sm">({categories.filter(c => c.type === 'income').length} {categories.filter(c => c.type === 'income').length === 1 ? 'категория' : categories.filter(c => c.type === 'income').length < 5 ? 'категории' : 'категорий'})</span>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded mr-2">Доходы</span>
+                <span className="text-gray-600 dark:text-gray-300 text-sm">({categories.filter(c => c.type === 'income').length} {categories.filter(c => c.type === 'income').length === 1 ? 'категория' : categories.filter(c => c.type === 'income').length < 5 ? 'категории' : 'категорий'})</span>
               </h3>
               <table className="min-w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Название</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Описание</th>
                     {isAdmin && (
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Действия</th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {categories.filter(category => category.type === 'income').length > 0 ? (
                     categories
                       .filter(category => category.type === 'income')
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
-                      <tr 
-                        key={category.id} 
-                        className="hover:bg-gray-50"
+                      <tr
+                        key={category.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
-                        <td 
-                          className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                        <td
+                          className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"
                         >
                           {category.name}
                         </td>
-                        <td 
-                          className="p-4 text-sm text-gray-500"
+                        <td
+                          className="p-4 text-sm text-gray-500 dark:text-gray-400"
                         >
                           {category.description || '-'}
                         </td>
@@ -212,7 +212,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                             <div className="flex justify-end space-x-2">
                               <button
                                 onClick={() => openFormModal(category.id)}
-                                className="text-blue-600 hover:text-blue-900"
+                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                 title="Редактировать категорию"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -221,7 +221,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                               </button>
                               <button
                                 onClick={() => confirmDelete(category.id)}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                                 title="Удалить категорию"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -235,7 +235,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={isAdmin ? 3 : 2} className="p-4 text-center text-sm text-gray-500">
+                      <td colSpan={isAdmin ? 3 : 2} className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                         Нет категорий доходов.
                       </td>
                     </tr>
@@ -247,44 +247,44 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
         ) : (
           // Desktop View - Table with filtered categories
           <table className="hidden md:table w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Название</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Тип</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Описание</th>
                 {isAdmin && (
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Действия</th>
                 )}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {categories.filter(category => matchesFilter(category.type)).length > 0 ? (
                 categories
                   .filter(category => matchesFilter(category.type))
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((category) => (
-                  <tr 
-                    key={category.id} 
-                    className="hover:bg-gray-50"
+                  <tr
+                    key={category.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                    <td
+                      className="p-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"
                     >
                       {category.name}
                     </td>
-                    <td 
-                      className="p-4 whitespace-nowrap text-sm text-gray-500"
+                    <td
+                      className="p-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
                     >
                       <span className={`px-2 py-1 rounded-full text-xs ${
-                        category.type === 'expense' 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-green-100 text-green-800'
+                        category.type === 'expense'
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                          : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                       }`}>
                         {category.type === 'expense' ? 'Расход' : 'Доход'}
                       </span>
                     </td>
-                    <td 
-                      className="p-4 text-sm text-gray-500"
+                    <td
+                      className="p-4 text-sm text-gray-500 dark:text-gray-400"
                     >
                       {category.description || '-'}
                     </td>
@@ -293,7 +293,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                         <div className="flex justify-end space-x-2">
                           <button
                             onClick={() => openFormModal(category.id)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                             title="Редактировать категорию"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -302,7 +302,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                           </button>
                           <button
                             onClick={() => confirmDelete(category.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                             title="Удалить категорию"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -316,7 +316,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                 ))
               ) : (
                 <tr>
-                  <td colSpan={isAdmin ? 4 : 3} className="p-4 text-center text-sm text-gray-500">
+                  <td colSpan={isAdmin ? 4 : 3} className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                     Нет категорий. {isCategoriesLoading ? 'Загрузка...' : 'Добавьте первую категорию.'}
                   </td>
                 </tr>
@@ -329,26 +329,26 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
         <div className="block md:hidden divide-y divide-gray-200">
           {filterType === 'all' ? (
             <div>
-              {/* Expenses Section */}  
+              {/* Expenses Section */}
               <div className="mb-6">
-                <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
-                  <span className="bg-red-100 text-red-800 px-2 py-1 rounded mr-2">Расходы</span>
-                  <span className="text-gray-600 text-sm">({categories.filter(c => c.type === 'expense').length} {categories.filter(c => c.type === 'expense').length === 1 ? 'категория' : categories.filter(c => c.type === 'expense').length < 5 ? 'категории' : 'категорий'})</span>
+                <h3 className="text-md font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+                  <span className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 px-2 py-1 rounded mr-2">Расходы</span>
+                  <span className="text-gray-600 dark:text-gray-300 text-sm">({categories.filter(c => c.type === 'expense').length} {categories.filter(c => c.type === 'expense').length === 1 ? 'категория' : categories.filter(c => c.type === 'expense').length < 5 ? 'категории' : 'категорий'})</span>
                 </h3>
-                <div className="divide-y divide-gray-200">
+                <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   {categories.filter(category => category.type === 'expense').length > 0 ? (
                     categories
                       .filter(category => category.type === 'expense')
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
-                      <div key={category.id} className="p-4 hover:bg-gray-50">
+                      <div key={category.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center">
-                              <div className="text-sm font-medium text-gray-900">{category.name}</div>
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">{category.name}</div>
                             </div>
-                            <div className="mt-1 text-sm text-gray-500">
-                              {category.description || <span className="italic">Без описания</span>}
+                            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                              {category.description || <span className="italic dark:text-gray-500">Без описания</span>}
                             </div>
                           </div>
                           {isAdmin && (
@@ -356,7 +356,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                               <div className="flex space-x-2">
                                 <button
                                   onClick={() => openFormModal(category.id)}
-                                  className="text-blue-600 hover:text-blue-900"
+                                  className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                   title="Редактировать категорию"
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -365,7 +365,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                                 </button>
                                 <button
                                   onClick={() => confirmDelete(category.id)}
-                                  className="text-red-600 hover:text-red-900"
+                                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                                   title="Удалить категорию"
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -379,7 +379,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                       </div>
                     ))
                   ) : (
-                    <div className="p-4 text-center text-sm text-gray-500">
+                    <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                       Нет категорий расходов.
                     </div>
                   )}
@@ -388,24 +388,24 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
 
               {/* Income Section */}
               <div>
-                <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
-                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded mr-2">Доходы</span>
-                  <span className="text-gray-600 text-sm">({categories.filter(c => c.type === 'income').length} {categories.filter(c => c.type === 'income').length === 1 ? 'категория' : categories.filter(c => c.type === 'income').length < 5 ? 'категории' : 'категорий'})</span>
+                <h3 className="text-md font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+                  <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded mr-2">Доходы</span>
+                  <span className="text-gray-600 dark:text-gray-300 text-sm">({categories.filter(c => c.type === 'income').length} {categories.filter(c => c.type === 'income').length === 1 ? 'категория' : categories.filter(c => c.type === 'income').length < 5 ? 'категории' : 'категорий'})</span>
                 </h3>
-                <div className="divide-y divide-gray-200">
+                <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   {categories.filter(category => category.type === 'income').length > 0 ? (
                     categories
                       .filter(category => category.type === 'income')
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .map((category) => (
-                      <div key={category.id} className="p-4 hover:bg-gray-50">
+                      <div key={category.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center">
-                              <div className="text-sm font-medium text-gray-900">{category.name}</div>
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">{category.name}</div>
                             </div>
-                            <div className="mt-1 text-sm text-gray-500">
-                              {category.description || <span className="italic">Без описания</span>}
+                            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                              {category.description || <span className="italic dark:text-gray-500">Без описания</span>}
                             </div>
                           </div>
                           {isAdmin && (
@@ -413,7 +413,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                               <div className="flex space-x-2">
                                 <button
                                   onClick={() => openFormModal(category.id)}
-                                  className="text-blue-600 hover:text-blue-900"
+                                  className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                   title="Редактировать категорию"
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -422,7 +422,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                                 </button>
                                 <button
                                   onClick={() => confirmDelete(category.id)}
-                                  className="text-red-600 hover:text-red-900"
+                                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                                   title="Удалить категорию"
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -436,7 +436,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                       </div>
                     ))
                   ) : (
-                    <div className="p-4 text-center text-sm text-gray-500">
+                    <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                       Нет категорий доходов.
                     </div>
                   )}
@@ -452,21 +452,21 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                 .filter(category => matchesFilter(category.type))
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map((category) => (
-                <div key={category.id} className="p-4 hover:bg-gray-50">
+                <div key={category.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium text-gray-900">{category.name}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">{category.name}</div>
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          category.type === 'expense' 
-                            ? 'bg-red-100 text-red-800' 
-                            : 'bg-green-100 text-green-800'
+                          category.type === 'expense'
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                            : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                         }`}>
                           {category.type === 'expense' ? 'Расход' : 'Доход'}
                         </span>
                       </div>
-                      <div className="mt-1 text-sm text-gray-500">
-                        {category.description || <span className="italic">Без описания</span>}
+                      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {category.description || <span className="italic dark:text-gray-500">Без описания</span>}
                       </div>
                     </div>
                     {isAdmin && (
@@ -474,7 +474,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                         <div className="flex space-x-2">
                           <button
                             onClick={() => openFormModal(category.id)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                             title="Редактировать категорию"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -483,7 +483,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                           </button>
                           <button
                             onClick={() => confirmDelete(category.id)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                             title="Удалить категорию"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -497,7 +497,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
                 </div>
               ))
             ) : (
-              <div className="p-4 text-center text-sm text-gray-500">
+              <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                 Нет категорий. {isCategoriesLoading ? 'Загрузка...' : 'Добавьте первую категорию.'}
               </div>
             )
@@ -506,14 +506,14 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
       </div>
       
       {isAdmin && deleteConfirmationId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Подтверждение удаления</h3>
-            <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить эту категорию? Это действие нельзя отменить.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Подтверждение удаления</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">Вы уверены, что хотите удалить эту категорию? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={cancelDelete}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Отмена
               </button>

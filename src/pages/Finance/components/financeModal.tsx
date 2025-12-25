@@ -209,7 +209,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Дата *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
             <input
               type="date"
               name="date"
@@ -217,7 +217,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
               onChange={(e) => setDate(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               required
             />
           </div>
@@ -255,7 +255,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Название *
                   </label>
                   <input
@@ -265,14 +265,14 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
                     onChange={(e) => updateItemField(item.id, 'name', e.target.value)}
                     onFocus={(e) => setFocusedInput(e.target.name)}
                     onBlur={() => setFocusedInput(null)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
                     placeholder="Название товара/услуги"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Категория *
                   </label>
                   <select
@@ -281,15 +281,15 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
                     onChange={(e) => updateItemField(item.id, 'classification', e.target.value)}
                     onFocus={(e) => setFocusedInput(e.target.name)}
                     onBlur={() => setFocusedInput(null)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
                     required
                   >
-                    <option value="">Выберите категорию</option>
+                    <option value="" className="dark:bg-gray-700 dark:text-white">Выберите категорию</option>
                     {categories
                       .sort((a, b) => a.name.localeCompare(b.name))
                       .filter((a) => a.type === 'expense')
                       .map((category) => (
-                        <option key={`${category.id}-${item.id}`} value={category.name}>
+                        <option key={`${category.id}-${item.id}`} value={category.name} className="dark:bg-gray-700 dark:text-white">
                           {category.name}
                         </option>
                       ))}
@@ -297,7 +297,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Цена *
                   </label>
                   <input
@@ -307,7 +307,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
                     onChange={(e) => updateItemField(item.id, 'price', e.target.value)}
                     onFocus={(e) => setFocusedInput(e.target.name)}
                     onBlur={() => setFocusedInput(null)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
                     placeholder="Цена за единицу"
                     min="0"
                     step="0.01"
@@ -316,7 +316,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Кол-во *
                   </label>
                   <input
@@ -326,7 +326,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
                     onChange={(e) => updateItemField(item.id, 'quantity', e.target.value)}
                     onFocus={(e) => setFocusedInput(e.target.name)}
                     onBlur={() => setFocusedInput(null)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
                     placeholder="Количество"
                     min="0"
                     step="0.01"
@@ -335,7 +335,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Сумма
                   </label>
                   <input
@@ -343,7 +343,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
                     name={`total-${index}`}
                     value={formatCurrencyWithSeparators(item.total.toString())}
                     readOnly
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-100"
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md bg-gray-100 dark:bg-gray-700"
                     placeholder="Сумма"
                   />
                 </div>
@@ -353,14 +353,14 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Комментарий</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Комментарий</label>
           <textarea
             name="comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             onFocus={(e) => setFocusedInput(e.target.name)}
             onBlur={() => setFocusedInput(null)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
             placeholder="Комментарий"
             rows={3}
           />

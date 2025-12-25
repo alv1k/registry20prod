@@ -38,7 +38,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className={`${dotSizeClasses[size]} bg-blue-500 rounded-full animate-bounce`}
+                className={`${dotSizeClasses[size]} bg-blue-500 rounded-full animate-bounce dark:bg-blue-400`}
                 style={{ animationDelay: `${i * 0.1}s` }}
               />
             ))}
@@ -50,7 +50,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className={`${barSizeClasses[size]} bg-blue-500 rounded-full animate-pulse`}
+                className={`${barSizeClasses[size]} bg-blue-500 rounded-full animate-pulse dark:bg-blue-400`}
                 style={{ animationDelay: `${i * 0.1}s` }}
               />
             ))}
@@ -59,7 +59,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       case 'default':
       default:
         return (
-          <div className={`${sizeClasses[size]} animate-spin rounded-full border-4 border-t-blue-500 border-r-blue-500 border-b-blue-300 border-l-blue-300`}></div>
+          <div className={`${sizeClasses[size]} animate-spin rounded-full border-4 border-t-blue-500 border-r-blue-500 border-b-blue-300 border-l-blue-300 dark:border-t-blue-400 dark:border-r-blue-400 dark:border-b-blue-600 dark:border-l-blue-600`}></div>
         );
     }
   };
@@ -70,7 +70,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         {renderSpinner()}
       </div>
       {message && (
-        <p className="mt-4 text-gray-600 font-medium">{message}</p>
+        <p className="mt-4 text-gray-600 dark:text-gray-400 font-medium">{message}</p>
       )}
     </div>
   );

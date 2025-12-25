@@ -78,13 +78,13 @@ const Period = () => {
   }
 
   if (isPeriodDataLoading) {
-    return <div>Загрузка событий...</div>;
+    return <div className="text-gray-700 dark:text-gray-300">Загрузка событий...</div>;
   }
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Каталог</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Каталог</h1>
         <button
           onClick={() => {
             setCurrentEvent(null);
@@ -96,7 +96,7 @@ const Period = () => {
         </button>
       </div>
       <div className="flex">
-        <div className="bg-white p-6 rounded-lg shadow w-1/2 text-xs">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow w-1/2 text-xs">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
@@ -105,7 +105,8 @@ const Period = () => {
               id: typeof e.id === 'string' ? e.id : e.id.toString(),
               date: e.date,
               description: e.description,
-              backgroundColor: getCategoryColor(e.category || 'Другое')
+              backgroundColor: getCategoryColor(e.category || 'Другое'),
+              textColor: '#ffffff'
             }))}
             headerToolbar={{
               left: 'prev,next today',

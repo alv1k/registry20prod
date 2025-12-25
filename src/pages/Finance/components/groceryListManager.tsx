@@ -259,7 +259,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
   }, [onRegisterOpenForm, openGroceryListFormModal]);
 
   return (
-    <div className="bg-white shadow-sm">
+    <div className="bg-white dark:bg-gray-800 shadow-sm">
         {isAdmin && (
             <div className="flex flex-col sm:flex-row gap-2">
                 {/* Button that was moved to Finance index page */}
@@ -268,7 +268,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
 
       <div className="p-6">
         {groceryEntries.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             Список покупок пуст
           </div>
         ) : (
@@ -276,7 +276,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
             {groceryEntries.map((entry) => (
               <div
                 key={entry.id}
-                className={`p-4 rounded-lg border ${entry.purchased ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'} transition-colors`}
+                className={`p-4 rounded-lg border ${entry.purchased ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'} transition-colors`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
@@ -284,10 +284,10 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
                       type="checkbox"
                       checked={entry.purchased}
                       onChange={() => togglePurchaseStatus(entry.id)}
-                      className="h-5 w-5 text-green-600 rounded focus:ring-green-500"
+                      className="h-5 w-5 text-green-600 rounded focus:ring-green-500 dark:bg-gray-700"
                     />
                     <div className="ml-4">
-                      <div className={`font-medium ${entry.purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                      <div className={`font-medium ${entry.purchased ? 'line-through text-gray-500 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
                         {
                           !isMobile &&
                           'Запись покупок от '
@@ -295,7 +295,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
                         {new Date(entry.dateAdded).toLocaleDateString('ru-RU')}
                       </div>
                       {entry.comment && !isMobile && (
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                           {entry.comment}
                         </div>
                       )}
@@ -306,14 +306,14 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleEdit(entry)}
-                        className="text-blue-600 hover:text-blue-800 p-1"
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 p-1"
                         title="Редактировать"
                       >
                         <Edit2Icon className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => confirmDelete(entry.id)}
-                        className="text-red-600 hover:text-red-800 p-1"
+                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 p-1"
                         title="Удалить"
                       >
                         <Trash2Icon className="h-5 w-5" />
@@ -324,27 +324,27 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
 
                 {/* Display all items in this entry */}
                 {/* Header row with column titles */}
-                <div className="grid grid-cols-12 gap-2 py-2 px-2 bg-gray-50 rounded-t-md mb-1">
-                  <div className="col-span-3 text-sm font-medium text-gray-700">Название</div>
+                <div className="grid grid-cols-12 gap-2 py-2 px-2 bg-gray-50 dark:bg-gray-700 rounded-t-md mb-1">
+                  <div className="col-span-3 text-sm font-medium text-gray-700 dark:text-gray-300">Название</div>
                   {
-                    !isMobile && 
-                    <div className="col-span-2 text-sm font-medium text-gray-700">Кол-во</div>
+                    !isMobile &&
+                    <div className="col-span-2 text-sm font-medium text-gray-700 dark:text-gray-300">Кол-во</div>
                   }
                   {
-                    !isMobile && 
-                    <div className="col-span-2 text-sm font-medium text-gray-700">Категория</div>
+                    !isMobile &&
+                    <div className="col-span-2 text-sm font-medium text-gray-700 dark:text-gray-300">Категория</div>
                   }
                   {
-                    !isMobile && 
-                    <div className="col-span-1 text-sm font-medium text-gray-700">Цена/ед</div>
+                    !isMobile &&
+                    <div className="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300">Цена/ед</div>
                   }
                   {
-                    !isMobile && 
-                    <div className="col-span-2 text-sm font-medium text-gray-700">Стоимость</div>
+                    !isMobile &&
+                    <div className="col-span-2 text-sm font-medium text-gray-700 dark:text-gray-300">Стоимость</div>
                   }
                   {
-                    !isMobile && 
-                    <div className="col-span-2 text-sm font-medium text-gray-700">Факт. расход</div>
+                    !isMobile &&
+                    <div className="col-span-2 text-sm font-medium text-gray-700 dark:text-gray-300">Факт. расход</div>
                   }
                 </div>
 
@@ -360,40 +360,40 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
                               type="checkbox"
                               checked={item.purchased}
                               onChange={() => toggleItemPurchaseStatus(entry.id, item.id)}
-                              className="h-5 w-5 text-green-600 rounded focus:ring-green-500 mr-2"
+                              className="h-5 w-5 text-green-600 rounded focus:ring-green-500 dark:bg-gray-700 mr-2"
                             />
-                            <span className={`font-medium ${item.purchased ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                            <span className={`font-medium ${item.purchased ? 'line-through text-gray-500 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
                               {item.name}
                             </span>
                           </label>
                         </div>
                         {
-                          !isMobile && 
-                          <div className="col-span-2 text-sm text-gray-500">
+                          !isMobile &&
+                          <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
                             {item.quantity} {item.unit}
                           </div>
                         }
                         {
-                          !isMobile && 
-                          <div className="col-span-2 text-sm text-gray-500">
+                          !isMobile &&
+                          <div className="col-span-2 text-sm text-gray-500 dark:text-gray-400">
                             {item.category}
                           </div>
                         }
                         {
-                          !isMobile && 
-                          <div className="col-span-1 text-sm font-medium text-gray-700">
+                          !isMobile &&
+                          <div className="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                             {item.price.toLocaleString()} ₽/ед
                           </div>
                         }
                         {
-                          !isMobile && 
-                          <div className="col-span-2 text-sm font-medium text-green-600">
+                          !isMobile &&
+                          <div className="col-span-2 text-sm font-medium text-green-600 dark:text-green-400">
                             {totalPrice.toLocaleString()} ₽
                           </div>
                         }
                         {
-                          !isMobile && 
-                          <div className="col-span-2 text-sm font-medium text-blue-600">
+                          !isMobile &&
+                          <div className="col-span-2 text-sm font-medium text-blue-600 dark:text-blue-400">
                             {item.actualExpense !== null && item.actualExpense !== undefined ? `${item.actualExpense.toLocaleString()} ₽` : '-'}
                           </div>
                         }
@@ -403,14 +403,14 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
                   {/* Total sum for this entry */}
                   {
                     !isMobile &&
-                    <div className="grid grid-cols-12 gap-2 py-2 border-t border-gray-200 mt-1">
-                      <div className="col-span-8 text-sm font-medium text-gray-700">
+                    <div className="grid grid-cols-12 gap-2 py-2 border-t border-gray-200 dark:border-gray-700 mt-1">
+                      <div className="col-span-8 text-sm font-medium text-gray-700 dark:text-gray-300">
                         Общая сумма:
                       </div>
-                      <div className="col-span-2 text-sm font-bold text-green-700">
+                      <div className="col-span-2 text-sm font-bold text-green-700 dark:text-green-400">
                         {entry.items.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString()} ₽
                       </div>
-                      <div className="col-span-2 text-sm font-bold text-blue-700">
+                      <div className="col-span-2 text-sm font-bold text-blue-700 dark:text-blue-400">
                         {entry.items.reduce((sum, item) => sum + ((item.actualExpense !== null && item.actualExpense !== undefined) ? item.actualExpense : 0), 0).toLocaleString()} ₽
                       </div>
                     </div>
@@ -444,7 +444,7 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
           title="Подтверждение удаления"
         >
           <div className="p-1">
-            <p className="text-gray-600 mb-6">Вы уверены, что хотите удалить этот элемент списка покупок? Это действие нельзя отменить.</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">Вы уверены, что хотите удалить этот элемент списка покупок? Это действие нельзя отменить.</p>
             <div className="flex justify-end space-x-3">
               <Button onClick={cancelDelete} variant="secondary">
                 Отмена
@@ -641,14 +641,14 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
         {/* Always use multiple items form since we're grouping items into entries */}
         <div>
           {/* Header row with column titles */}
-          <div className="grid grid-cols-12 gap-2 mb-2 px-2 py-2 bg-gray-50 rounded-md">
-            <div className="col-span-3 text-sm font-medium text-gray-700">Название *</div>
-            <div className="col-span-2 text-sm font-medium text-gray-700">Категория *</div>
-            <div className="col-span-1 text-sm font-medium text-gray-700">Кол-во *</div>
-            <div className="col-span-1 text-sm font-medium text-gray-700">Ед.</div>
-            <div className="col-span-1 text-sm font-medium text-gray-700">Цена за ед./кг</div>
-            <div className="col-span-2 text-sm font-medium text-gray-700">Стоимость</div>
-            <div className="col-span-1 text-sm font-medium text-gray-700">Факт. расход</div>
+          <div className="grid grid-cols-12 gap-2 mb-2 px-2 py-2 bg-gray-50 dark:bg-gray-700 rounded-md">
+            <div className="col-span-3 text-sm font-medium text-gray-700 dark:text-gray-300">Название *</div>
+            <div className="col-span-2 text-sm font-medium text-gray-700 dark:text-gray-300">Категория *</div>
+            <div className="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300">Кол-во *</div>
+            <div className="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300">Ед.</div>
+            <div className="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300">Цена за ед./кг</div>
+            <div className="col-span-2 text-sm font-medium text-gray-700 dark:text-gray-300">Стоимость</div>
+            <div className="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300">Факт. расход</div>
             <div className="col-span-1"></div>
           </div>
 
@@ -664,13 +664,13 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
                       type="text"
                       value={item.name}
                       onChange={(e) => handleMultipleChange(index, 'name', e.target.value)}
-                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        (errors as Record<number, Record<string, string>>)[index]?.name ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                        (errors as Record<number, Record<string, string>>)[index]?.name ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                       }`}
                       placeholder="Название продукта"
                     />
                     {(errors as Record<number, Record<string, string>>)[index]?.name && (
-                      <div className="text-red-500 text-sm mt-1">
+                      <div className="text-red-500 dark:text-red-400 text-sm mt-1">
                         {(errors as Record<number, Record<string, string>>)[index]?.name}
                       </div>
                     )}
@@ -680,21 +680,21 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
                     <select
                       value={item.category}
                       onChange={(e) => handleMultipleChange(index, 'category', e.target.value)}
-                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        (errors as Record<number, Record<string, string>>)[index]?.category ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                        (errors as Record<number, Record<string, string>>)[index]?.category ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                       }`}
                     >
-                      <option value="">Выберите категорию</option>
+                      <option value="" className="dark:bg-gray-700 dark:text-white">Выберите категорию</option>
                       {categories
                         .filter(cat => cat.type === 'expense') // Only show expense categories
                         .map(category => (
-                          <option key={category.id} value={category.name}>
+                          <option key={category.id} value={category.name} className="dark:bg-gray-700 dark:text-white">
                             {category.name}
                           </option>
                         ))}
                     </select>
                     {(errors as Record<number, Record<string, string>>)[index]?.category && (
-                      <div className="text-red-500 text-sm mt-1">
+                      <div className="text-red-500 dark:text-red-400 text-sm mt-1">
                         {(errors as Record<number, Record<string, string>>)[index]?.category}
                       </div>
                     )}
@@ -706,13 +706,13 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
                       value={item.quantity}
                       onChange={(e) => handleMultipleChange(index, 'quantity', Number(e.target.value))}
                       min="1"
-                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 ${
-                        (errors as Record<number, Record<string, string>>)[index]?.quantity ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                        (errors as Record<number, Record<string, string>>)[index]?.quantity ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
                       }`}
                       placeholder="Количество"
                     />
                     {(errors as Record<number, Record<string, string>>)[index]?.quantity && (
-                      <div className="text-red-500 text-sm mt-1">
+                      <div className="text-red-500 dark:text-red-400 text-sm mt-1">
                         {(errors as Record<number, Record<string, string>>)[index]?.quantity}
                       </div>
                     )}
@@ -722,15 +722,15 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
                     <select
                       value={item.unit}
                       onChange={(e) => handleMultipleChange(index, 'unit', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="шт">шт</option>
-                      <option value="кг">кг</option>
-                      <option value="г">г</option>
-                      <option value="л">л</option>
-                      <option value="мл">мл</option>
-                      <option value="уп">уп</option>
-                      <option value="пак">пак</option>
+                      <option value="шт" className="dark:bg-gray-700 dark:text-white">шт</option>
+                      <option value="кг" className="dark:bg-gray-700 dark:text-white">кг</option>
+                      <option value="г" className="dark:bg-gray-700 dark:text-white">г</option>
+                      <option value="л" className="dark:bg-gray-700 dark:text-white">л</option>
+                      <option value="мл" className="dark:bg-gray-700 dark:text-white">мл</option>
+                      <option value="уп" className="dark:bg-gray-700 dark:text-white">уп</option>
+                      <option value="пак" className="dark:bg-gray-700 dark:text-white">пак</option>
                     </select>
                   </div>
 
@@ -741,13 +741,13 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
                       onChange={(e) => handleMultipleChange(index, 'price', Number(e.target.value))}
                       min="0"
                       step="0.01"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Цена за ед."
                     />
                   </div>
 
                   <div className="col-span-2">
-                    <div className="w-full p-2 bg-gray-50 border border-gray-300 rounded-md">
+                    <div className="w-full p-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md">
                       {totalPrice.toLocaleString()} ₽
                     </div>
                   </div>
@@ -759,7 +759,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
                       onChange={(e) => handleMultipleChange(index, 'actualExpense', e.target.value ? Number(e.target.value) : null)}
                       min="0"
                       step="0.01"
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Факт. расход"
                     />
                   </div>
@@ -790,13 +790,13 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
 
           {/* Comment field */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Комментарий
             </label>
             <textarea
               value={multipleValues.comment || ''}
               onChange={handleCommentChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring-blue-500 focus:border-blue-500"
               placeholder="Комментарий к записи покупок"
               rows={2}
             />

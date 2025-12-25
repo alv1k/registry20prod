@@ -112,7 +112,7 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Название *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Название *</label>
             <input
               type="text"
               name="name"
@@ -120,14 +120,14 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Например: Грузовик 1"
               required
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Производитель *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Производитель *</label>
             <input
               type="text"
               name="manufacturer"
@@ -135,14 +135,14 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
               onChange={(e) => setManufacturer(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Например: Mercedes-Benz"
               required
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Марка *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Марка *</label>
             <input
               type="text"
               name="model"
@@ -150,14 +150,14 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
               onChange={(e) => setModel(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Например: Actros"
               required
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Объем двигателя</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Объем двигателя</label>
             <input
               type="text"
               name="engineVolume"
@@ -165,13 +165,13 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
               onChange={(e) => setEngineVolume(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Например: 12.8 л"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Номер двигателя</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Номер двигателя</label>
             <input
               type="text"
               name="engineNumber"
@@ -179,13 +179,13 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
               onChange={(e) => setEngineNumber(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Номер двигателя"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Номер VIN/кузова</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Номер VIN/кузова</label>
             <input
               type="text"
               name="vin"
@@ -193,13 +193,13 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
               onChange={(e) => setVin(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Номер VIN"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Данные СТС</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Данные СТС</label>
             <input
               type="text"
               name="stsData"
@@ -207,13 +207,13 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
               onChange={(e) => setStsData(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Серия и номер СТС"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Данные ПТС</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Данные ПТС</label>
             <input
               type="text"
               name="ptsData"
@@ -221,7 +221,7 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
               onChange={(e) => setPtsData(e.target.value)}
               onFocus={(e) => setFocusedInput(e.target.name)}
               onBlur={() => setFocusedInput(null)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
               placeholder="Серия и номер ПТС"
             />
           </div>
