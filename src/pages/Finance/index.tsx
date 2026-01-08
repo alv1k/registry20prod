@@ -75,6 +75,12 @@ const Finance = () => {
     
     return `${year}-${month}`;
   };  
+
+  const getCurrentYear = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    return year;
+  }  
   
   const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'month', value: getCurrentMonth()});
   
@@ -703,28 +709,84 @@ const Finance = () => {
                 <option value="year" className="dark:bg-gray-700 dark:text-white">Год</option>
               </select>
               {periodFilter.type !== 'all' && (
-                <select
-                  value={periodFilter.value}
-                  onChange={(e) => setPeriodFilter({...periodFilter, value: e.target.value})}
-                  className="w-32 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                >
-                  {periodFilter.type === 'year' && Array.from({length: 10}, (_, i) => {
-                    const year = new Date().getFullYear() - i;
-                    return <option key={year} value={year.toString()} className="dark:bg-gray-700 dark:text-white">{year}</option>;
-                  })}
-                  {periodFilter.type === 'month' && Array.from({length: 12}, (_, i) => {
-                    const month = i + 1;
-                    const year = new Date().getFullYear();
-                    const monthStr = month < 10 ? `0${month}` : month;
-                    const displayMonth = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][i];
-                    return <option key={month} value={`${year}-${monthStr}`} className="dark:bg-gray-700 dark:text-white">{displayMonth}</option>;
-                  })}
-                  {periodFilter.type === 'quarter' && Array.from({length: 4}, (_, i) => {
-                    const quarter = i + 1;
-                    const year = new Date().getFullYear();
-                    return <option key={quarter} value={`${year}-Q${quarter}`} className="dark:bg-gray-700 dark:text-white">Q{quarter}</option>;
-                  })}
-                </select>
+                <>
+                  {periodFilter.type === 'year' ? (
+                    <select
+                      value={periodFilter.value}
+                      onChange={(e) => setPeriodFilter({...periodFilter, value: e.target.value})}
+                      className="w-32 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                    >
+                      {Array.from({length: 10}, (_, i) => {
+                        const year = new Date().getFullYear() - i;
+                        return <option key={year} value={year.toString()} className="dark:bg-gray-700 dark:text-white">{year}</option>;
+                      })}
+                    </select>
+                  ) : periodFilter.type === 'month' ? (
+                    <div className="flex space-x-2">
+                      <select
+                        value={periodFilter.value.split('-')[0] || new Date().getFullYear()}
+                        onChange={(e) => {
+                          const selectedYear = e.target.value;
+                          const currentMonth = periodFilter.value.split('-')[1] || '01';
+                          setPeriodFilter({...periodFilter, value: `${selectedYear}-${currentMonth}`});
+                        }}
+                        className="w-24 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      >
+                        {Array.from({length: 10}, (_, i) => {
+                          const year = new Date().getFullYear() - i;
+                          return <option key={year} value={year.toString()} className="dark:bg-gray-700 dark:text-white">{year}</option>;
+                        })}
+                      </select>
+                      <select
+                        value={periodFilter.value.split('-')[1] || '01'}
+                        onChange={(e) => {
+                          const selectedMonth = e.target.value;
+                          const currentYear = periodFilter.value.split('-')[0] || new Date().getFullYear().toString();
+                          setPeriodFilter({...periodFilter, value: `${currentYear}-${selectedMonth}`});
+                        }}
+                        className="w-24 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      >
+                        {Array.from({length: 12}, (_, i) => {
+                          const month = i + 1;
+                          const monthStr = month < 10 ? `0${month}` : month;
+                          const displayMonth = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][i];
+                          return <option key={month} value={monthStr} className="dark:bg-gray-700 dark:text-white">{displayMonth}</option>;
+                        })}
+                      </select>
+                    </div>
+                  ) : periodFilter.type === 'quarter' ? (
+                    <div className="flex space-x-2">
+                      <select
+                        value={periodFilter.value.split('-')[0] || new Date().getFullYear()}
+                        onChange={(e) => {
+                          const selectedYear = e.target.value;
+                          const currentQuarter = periodFilter.value.split('-')[1] || 'Q1';
+                          setPeriodFilter({...periodFilter, value: `${selectedYear}-${currentQuarter}`});
+                        }}
+                        className="w-24 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      >
+                        {Array.from({length: 10}, (_, i) => {
+                          const year = new Date().getFullYear() - i;
+                          return <option key={year} value={year.toString()} className="dark:bg-gray-700 dark:text-white">{year}</option>;
+                        })}
+                      </select>
+                      <select
+                        value={periodFilter.value.split('-')[1] || 'Q1'}
+                        onChange={(e) => {
+                          const selectedQuarter = e.target.value;
+                          const currentYear = periodFilter.value.split('-')[0] || new Date().getFullYear().toString();
+                          setPeriodFilter({...periodFilter, value: `${currentYear}-${selectedQuarter}`});
+                        }}
+                        className="w-24 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                      >
+                        {Array.from({length: 4}, (_, i) => {
+                          const quarter = i + 1;
+                          return <option key={quarter} value={`Q${quarter}`} className="dark:bg-gray-700 dark:text-white">Q{quarter}</option>;
+                        })}
+                      </select>
+                    </div>
+                  ) : null}
+                </>
               )}
             </div>
           </div>
