@@ -1,8 +1,11 @@
 // src/contexts/AuthContext.tsx
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, ReactNode } from 'react';
 import { onAuthStateChangedListener, getCurrentUser } from '../firebase/authService';
 import { User } from 'firebase/auth';
 import { isTokenExpiringSoon, refreshToken } from '../utils/authUtils';
+
+// Centralized admin UID — single source of truth
+export const ADMIN_UID = 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2';
 
 interface AuthContextType {
   user: User | null;
@@ -20,7 +23,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [tokenCheckInterval, setTokenCheckInterval] = useState<NodeJS.Timeout | null>(null);
+  const tokenCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChangedListener((user) => {
@@ -33,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (currentUser) {
       setUser(currentUser);
     }
-    
+
     return unsubscribe;
   }, []);
 
@@ -43,11 +46,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (user) {
         try {
           const idTokenResult = await user.getIdTokenResult();
-          setIsAdmin(idTokenResult.claims.admin === true || user.uid === 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2');
+          setIsAdmin(idTokenResult.claims.admin === true || user.uid === ADMIN_UID);
         } catch (error) {
           console.error('Error checking admin status:', error);
           // As a fallback, check if it's the specific UID
-          setIsAdmin(user.uid === 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2');
+          setIsAdmin(user.uid === ADMIN_UID);
         }
       } else {
         setIsAdmin(false);
@@ -59,6 +62,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Monitor token expiration and refresh if needed
   useEffect(() => {
+    // Clear any previous interval
+    if (tokenCheckIntervalRef.current) {
+      clearInterval(tokenCheckIntervalRef.current);
+      tokenCheckIntervalRef.current = null;
+    }
+
     if (user) {
       // Set up interval to check token expiration every 5 minutes
       const interval = setInterval(async () => {
@@ -68,23 +77,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             await refreshToken(user);
           }
         } catch (error) {
-          console.error('Error checking/expiring token:', error);
+          console.error('Error checking/refreshing token:', error);
         }
       }, 5 * 60 * 1000); // Every 5 minutes
-      
-      setTokenCheckInterval(interval);
-      
+
+      tokenCheckIntervalRef.current = interval;
+
       return () => {
-        if (interval) {
-          clearInterval(interval);
-        }
+        clearInterval(interval);
+        tokenCheckIntervalRef.current = null;
       };
-    } else {
-      // Clear interval if user logs out
-      if (tokenCheckInterval) {
-        clearInterval(tokenCheckInterval);
-        setTokenCheckInterval(null);
-      }
     }
   }, [user]);
 

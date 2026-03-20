@@ -273,6 +273,17 @@ type EntityServices<F, T> = {
   convertToUpdate: (partial: Partial<T>) => any;
 };
 
+// Helper to strip undefined values from an object before sending to Firestore
+function stripUndefined(obj: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  for (const key of Object.keys(obj)) {
+    if (obj[key] !== undefined) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
 type EntityHandlers<T extends BaseEntity> = {
   sync: () => Promise<void>;
   add: (record: Omit<T, 'id'>) => Promise<void>;
@@ -323,7 +334,7 @@ function createEntityHandlers<F, T extends BaseEntity>(
 
     update: async (id: number | string, updatedFields: Partial<T>) => {
       try {
-        const firebaseData = services.convertToUpdate(updatedFields);
+        const firebaseData = stripUndefined(services.convertToUpdate(updatedFields));
         await services.updateFirebase(id.toString(), firebaseData);
         
         setData(getData().map(record =>

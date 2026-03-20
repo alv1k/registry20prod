@@ -14,8 +14,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
   const isCategoriesLoading = useStore((state) => state.isCategoriesLoading);
   const categoriesError = useStore((state) => state.categoriesError);
 
-  const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin } = useAuth();
 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | string | null>(null);
@@ -26,25 +25,6 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
   const matchesFilter = (categoryType: 'expense' | 'income') => {
     return filterType === 'all' || categoryType === filterType;
   };
-
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user) {
-        try {
-          const idTokenResult = await user.getIdTokenResult();
-          setIsAdmin(idTokenResult.claims.admin === true || user.uid === 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2');
-        } catch (error) {
-          console.error('Error checking admin status:', error);
-          // As a fallback, check if it's the specific UID
-          setIsAdmin(user.uid === 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2');
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminStatus();
-  }, [user]);
 
   useEffect(() => {
     // Load categories from Firebase when component mounts

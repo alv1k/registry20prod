@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useStore } from '../../../store/useStore';
 import { useAuth } from '../../../contexts/AuthContext';
 import Modal from '../../../components/Modal';
@@ -31,8 +31,7 @@ interface GroceriesManagerProps {
 }
 
 const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick, onRegisterOpenForm }) => {
-  const { user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin } = useAuth();
   const [groceryEntries, setGroceryEntries] = useState<AppGroceryEntry[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentGroceryEntry, setCurrentGroceryEntry] = useState<AppGroceryEntry | null>(null);
@@ -59,25 +58,6 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
       console.error('Error loading grocery entries:', error);
     });
   }, [syncCategories, syncGroceryEntries]);
-
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (user) {
-        try {
-          const idTokenResult = await user.getIdTokenResult();
-          setIsAdmin(idTokenResult.claims.admin === true || user.uid === 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2');
-        } catch (error) {
-          console.error('Error checking admin status:', error);
-          // As a fallback, check if it's the specific UID
-          setIsAdmin(user.uid === 'Rz9j7obzy7SBydiuF3VdRSuE1Ge2');
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminStatus();
-  }, [user]);
 
   useEffect(() => {
     // Set initial grocery entries from store
@@ -227,22 +207,23 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
   const toggleItemPurchaseStatus = (entryId: number | string, itemId: string | number) => {
     const entry = groceryEntries.find(entry => entry.id === entryId);
     if (entry) {
+      const updatedItems = entry.items.map(item =>
+        item.id === itemId ? { ...item, purchased: !item.purchased } : item
+      );
       const updatedEntry: AppGroceryEntry = {
         ...entry,
-        items: entry.items.map(item =>
-          item.id === itemId ? { ...item, purchased: !item.purchased } : item
-        ),
-        purchased: entry.items.every(item => item.purchased) // Update entry's purchased status if all items are purchased
+        items: updatedItems,
+        purchased: updatedItems.every(item => item.purchased) // Check against the already-toggled items
       };
       updateGroceryEntry(entryId, updatedEntry);
     }
   };
 
   // Function to open the grocery list form modal
-  const openGroceryListFormModal = () => {
+  const openGroceryListFormModal = useCallback(() => {
     setCurrentGroceryEntry(null);
     setIsModalOpen(true);
-  };
+  }, []);
 
   // Register the function with the parent when component mounts
   React.useEffect(() => {
@@ -596,7 +577,7 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
     if (multipleValues.items.length > 1) {
       const newItems = [...multipleValues.items];
       newItems.splice(index, 1);
-      setMultipleValues({ items: newItems });
+      setMultipleValues({ ...multipleValues, items: newItems });
     }
   };
 
