@@ -173,14 +173,27 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
     if (!file) return;
 
     setError(null);
+
+    // Create a temporary container for scanning
+    const tempDiv = document.createElement('div');
+    tempDiv.id = 'qr-file-scan-' + Date.now();
+    tempDiv.style.position = 'fixed';
+    tempDiv.style.left = '-9999px';
+    document.body.appendChild(tempDiv);
+
     try {
-      const scanner = new Html5Qrcode('qr-file-temp');
-      const result = await scanner.scanFile(file, true);
+      const scanner = new Html5Qrcode(tempDiv.id);
+      const result = await scanner.scanFile(file, false);
       await scanner.clear();
+      document.body.removeChild(tempDiv);
       processQrData(result);
     } catch {
+      try { document.body.removeChild(tempDiv); } catch { /* ignore */ }
       setError('QR код не найден на изображении. Попробуйте другое фото или введите данные вручную.');
     }
+
+    // Reset file input
+    if (qrFileInputRef.current) qrFileInputRef.current.value = '';
   };
 
   // Submit manual QR text
@@ -359,9 +372,6 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
             className="w-full max-w-sm mx-auto rounded-lg overflow-hidden"
             style={{ minHeight: 300 }}
           />
-
-          {/* Hidden container for file-based QR scanning */}
-          <div id="qr-file-temp" style={{ display: 'none' }} />
 
           {/* Fallback options */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-3">
