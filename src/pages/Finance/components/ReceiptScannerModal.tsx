@@ -162,9 +162,8 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
           // QR not found in frame — ignore
         }
       );
-    } catch (err: any) {
-      setError('Не удалось запустить камеру. Попробуйте сканировать фото.');
-      setPhase('CHOOSE');
+    } catch {
+      setError('Камера недоступна. Загрузите фото QR кода или введите данные вручную.');
     }
   };
 
