@@ -30,6 +30,9 @@ interface FinanceFormModalProps {
   recordId?: number | string | null;
   onAdd: (record: Omit<FinanceRecord, 'id'>) => void | Promise<void>;
   onUpdate: (id: number | string, updatedRecord: Partial<FinanceRecord>) => void | Promise<void>;
+  initialItems?: FinanceItem[];
+  initialDate?: string;
+  initialComment?: string;
 }
 
 const FinanceModal: React.FC<FinanceFormModalProps> = ({
@@ -37,13 +40,14 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
   onClose,
   recordId,
   onAdd,
-  onUpdate
+  onUpdate,
+  initialItems,
+  initialDate,
+  initialComment,
 }) => {
   const financeData = useStore((state) => state.financeData);
   const categories = useStore((state) => state.categories);
   const syncCategories = useStore((state) => state.syncCategories);
-  const addFinanceRecord = useStore((state) => state.addFinanceRecord);
-  const updateFinanceRecord = useStore((state) => state.updateFinanceRecord);
 
   const [date, setDate] = useState<string>('');
   const [items, setItems] = useState<FinanceItem[]>([
@@ -89,13 +93,16 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
         setComment(existingRecord.comment);
       }
     } else if (isOpen) {
-      // Reset form for new records
-      const today = new Date().toISOString().split('T')[0];
-      setDate(today);
-      setItems([{ id: Date.now().toString(), name: '', price: '', quantity: '', classification: '', total: 0 }]);
-      setComment('');
+      // Reset form for new records, or use initial values from receipt scanner
+      setDate(initialDate || new Date().toISOString().split('T')[0]);
+      setItems(
+        initialItems && initialItems.length > 0
+          ? initialItems
+          : [{ id: Date.now().toString(), name: '', price: '', quantity: '', classification: '', total: 0 }]
+      );
+      setComment(initialComment || '');
     }
-  }, [recordId, isOpen, financeData]);
+  }, [recordId, isOpen, financeData, initialItems, initialDate, initialComment]);
 
   // Add a new empty item to the list
   const addItem = () => {
@@ -163,7 +170,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
         const quantityNum = parseFloat(firstItem.quantity);
         const totalNum = calculateItemTotal(firstItem.price, firstItem.quantity);
 
-        await updateFinanceRecord(recordId, {
+        await onUpdate(recordId, {
           date,
           name: firstItem.name,
           price: priceNum,
@@ -179,7 +186,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
           const quantityNum = parseFloat(item.quantity);
           const totalNum = calculateItemTotal(item.price, item.quantity);
 
-          await addFinanceRecord({
+          await onAdd({
             date,
             name: item.name,
             price: priceNum,

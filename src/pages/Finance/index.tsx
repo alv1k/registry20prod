@@ -12,8 +12,10 @@ import Tabs from '../../components/Tabs';
 import { formatCurrencyWithSeparators, formatDate } from '../../utils/formatUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { exportRecordsToExcel } from '../../utils/exportUtils';
-import { FiPlus, FiDownload, FiX, FiTrash2, FiChevronDown } from 'react-icons/fi';
+import { FiPlus, FiDownload, FiX, FiTrash2, FiChevronDown, FiCamera } from 'react-icons/fi';
 import useIsMobile from '../../hooks/useIsMobile';
+import ReceiptScannerModal from './components/ReceiptScannerModal';
+import useReceiptQueue from '../../hooks/useReceiptQueue';
 
 // Type the icons properly
 const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -21,6 +23,7 @@ const DownloadIcon = FiDownload as React.FC<React.SVGProps<SVGSVGElement>>;
 const XIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
 const TrashIcon = FiTrash2 as React.FC<React.SVGProps<SVGSVGElement>>;
 const ChevronDownIcon = FiChevronDown as React.FC<React.SVGProps<SVGSVGElement>>;
+const CameraIcon = FiCamera as React.FC<React.SVGProps<SVGSVGElement>>;
 
 const Finance = () => {
   const financeData = useStore((state) => state.financeData);
@@ -50,6 +53,13 @@ const Finance = () => {
   const [categoriesHeight, setCategoriesHeight] = useState<number | string>('auto');
 
   const isMobile = useIsMobile();
+
+  // Receipt scanner state
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [scannerInitialItems, setScannerInitialItems] = useState<any[] | undefined>(undefined);
+  const [scannerInitialDate, setScannerInitialDate] = useState<string | undefined>(undefined);
+  const [scannerInitialComment, setScannerInitialComment] = useState<string | undefined>(undefined);
+  const { pendingCount, processedResults, clearProcessedResult, refreshCount } = useReceiptQueue();
 
   // Auto-scroll to the bottom of the table when shouldScrollToBottom is true
   useEffect(() => {
@@ -285,6 +295,41 @@ const Finance = () => {
     setShowAllExpensesByCategory(prev => !prev);
   }
   
+  // Handle receipt scanner results
+  const handleScannerItemsReady = (items: any[], date: string, comment: string) => {
+    const financeItems = items.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      price: String(item.price),
+      quantity: String(item.quantity),
+      classification: item.classification,
+      total: item.total,
+    }));
+    setScannerInitialItems(financeItems);
+    setScannerInitialDate(date);
+    setScannerInitialComment(comment);
+    setSelectedRecordId(null);
+    setIsFinanceFormModalOpen(true);
+  };
+
+  // Handle processed queue results
+  const handleProcessedResult = (result: typeof processedResults[0]) => {
+    const items = result.result.items.map((item, i) => ({
+      id: `${Date.now()}-${i}`,
+      name: item.name,
+      price: String(item.price),
+      quantity: String(item.quantity),
+      classification: '',
+      total: item.total,
+    }));
+    setScannerInitialItems(items);
+    setScannerInitialDate(result.result.date || new Date().toISOString().split('T')[0]);
+    setScannerInitialComment(result.result.storeName ? `Магазин: ${result.result.storeName}` : '');
+    setSelectedRecordId(null);
+    setIsFinanceFormModalOpen(true);
+    clearProcessedResult(result.queueId);
+  };
+
   const financeTabs = [
     {
       id: 'tab1',
@@ -296,14 +341,29 @@ const Finance = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Записи</h3>
               <div className="flex gap-3 ms-auto">
                 {isAdmin && (
-                  <Button
-                    onClick={() => openFinanceFormModal()}
-                    variant="primary"
-                    className="flex items-center"
-                  >
-                    <PlusIcon className="mr-2" />
-                    Добавить
-                  </Button>
+                  <>
+                    <Button
+                      onClick={() => setIsScannerOpen(true)}
+                      variant="secondary"
+                      className="flex items-center relative"
+                      title="Сканировать чек"
+                    >
+                      <CameraIcon />
+                      {pendingCount > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                          {pendingCount}
+                        </span>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => openFinanceFormModal()}
+                      variant="primary"
+                      className="flex items-center"
+                    >
+                      <PlusIcon className="mr-2" />
+                      Добавить
+                    </Button>
+                  </>
                 )}
                 <Button
                   onClick={handleRecordsDownload}
@@ -700,7 +760,20 @@ const Finance = () => {
             <div className="flex space-x-2">
               <select
                 value={periodFilter.type}
-                onChange={(e) => setPeriodFilter({type: e.target.value as any, value: periodFilter.value})}
+                onChange={(e) => {
+                  const newType = e.target.value as 'all' | 'month' | 'quarter' | 'year';
+                  const currentYear = new Date().getFullYear();
+                  let newValue = '';
+                  if (newType === 'month') {
+                    newValue = getCurrentMonth();
+                  } else if (newType === 'quarter') {
+                    const currentQuarter = Math.floor(new Date().getMonth() / 3) + 1;
+                    newValue = `${currentYear}-Q${currentQuarter}`;
+                  } else if (newType === 'year') {
+                    newValue = currentYear.toString();
+                  }
+                  setPeriodFilter({ type: newType, value: newValue });
+                }}
                 className="w-32 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               >
                 <option value="all" className="dark:bg-gray-700 dark:text-white">Весь</option>
@@ -802,6 +875,32 @@ const Finance = () => {
         </div>
       </AnimatedAccordion>
 
+      {/* Processed queue results notification */}
+      {processedResults.length > 0 && (
+        <div className="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <div className="text-sm font-medium text-green-800 dark:text-green-300 mb-2">
+            Обработано чеков из очереди: {processedResults.length}
+          </div>
+          <div className="space-y-2">
+            {processedResults.map((result) => (
+              <div key={result.queueId} className="flex items-center justify-between">
+                <span className="text-sm text-green-700 dark:text-green-400">
+                  {result.result.items.length} товаров
+                  {result.result.storeName && ` — ${result.result.storeName}`}
+                </span>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleProcessedResult(result)}
+                >
+                  Просмотреть
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Summary blocks */}
       <div>
         <Tabs tabs={financeTabs} />
@@ -833,12 +932,26 @@ const Finance = () => {
       
       {isAdmin && (
         <>
-          <FinanceModal 
-            isOpen={isFinanceFormModalOpen} 
-            onClose={closeFinanceFormModal} 
-            recordId={selectedRecordId} 
-            onAdd={addFinanceRecordAndScroll} 
-            onUpdate={updateFinanceRecord} 
+          <FinanceModal
+            isOpen={isFinanceFormModalOpen}
+            onClose={() => {
+              closeFinanceFormModal();
+              setScannerInitialItems(undefined);
+              setScannerInitialDate(undefined);
+              setScannerInitialComment(undefined);
+            }}
+            recordId={selectedRecordId}
+            onAdd={addFinanceRecordAndScroll}
+            onUpdate={updateFinanceRecord}
+            initialItems={scannerInitialItems}
+            initialDate={scannerInitialDate}
+            initialComment={scannerInitialComment}
+          />
+          <ReceiptScannerModal
+            isOpen={isScannerOpen}
+            onClose={() => setIsScannerOpen(false)}
+            onItemsReady={handleScannerItemsReady}
+            onQueueUpdated={refreshCount}
           />
           <CategoryModal
             isOpen={isCategoryFormModalOpen}
