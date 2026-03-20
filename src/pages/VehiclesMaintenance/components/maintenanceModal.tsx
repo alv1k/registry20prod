@@ -51,7 +51,7 @@ const MaintenanceModal: React.FC<MaintenanceFormModalProps> = ({
   const [comment, setComment] = useState<string>('');
   const [frequency, setFrequency] = useState<string>('');
   const [mileage, setMileage] = useState<number | undefined>(undefined);
-  const [_focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [, setFocusedInput] = useState<string | null>(null);
 
   // Calculate total cost
   const totalCost = cost * (quantity || 1);

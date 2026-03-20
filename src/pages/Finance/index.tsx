@@ -86,12 +86,6 @@ const Finance = () => {
     return `${year}-${month}`;
   };  
 
-  const getCurrentYear = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    return year;
-  }  
-  
   const [periodFilter, setPeriodFilter] = useState<{type: 'all' | 'month' | 'quarter' | 'year', value: string}>({type: 'month', value: getCurrentMonth()});
   
   useEffect(() => {

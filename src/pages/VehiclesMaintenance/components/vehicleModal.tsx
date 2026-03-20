@@ -38,7 +38,7 @@ const VehicleModal: React.FC<VehicleFormModalProps> = ({
   const [vin, setVin] = useState<string>('');
   const [stsData, setStsData] = useState<string>('');
   const [ptsData, setPtsData] = useState<string>('');
-  const [_focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [, setFocusedInput] = useState<string | null>(null);
 
   // Load record data if editing
   useEffect(() => {

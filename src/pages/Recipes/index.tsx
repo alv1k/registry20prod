@@ -53,10 +53,10 @@ const Recipes = () => {
   const { openModal, closeModal } = useModal();
 
   // State for holiday menu functionality
-  const [_selectedHolidayMenuId, setSelectedHolidayMenuId] = useState<number | string | null>(null);
+  const [, setSelectedHolidayMenuId] = useState<number | string | null>(null);
 
   // State for modals
-  const [_selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
+  const [, setSelectedRecordId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
 
   // Load data on component mount

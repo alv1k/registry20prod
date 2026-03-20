@@ -33,7 +33,7 @@ const RecipeModal: React.FC<RecipeFormModalProps> = ({
 }) => {
   const [title, setTitle] = useState<string>('');
   const [category, setCategory] = useState<string>('');
-  const [ingredients, setIngredients] = useState<string>('');
+  const [, setIngredients] = useState<string>('');
   const [ingredientToAdd, setIngredientToAdd] = useState<string>('');
   const [ingredientAmount, setIngredientAmount] = useState<string>('');
   const [ingredientUnit, setIngredientUnit] = useState<string>(''); // единица измерения
@@ -42,7 +42,7 @@ const RecipeModal: React.FC<RecipeFormModalProps> = ({
   const [cookingTime, setCookingTime] = useState<number | undefined>(undefined);
   const [servings, setServings] = useState<number | undefined>(undefined);
   const [tags, setTags] = useState<string>('');
-  const [_focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [, setFocusedInput] = useState<string | null>(null);
 
   // Load record data if editing
   useEffect(() => {

@@ -47,11 +47,6 @@ const Period = () => {
     setIsModalOpen(true);
   };
 
-  const handleDateClick = async () => {    
-    setCurrentEvent(null);
-    setIsModalOpen(true);
-  }
-
   const handleSaveEvent = async (event: PeriodEvent) => {
     try {
       if (event.id) {
