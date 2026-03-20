@@ -22,6 +22,7 @@
     "firebase-admin": "^13.5.0",
     "framer-motion": "^12.23.26",
     "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",

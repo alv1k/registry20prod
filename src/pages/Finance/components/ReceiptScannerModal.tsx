@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
+import jsQR from 'jsqr';
 import Modal from '../../../components/Modal';
 import Button from '../../../components/Button';
 import LoadingSpinner from '../../../components/LoadingSpinner';
@@ -167,33 +168,50 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
     }
   };
 
-  // Scan QR from uploaded image file
+  // Scan QR from uploaded image file using jsQR
   const handleQrFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setError(null);
 
-    // Create a temporary container for scanning
-    const tempDiv = document.createElement('div');
-    tempDiv.id = 'qr-file-scan-' + Date.now();
-    tempDiv.style.position = 'fixed';
-    tempDiv.style.left = '-9999px';
-    document.body.appendChild(tempDiv);
-
     try {
-      const scanner = new Html5Qrcode(tempDiv.id);
-      const result = await scanner.scanFile(file, false);
-      await scanner.clear();
-      document.body.removeChild(tempDiv);
-      processQrData(result);
+      const imageData = await fileToImageData(file);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+      if (code && code.data) {
+        processQrData(code.data);
+      } else {
+        setError('QR код не найден на изображении. Попробуйте более чёткое фото или введите данные вручную.');
+      }
     } catch {
-      try { document.body.removeChild(tempDiv); } catch { /* ignore */ }
-      setError('QR код не найден на изображении. Попробуйте другое фото или введите данные вручную.');
+      setError('Не удалось обработать изображение.');
     }
 
-    // Reset file input
     if (qrFileInputRef.current) qrFileInputRef.current.value = '';
+  };
+
+  // Convert File to ImageData for jsQR
+  const fileToImageData = (file: File): Promise<ImageData> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { reject(new Error('No canvas context')); return; }
+          ctx.drawImage(img, 0, 0);
+          resolve(ctx.getImageData(0, 0, img.width, img.height));
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
   };
 
   // Submit manual QR text
