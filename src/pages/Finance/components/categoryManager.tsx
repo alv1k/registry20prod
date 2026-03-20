@@ -19,7 +19,7 @@ const CategoryManager: React.FC<CategoriesManagerProps> = ({ onAddCategoryClick 
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
-  const [filterType, setFilterType] = useState<'all' | 'expense' | 'income'>('all');
+  const [filterType] = useState<'all' | 'expense' | 'income'>('all');
 
   // Helper function to check if category matches filter
   const matchesFilter = (categoryType: 'expense' | 'income') => {

@@ -32,7 +32,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [type, setType] = useState<'expense' | 'income'>('expense');
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [, setFocusedInput] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
 

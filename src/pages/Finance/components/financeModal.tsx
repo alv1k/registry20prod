@@ -54,7 +54,7 @@ const FinanceModal: React.FC<FinanceFormModalProps> = ({
     { id: Date.now().toString(), name: '', price: '', quantity: '', classification: '', total: 0 }
   ]);
   const [comment, setComment] = useState<string>('');
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [, setFocusedInput] = useState<string | null>(null);
 
   useEffect(() => {
     // Load categories when modal opens

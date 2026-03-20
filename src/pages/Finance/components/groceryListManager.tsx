@@ -3,11 +3,10 @@ import { useStore } from '../../../store/useStore';
 import { useAuth } from '../../../contexts/AuthContext';
 import Modal from '../../../components/Modal';
 import Button from '../../../components/Button';
-import { FiPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
+import { FiTrash2, FiEdit2 } from 'react-icons/fi';
 import { AppGroceryEntry, AppGroceryItem } from '../../../store/useStore';
 import useIsMobile from '../../../hooks/useIsMobile';
 
-const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
 const Trash2Icon = FiTrash2 as React.FC<React.SVGProps<SVGSVGElement>>;
 const Edit2Icon = FiEdit2 as React.FC<React.SVGProps<SVGSVGElement>>;
 
@@ -332,7 +331,6 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
                 <div className={` ${isMobile ? 'ml-2' : 'ml-8'} space-y-1`}>
                   {entry.items.map((item, index) => {
                     const totalPrice = item.quantity * item.price;
-                    const actualExpense = item.actualExpense !== undefined ? item.actualExpense : null;
                     return (
                       <div key={item.id || index} className="grid grid-cols-12 gap-2 py-1">
                         <div className={`${isMobile ? 'col-span-12' : 'col-span-3'} gap-2 flex items-center`}>
@@ -510,29 +508,6 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
     }
   }, [groceryEntry, isOpen]);
 
-  const validateSingle = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!singleValues.name.trim()) {
-      newErrors.name = 'Название обязательно';
-    }
-
-    if (!singleValues.category.trim()) {
-      newErrors.category = 'Категория обязательна';
-    }
-
-    if (singleValues.quantity <= 0) {
-      newErrors.quantity = 'Количество должно быть больше 0';
-    }
-
-    if (singleValues.price < 0) {
-      newErrors.price = 'Цена не может быть отрицательной';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const validateMultiple = (): boolean => {
     const newErrors: Record<number, Record<string, string>> = {};
     let isValid = true;
@@ -585,14 +560,6 @@ const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, 
     const newItems = [...multipleValues.items];
     newItems[index] = { ...newItems[index], [field]: value };
     setMultipleValues({ ...multipleValues, items: newItems });
-  };
-
-  const handleSingleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setSingleValues(prev => ({
-      ...prev,
-      [name]: name === 'quantity' || name === 'price' ? Number(value) : value
-    }));
   };
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

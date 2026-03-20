@@ -49,16 +49,11 @@ interface ClassificationData {
   count: number;
 }
 
-interface LegendPayload {
-  value: string;
-  // other properties from Recharts legend payload
-}
-
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#c44569', '#f8c291', '#6a89cc', '#b8e994', '#f6b93b', '#82ccdd'];
 
 const Charts: React.FC<ChartsProps> = ({ records }) => {
   const isMobile = useIsMobile();
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeIndex] = useState<number | null>(null);
   // Подготовка данных для диаграммы по классификациям
   const classificationData: (ClassificationData & { [key: string]: any })[] = Object.values(
     records.reduce((acc: Record<string, ClassificationData>, record) => {
