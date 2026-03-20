@@ -36,7 +36,7 @@ const Finance = () => {
   const categories = useStore((state) => state.categories);
   const syncCategories = useStore((state) => state.syncCategories);
 
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   
   const [isFinanceFormModalOpen, setIsFinanceFormModalOpen] = useState(false);
   const [isCategoryFormModalOpen, setIsCategoryFormModalOpen] = useState(false);
