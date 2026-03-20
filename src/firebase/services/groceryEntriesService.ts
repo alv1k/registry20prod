@@ -1,6 +1,5 @@
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firestore';
-import { AppGroceryItem } from '../../store/useStore';
 
 export interface FirebaseGroceryEntry {
   id?: string;

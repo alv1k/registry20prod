@@ -9,14 +9,9 @@ import {
   query,
   where
 } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
-import app from '../config';
 import { isValidCategory } from '../../utils/validation';
 import { sanitizeCategoryRecord } from '../../utils/sanitization';
-
-// Initialize Firebase Functions
-const functions = getFunctions(app);
 
 // Тип для категории
 export interface Category {

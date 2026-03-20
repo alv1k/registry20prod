@@ -10,13 +10,8 @@ import {
   orderBy,
   where
 } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
-import app from '../config';
 import { sanitizeVehicleRecord } from '../../utils/sanitization';
-
-// Initialize Firebase Functions
-const functions = getFunctions(app);
 
 // Тип для записи автомобиля
 export interface VehicleRecord {

@@ -9,13 +9,8 @@ import {
   query, 
   orderBy
 } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
-import app from '../config';
 import { sanitizeMaintenanceRecord } from '../../utils/sanitization';
-
-// Initialize Firebase Functions
-const functions = getFunctions(app);
 
 // Тип для записи технического обслуживания
 export interface MaintenanceRecord {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useStore } from '../../../store/useStore';
 import { useAuth } from '../../../contexts/AuthContext';
 import Modal from '../../../components/Modal';
@@ -37,7 +37,8 @@ const GroceryListManager: React.FC<GroceriesManagerProps> = ({ onAddGroceryClick
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
 
   // Get grocery data from store (create this store functionality if it doesn't exist)
-  const storedGroceryEntries = useStore(state => state.groceryEntries) || [];
+  const rawGroceryEntries = useStore(state => state.groceryEntries);
+  const storedGroceryEntries = useMemo(() => rawGroceryEntries || [], [rawGroceryEntries]);
   const addGroceryEntry = useStore(state => state.addGroceryEntry);
   const updateGroceryEntry = useStore(state => state.updateGroceryEntry);
   const deleteGroceryEntry = useStore(state => state.deleteGroceryEntry);
@@ -453,7 +454,7 @@ interface GroceryModalProps {
 }
 
 const GroceryModal: React.FC<GroceryModalProps> = ({ isOpen, onClose, onSubmit, groceryEntry, isMultipleMode = true, categories = [] }) => {
-  const [singleValues, setSingleValues] = useState<SingleGroceryFormValues>({
+  const [, setSingleValues] = useState<SingleGroceryFormValues>({
     name: groceryEntry?.items?.[0]?.name || '',
     category: groceryEntry?.items?.[0]?.category || '',
     quantity: groceryEntry?.items?.[0]?.quantity || 1,

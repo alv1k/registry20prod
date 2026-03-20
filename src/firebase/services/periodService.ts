@@ -8,16 +8,10 @@ import {
   doc,
   query,
   orderBy,
-  where,
-  DocumentData
+  where
 } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
-import app from '../config';
 import { sanitizePeriodEvent } from '../../utils/sanitization';
-
-// Initialize Firebase Functions
-const functions = getFunctions(app);
 
 // Тип для события периода
 export interface PeriodEvent {

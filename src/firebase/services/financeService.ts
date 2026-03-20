@@ -10,14 +10,9 @@ import {
   orderBy,
   where
 } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
-import app from '../config';
 import { isValidFinanceRecord } from '../../utils/validation';
 import { sanitizeFinanceRecord } from '../../utils/sanitization';
-
-// Initialize Firebase Functions
-const functions = getFunctions(app);
 
 // Тип для финансовой записи
 export interface FinanceRecord {
@@ -72,12 +67,6 @@ export const addFinanceRecord = async (record: Omit<FinanceRecord, 'id'>): Promi
     const validation = isValidFinanceRecord(sanitizedRecord);
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
-    }
-    
-    // Define the expected response structure
-    interface ValidationResponse {
-      valid: boolean;
-      message?: string;
     }
     
     // Server-side validation using callable function (temporarily disabled due to deployment issues)

@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useStore } from '../store/useStore';
 import VehiclesMaintenance from '../pages/VehiclesMaintenance/index';
 import Finance from '../pages/Finance/index';
-import Domestic from '../pages/Domestic/index';
 import Period from '../pages/Period/index';
 import Recipes from '../pages/Recipes/index';
 import Home from '../pages/Home';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FiX, FiHome, FiDollarSign, FiTruck, FiHome as FiHouse, FiBook, FiChevronRight, FiCoffee } from 'react-icons/fi';
+import { FiX, FiHome, FiDollarSign, FiTruck, FiBook, FiCoffee } from 'react-icons/fi';
 import { useStore } from '../store/useStore';
 import { useAdminAccess } from '../hooks/useAdminAccess';
 import Tooltip from './Tooltip';
@@ -11,7 +11,6 @@ const CloseIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
 const HomeIcon = FiHome as React.FC<React.SVGProps<SVGSVGElement>>;
 const DollarSignIcon = FiDollarSign as React.FC<React.SVGProps<SVGSVGElement>>;
 const TruckIcon = FiTruck as React.FC<React.SVGProps<SVGSVGElement>>;
-const HouseIcon = FiHouse as React.FC<React.SVGProps<SVGSVGElement>>;
 const BookIcon = FiBook as React.FC<React.SVGProps<SVGSVGElement>>;
 const CoffeeIcon = FiCoffee as React.FC<React.SVGProps<SVGSVGElement>>;
 

@@ -7,12 +7,9 @@ import {
   deleteDoc, 
   doc, 
   query, 
-  orderBy,
-  where
+  orderBy
 } from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firestore';
-import app from '../config';
 
 // Тип для бытовой записи
 export interface HouseholdRecord {
