@@ -42,7 +42,7 @@ const RecipeModal: React.FC<RecipeFormModalProps> = ({
   const [cookingTime, setCookingTime] = useState<number | undefined>(undefined);
   const [servings, setServings] = useState<number | undefined>(undefined);
   const [tags, setTags] = useState<string>('');
-  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [_focusedInput, setFocusedInput] = useState<string | null>(null);
 
   // Load record data if editing
   useEffect(() => {

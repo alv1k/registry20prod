@@ -9,13 +9,12 @@ import Charts from './components/charts';
 import Button from '../../components/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatCurrencyWithSeparators, formatDate } from '../../utils/formatUtils';
-import { exportRecordsToExcel, exportMaintenanceRecordsToExcel } from '../../utils/exportUtils';
-import { FiPlus, FiDownload, FiX, FiTrash2, FiEdit } from 'react-icons/fi';
+import { exportMaintenanceRecordsToExcel } from '../../utils/exportUtils';
+import { FiDownload, FiX, FiTrash2, FiEdit } from 'react-icons/fi';
 import useIsMobile from '../../hooks/useIsMobile';
 
 
 // Type the icons properly
-const PlusIcon = FiPlus as React.FC<React.SVGProps<SVGSVGElement>>;
 const DownloadIcon = FiDownload as React.FC<React.SVGProps<SVGSVGElement>>;
 const XIcon = FiX as React.FC<React.SVGProps<SVGSVGElement>>;
 const TrashIcon = FiTrash2 as React.FC<React.SVGProps<SVGSVGElement>>;
@@ -52,7 +51,7 @@ const VehiclesMaintenance = () => {
   const isMaintenanceDataLoading = useStore((state) => state.isMaintenanceDataLoading);
   const maintenanceDataError = useStore((state) => state.maintenanceDataError);
 
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   
   // State for modals
   const [isMaintenanceFormModalOpen, setIsMaintenanceFormModalOpen] = useState(false);
@@ -364,9 +363,16 @@ const VehiclesMaintenance = () => {
               Скачать в .xlsx
             </button>
             :
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <button
+              onClick={() => exportMaintenanceRecordsToExcel(
+                filteredData,
+                `Техническое_обслуживание_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                'Записи ТО'
+              )}
+              className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg"
+            >
               <DownloadIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            </div>
+            </button>
           }
         </div>
         <div className="overflow-x-auto">

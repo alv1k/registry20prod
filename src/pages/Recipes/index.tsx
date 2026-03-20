@@ -1,5 +1,5 @@
 // src/pages/Recipes/index.tsx
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useStore } from '../../store/useStore';
 import type { AppHolidayMenu as HolidayMenu } from '../../store/useStore';
 import AnimatedAccordion from '../../components/AnimatedAccordion';
@@ -34,7 +34,7 @@ const Recipes = () => {
   const isRecipeDataLoading = useStore((state) => state.isRecipeDataLoading);
   const recipeDataError = useStore((state) => state.recipeDataError);
 
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const isMobile = useIsMobile();
 
   // State for tabs
@@ -53,10 +53,10 @@ const Recipes = () => {
   const { openModal, closeModal } = useModal();
 
   // State for holiday menu functionality
-  const [selectedHolidayMenuId, setSelectedHolidayMenuId] = useState<number | string | null>(null);
+  const [_selectedHolidayMenuId, setSelectedHolidayMenuId] = useState<number | string | null>(null);
 
   // State for modals
-  const [selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
+  const [_selectedRecordId, setSelectedRecordId] = useState<number | string | null>(null);
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<number | string | null>(null);
 
   // Load data on component mount
