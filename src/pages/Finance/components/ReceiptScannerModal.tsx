@@ -177,15 +177,17 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
 
     try {
       const imageData = await fileToImageData(file);
+      console.log(`QR scan: image ${imageData.width}x${imageData.height}`);
       const code = jsQR(imageData.data, imageData.width, imageData.height);
 
       if (code && code.data) {
+        console.log('QR decoded:', code.data);
         processQrData(code.data);
       } else {
-        setError('QR код не найден на изображении. Попробуйте более чёткое фото или введите данные вручную.');
+        setError(`QR код не найден. Размер изображения: ${imageData.width}x${imageData.height}. Попробуйте обрезать фото так, чтобы QR занимал большую часть кадра.`);
       }
-    } catch {
-      setError('Не удалось обработать изображение.');
+    } catch (err: any) {
+      setError(`Ошибка обработки: ${err?.message || String(err)}`);
     }
 
     if (qrFileInputRef.current) qrFileInputRef.current.value = '';
