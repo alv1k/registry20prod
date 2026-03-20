@@ -49,7 +49,11 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
   const [imageReady, setImageReady] = useState(false);
   const [processingStep, setProcessingStep] = useState('');
 
+  const [qrManualText, setQrManualText] = useState('');
+  const [showManualInput, setShowManualInput] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const qrFileInputRef = useRef<HTMLInputElement>(null);
   const imageDataRef = useRef<{ base64: string; mimeType: string } | null>(null);
   const qrScannerRef = useRef<Html5Qrcode | null>(null);
   const qrContainerRef = useRef<string>('qr-reader-' + Math.random().toString(36).slice(2));
@@ -77,8 +81,11 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
     setError(null);
     setImageReady(false);
     setProcessingStep('');
+    setQrManualText('');
+    setShowManualInput(false);
     imageDataRef.current = null;
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (qrFileInputRef.current) qrFileInputRef.current.value = '';
     stopQrScanner();
   }, [stopQrScanner]);
 
@@ -158,6 +165,35 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
     } catch (err: any) {
       setError('Не удалось запустить камеру. Попробуйте сканировать фото.');
       setPhase('CHOOSE');
+    }
+  };
+
+  // Scan QR from uploaded image file
+  const handleQrFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    try {
+      const scanner = new Html5Qrcode('qr-file-temp');
+      const result = await scanner.scanFile(file, true);
+      await scanner.clear();
+      processQrData(result);
+    } catch {
+      setError('QR код не найден на изображении. Попробуйте другое фото или введите данные вручную.');
+    }
+  };
+
+  // Submit manual QR text
+  const handleManualQrSubmit = () => {
+    const text = qrManualText.trim();
+    if (!text) return;
+
+    // Validate it looks like a receipt QR
+    if (text.includes('fn=') && text.includes('fp=')) {
+      processQrData(text);
+    } else {
+      setError('Некорректный формат. Ожидается строка вида: t=20230916T1825&s=2099.00&fn=...&i=...&fp=...&n=1');
     }
   };
 
@@ -324,6 +360,65 @@ const ReceiptScannerModal: React.FC<ReceiptScannerModalProps> = ({
             className="w-full max-w-sm mx-auto rounded-lg overflow-hidden"
             style={{ minHeight: 300 }}
           />
+
+          {/* Hidden container for file-based QR scanning */}
+          <div id="qr-file-temp" style={{ display: 'none' }} />
+
+          {/* Fallback options */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-3">
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              QR плохо читается?
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              {/* Upload QR photo */}
+              <label className="flex-1 flex items-center justify-center gap-2 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                <CameraIcon className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-700 dark:text-gray-300">Фото QR кода</span>
+                <input
+                  ref={qrFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleQrFileChange}
+                  className="hidden"
+                />
+              </label>
+
+              {/* Manual input toggle */}
+              <button
+                onClick={() => setShowManualInput(!showManualInput)}
+                className="flex-1 flex items-center justify-center gap-2 p-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+              >
+                <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span className="text-gray-700 dark:text-gray-300">Ввести вручную</span>
+              </button>
+            </div>
+
+            {/* Manual QR string input */}
+            {showManualInput && (
+              <div className="space-y-2">
+                <textarea
+                  value={qrManualText}
+                  onChange={(e) => setQrManualText(e.target.value)}
+                  placeholder="t=20230916T1825&s=2099.00&fn=9960440502897843&i=22841&fp=1963030161&n=1"
+                  className="w-full p-2 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:ring focus:ring-blue-200 focus:border-blue-500"
+                  rows={2}
+                />
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleManualQrSubmit}
+                  disabled={!qrManualText.trim()}
+                  fullWidth
+                >
+                  Отправить
+                </Button>
+              </div>
+            )}
+          </div>
 
           {error && (
             <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
