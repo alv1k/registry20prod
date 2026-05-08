@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(find C:Userspc1Documentsworkingdirregistry20prod -name serviceWorker* -o -name sw.js -o -name index.html)",
+      "Bash(npm start:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm install:*)",
+      "Bash(taskkill //F //IM node.exe)",
+      "WebFetch(domain:openrouter.ai)",
+      "Bash(curl -s \"https://openrouter.ai/api/v1/models\")",
+      "WebFetch(domain:proverkacheka.com)",
+      "Bash(curl -s -X POST \"https://proverkacheka.com/check\" -H \"Content-Type: application/x-www-form-urlencoded\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" -d \"qrraw=t%3D20201017T1923%26s%3D1498.00%26fn%3D9282440300669857%26i%3D25151%26fp%3D1186123459%26n%3D1\")",
+      "Bash(curl -s -X POST \"https://proverkacheka.com/\" -H \"Content-Type: application/x-www-form-urlencoded\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" -d \"qrraw=t%3D20201017T1923%26s%3D1498.00%26fn%3D9282440300669857%26i%3D25151%26fp%3D1186123459%26n%3D1\" -L -v)",
+      "Bash(curl -s -X POST \"https://proverkacheka.com/\" -H \"Content-Type: application/x-www-form-urlencoded\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" -d \"qrraw=t%3D20201017T1923%26s%3D1498.00%26fn%3D9282440300669857%26i%3D25151%26fp%3D1186123459%26n%3D1\")",
+      "Bash(curl -s \"https://proverkacheka.com/check/35878197-03e484b5\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\")",
+      "Bash(curl -s -c /tmp/pch_cookies -X POST \"https://proverkacheka.com/\" -H \"Content-Type: application/x-www-form-urlencoded\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" -H \"Referer: https://proverkacheka.com/\" -d \"qrraw=t%3D20201017T1923%26s%3D1498.00%26fn%3D9282440300669857%26i%3D25151%26fp%3D1186123459%26n%3D1\" -D -)",
+      "Bash(curl -s \"https://proverkacheka.com/check/35878203-4eee0220\" -H \"User-Agent: Mozilla/5.0\")",
+      "Bash(CI=true npx react-scripts build)",
+      "Bash(curl -s -X POST \"https://proverkacheka.com/\" -H \"Content-Type: application/x-www-form-urlencoded\" -H \"User-Agent: Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36\" -d \"qrraw=t%3D20230916T182500%26s%3D2099.00%26fn%3D9960440502897843%26i%3D22841%26fp%3D1963030161%26n%3D1\")",
+      "Bash(curl -s \"https://proverkacheka.com/check/35878578-a1401f6c\" -H \"User-Agent: Mozilla/5.0\")",
+      "Bash(for id:*)",
+      "Bash(do echo:*)",
+      "Bash(curl -s \"https://proverkacheka.com/check/$id\" -H \"User-Agent: Mozilla/5.0\")",
+      "Bash(done)",
+      "Bash(curl -s -X POST \"https://registry20prod-git-dev-alenas-projects-c2c07a1e.vercel.app/api/check-receipt\" -H \"Content-Type: application/json\" -d '{\"\"\"\"qrraw\"\"\"\":\"\"\"\"t=20230916T182500&s=2099.00&fn=9960440502897843&i=22841&fp=1963030161&n=1\"\"\"\"}')",
+      "Bash(curl -s -X POST \"https://registry20prod-git-dev-alenas-projects-c2c07a1e.vercel.app/api/check-receipt\" -H \"Content-Type: application/json\" -d '{\"\"\"\"qrraw\"\"\"\":\"\"\"\"test\"\"\"\"}' -i)",
+      "Bash(wc:*)"
+    ]
+  }
+}

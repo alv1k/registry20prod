@@ -353,27 +353,41 @@ const VehiclesMaintenance = () => {
             }
 
           </h3>
-          {
-            !isMobile ?
-            <button onClick={() => exportMaintenanceRecordsToExcel(
-              filteredData,
-              `Техническое_обслуживание_${new Date().toISOString().slice(0, 10)}.xlsx`,
-              'Записи ТО'
-            )} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Скачать в .xlsx
-            </button>
-            :
-            <button
-              onClick={() => exportMaintenanceRecordsToExcel(
+          
+          <div className="flex flex-wrap gap-3">
+            {isAdmin && (
+              <Button
+                onClick={() => openMaintenanceFormModal()}
+                variant="primary" className="flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isMobile ? '' : 'mr-1'}`} viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                { !isMobile ? 'Добавить запись' : '' }
+              </Button>
+            )}
+            {
+              !isMobile ?
+              <button onClick={() => exportMaintenanceRecordsToExcel(
                 filteredData,
                 `Техническое_обслуживание_${new Date().toISOString().slice(0, 10)}.xlsx`,
                 'Записи ТО'
-              )}
-              className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg"
-            >
-              <DownloadIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-            </button>
-          }
+              )} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Скачать в .xlsx
+              </button>
+              :
+              <button
+                onClick={() => exportMaintenanceRecordsToExcel(
+                  filteredData,
+                  `Техническое_обслуживание_${new Date().toISOString().slice(0, 10)}.xlsx`,
+                  'Записи ТО'
+                )}
+                className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg"
+              >
+                <DownloadIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </button>
+            }
+          </div>
         </div>
         <div className="overflow-x-auto">
           {isMaintenanceDataLoading ? (
